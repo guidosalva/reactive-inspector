@@ -1,6 +1,8 @@
 package de.tu_darmstadt.stg.reclipse.graphview.view;
 
 import java.awt.Frame;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
@@ -29,5 +31,32 @@ public class CustomGraph extends mxGraph {
 
     graphComponent = new mxGraphComponent(this);
     graphFrame.add(graphComponent);
+
+    addMouseWheelListener();
+  }
+
+  private void addMouseWheelListener() {
+    graphComponent.addMouseWheelListener(new MouseWheelListener() {
+
+      @Override
+      public void mouseWheelMoved(final MouseWheelEvent e) {
+        final int steps = e.getWheelRotation();
+
+        if (steps < 0) {
+          zoomIn();
+        }
+        else {
+          zoomOut();
+        }
+      }
+    });
+  }
+
+  public void zoomIn() {
+    graphComponent.zoomIn();
+  }
+
+  public void zoomOut() {
+    graphComponent.zoomOut();
   }
 }
