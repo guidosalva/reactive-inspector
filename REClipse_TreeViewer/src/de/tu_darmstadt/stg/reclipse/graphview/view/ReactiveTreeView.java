@@ -32,22 +32,18 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Slider;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.part.ViewPart;
-import org.eclipse.zest.core.viewers.AbstractZoomableViewer;
-import org.eclipse.zest.core.viewers.IZoomableWorkbenchPart;
-import org.eclipse.zest.core.viewers.ZoomContributionViewItem;
 import org.eclipse.zest.core.widgets.Graph;
 
 /**
  * Base view class containing all the elements which are shown in the
  * "Reactive Tree" view / tab.
  */
-public class ReactiveTreeView extends ViewPart implements IZoomableWorkbenchPart, IDebugEventSetListener, DependencyGraphHistoryChangedListener {
+// IZoomableWorkbenchPart,
+public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener, DependencyGraphHistoryChangedListener {
 
   /**
    * The ID of the view as specified by the extension.
@@ -55,6 +51,8 @@ public class ReactiveTreeView extends ViewPart implements IZoomableWorkbenchPart
   public static final String ID = "de.tu-darmstadt.stg.reclipse.graphview.ReactiveTreeView"; //$NON-NLS-1$
 
   protected CustomGraphViewer viewer;
+  protected CustomGraph graph;
+
   protected Slider slider;
   private boolean showGraph = false;
   protected boolean manualMode = false;
@@ -71,28 +69,30 @@ public class ReactiveTreeView extends ViewPart implements IZoomableWorkbenchPart
 
   @Override
   public void createPartControl(final Composite parent) {
-    parent.setLayout(new GridLayout());
+    parent.setLayout(new GridLayout(1, true));
 
-    viewer = new CustomGraphViewer(parent, SWT.NONE);
-    viewer.getControl().setLayoutData(new GridData(GridData.FILL, SWT.FILL, true, true));
-    viewer.getControl().addMouseListener(new MoveGraphMouseAdapter());
-    viewer.getControl().addMouseMoveListener(new MoveGraphMoveListener());
+    // viewer = new CustomGraphViewer(parent, SWT.NONE);
+    // viewer.getControl().setLayoutData(new GridData(GridData.FILL, SWT.FILL,
+    // true, true));
+    // viewer.getControl().addMouseListener(new MoveGraphMouseAdapter());
+    // viewer.getControl().addMouseMoveListener(new MoveGraphMoveListener());
+    graph = new CustomGraph(parent);
 
     // be careful: you have to set environment variable LIBOVERLAY_SCROLLBAR=0
     // under Ubuntu / OpenJDK, so that the slider works - see
     // https://bugs.eclipse.org/bugs/show_bug.cgi?id=368929
-    slider = new Slider(parent, SWT.HORIZONTAL);
-    slider.setMinimum(0);
-    slider.setIncrement(1);
-    slider.setPageIncrement(1);
-    slider.setLayoutData(new GridData(SWT.FILL, SWT.END, true, false));
-    slider.addListener(SWT.Selection, new Listener() {
-
-      @Override
-      public void handleEvent(final Event event) {
-        rebuildGraph();
-      }
-    });
+    // slider = new Slider(parent, SWT.HORIZONTAL);
+    // slider.setMinimum(0);
+    // slider.setIncrement(1);
+    // slider.setPageIncrement(1);
+    // slider.setLayoutData(new GridData(SWT.FILL, SWT.END, true, false));
+    // slider.addListener(SWT.Selection, new Listener() {
+    //
+    // @Override
+    // public void handleEvent(final Event event) {
+    // rebuildGraph();
+    // }
+    // });
 
     final QueryController queryController = new QueryController(this);
     final Composite queryComposite = new Composite(parent, SWT.NONE);
@@ -135,7 +135,8 @@ public class ReactiveTreeView extends ViewPart implements IZoomableWorkbenchPart
     getViewSite().getActionBars().getToolBarManager().add(new SaveGraphAsImage(getSite(), viewer));
     getViewSite().getActionBars().getToolBarManager().add(new ZoomIn(viewer));
     getViewSite().getActionBars().getToolBarManager().add(new ZoomOut(viewer));
-    getViewSite().getActionBars().getToolBarManager().add(new ZoomContributionViewItem(this));
+    // getViewSite().getActionBars().getToolBarManager().add(new
+    // ZoomContributionViewItem(this));
 
     // create the context menu
     final MenuManager menuMgr = new MenuManager();
@@ -160,20 +161,20 @@ public class ReactiveTreeView extends ViewPart implements IZoomableWorkbenchPart
         manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
       }
     });
-    final Menu menu = menuMgr.createContextMenu(viewer.getControl());
-    viewer.getControl().setMenu(menu);
-    getSite().registerContextMenu(menuMgr, viewer);
+    // final Menu menu = menuMgr.createContextMenu(viewer.getControl());
+    // viewer.getControl().setMenu(menu);
+    // getSite().registerContextMenu(menuMgr, viewer);
   }
 
-  @Override
-  public AbstractZoomableViewer getZoomableViewer() {
-    return viewer;
-  }
+  // @Override
+  // public AbstractZoomableViewer getZoomableViewer() {
+  // return viewer;
+  // }
 
   @Override
   public void setFocus() {
     rebuildGraph();
-    viewer.getControl().setFocus();
+    // viewer.getControl().setFocus();
   }
 
   @Override
