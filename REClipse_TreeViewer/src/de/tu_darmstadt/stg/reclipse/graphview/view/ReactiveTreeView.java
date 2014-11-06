@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Slider;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbenchActionConstants;
@@ -81,18 +82,18 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
     // be careful: you have to set environment variable LIBOVERLAY_SCROLLBAR=0
     // under Ubuntu / OpenJDK, so that the slider works - see
     // https://bugs.eclipse.org/bugs/show_bug.cgi?id=368929
-    // slider = new Slider(parent, SWT.HORIZONTAL);
-    // slider.setMinimum(0);
-    // slider.setIncrement(1);
-    // slider.setPageIncrement(1);
-    // slider.setLayoutData(new GridData(SWT.FILL, SWT.END, true, false));
-    // slider.addListener(SWT.Selection, new Listener() {
-    //
-    // @Override
-    // public void handleEvent(final Event event) {
-    // rebuildGraph();
-    // }
-    // });
+    slider = new Slider(parent, SWT.HORIZONTAL);
+    slider.setMinimum(0);
+    slider.setIncrement(1);
+    slider.setPageIncrement(1);
+    slider.setLayoutData(new GridData(SWT.FILL, SWT.END, true, false));
+    slider.addListener(SWT.Selection, new Listener() {
+
+      @Override
+      public void handleEvent(final Event event) {
+        rebuildGraph();
+      }
+    });
 
     final QueryController queryController = new QueryController(this);
     final Composite queryComposite = new Composite(parent, SWT.NONE);
@@ -213,14 +214,12 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
 
       @Override
       public void run() {
-        if (viewer == null || viewer.getControl().isDisposed()) {
+        if (graph == null) {
           return;
         }
-        // reset filters if new tree is shown
-        viewer.resetFilters();
-        // just give the point in time to the viewer at which the user wants to
+        // just give the point in time to the graph at which the user wants to
         // see the dependency graph
-        viewer.setInput(getCurrentSliderValue());
+        graph.setPointInTime(getCurrentSliderValue());
         if (slider != null && !slider.isDisposed()) {
           slider.redraw();
         }

@@ -1,16 +1,24 @@
 package de.tu_darmstadt.stg.reclipse.graphview.view;
 
+import de.tu_darmstadt.stg.reclipse.graphview.provider.ContentModel;
+import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
+
 import java.awt.Frame;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 
+import com.mxgraph.layout.mxGraphLayout;
+import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.view.mxGraph;
 
@@ -23,8 +31,18 @@ public class CustomGraph extends mxGraph {
 
   protected mxGraphComponent graphComponent;
 
+  protected ContentModel contentModel;
+
+  private final mxGraphLayout graphLayout;
+
   public CustomGraph(final Composite parent) {
     super();
+
+    // create new content model
+    contentModel = new ContentModel();
+
+    // set graph layout
+    graphLayout = new mxHierarchicalLayout(this);
 
     // create child composite
     final Composite composite = new Composite(parent, SWT.EMBEDDED | SWT.BACKGROUND);
@@ -42,6 +60,61 @@ public class CustomGraph extends mxGraph {
     // add listeners
     addMouseWheelListener();
     addMouseListener();
+
+    updateGraph();
+  }
+
+  public void setPointInTime(final int pointInTime) {
+    // set point in time in content model
+    contentModel.setPointInTime(pointInTime);
+
+    updateGraph();
+  }
+
+  public void updateGraph() {
+    // remove cells, if any
+    removeCells(getChildVertices(getDefaultParent()));
+
+    // load vertices from content model
+    final Map<Object, Object> vertices = contentModel.getVertices();
+
+    // load edges from content model
+    final Map<Object, Set<Object>> edges = contentModel.getEdges();
+
+    // set default parent
+    final Object defaultParent = getDefaultParent();
+
+    // insert vertices
+    final Map<Object, Object> mapping = new HashMap<>();
+    for (final Object id : vertices.keySet()) {
+      // get reactive variable
+      final ReactiveVariable reVar = (ReactiveVariable) vertices.get(id);
+
+      // create vertex
+      final Object vertex = insertVertex(defaultParent, id.toString(), reVar.getName(), 0, 0, 80, 80);
+
+      // add vertex to mapping
+      mapping.put(id, vertex);
+    }
+
+    // insert edges
+    for (final Object id : edges.keySet()) {
+      // get source vertex
+      final Object sourceVertex = mapping.get(id);
+
+      // get destinations
+      final Set<Object> destinations = edges.get(id);
+
+      for (final Object connectedId : destinations) {
+        // get destination vertex
+        final Object destinationVertex = mapping.get(connectedId);
+
+        insertEdge(defaultParent, null, "", sourceVertex, destinationVertex); //$NON-NLS-1$
+      }
+    }
+
+    // execute layout
+    graphLayout.execute(getDefaultParent());
   }
 
   private void addMouseWheelListener() {
