@@ -3,7 +3,9 @@ package de.tu_darmstadt.stg.reclipse.graphview.view;
 import de.tu_darmstadt.stg.reclipse.graphview.provider.ContentModel;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
+import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
@@ -20,6 +22,7 @@ import org.eclipse.swt.widgets.Composite;
 import com.mxgraph.layout.mxGraphLayout;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxGraph;
 
 /**
@@ -34,6 +37,8 @@ public class CustomGraph extends mxGraph {
   protected ContentModel contentModel;
 
   private final mxGraphLayout graphLayout;
+
+  private double xTranslate;
 
   public CustomGraph(final Composite parent) {
     super();
@@ -55,6 +60,8 @@ public class CustomGraph extends mxGraph {
 
     // initialize graph component and add it to frame
     graphComponent = new mxGraphComponent(this);
+    graphComponent.setEnabled(false);
+
     graphFrame.add(graphComponent);
 
     // add listeners
@@ -90,8 +97,11 @@ public class CustomGraph extends mxGraph {
       // get reactive variable
       final ReactiveVariable reVar = (ReactiveVariable) vertices.get(id);
 
+      // create label
+      final String label = reVar.getName() + "\n\n" + "Value: " + reVar.getValueString() + "\n" + "Type: " + reVar.getTypeSimple();
+
       // create vertex
-      final Object vertex = insertVertex(defaultParent, id.toString(), reVar.getName(), 0, 0, 80, 80);
+      final Object vertex = insertVertex(defaultParent, id.toString(), label, 0, 0, 160, 80, "align=left");
 
       // add vertex to mapping
       mapping.put(id, vertex);
@@ -113,8 +123,27 @@ public class CustomGraph extends mxGraph {
       }
     }
 
+    // calculate bounds for vertices (and edges)
+    final mxRectangle cellBounds = getBoundsForCells(mapping.values().toArray(), true, true, true);
+
+    // calculate x translation
+    xTranslate = graphComponent.getWidth() / 2.0;
+    if (cellBounds != null) {
+      xTranslate -= (cellBounds.getWidth() / 2.0);
+    }
+
     // execute layout
-    graphLayout.execute(getDefaultParent());
+    getModel().beginUpdate();
+    try {
+      // execute layout
+      graphLayout.execute(getDefaultParent());
+
+      // center cells
+      moveCells(getChildCells(getDefaultParent(), true, true), xTranslate, 20);
+    }
+    finally {
+      getModel().endUpdate();
+    }
   }
 
   private void addMouseWheelListener() {
@@ -135,6 +164,18 @@ public class CustomGraph extends mxGraph {
         }
       }
     });
+  }
+
+  private void center() {
+    final Dimension graphSize = graphComponent.getGraphControl().getSize();
+    final Dimension viewPortSize = graphComponent.getViewport().getSize();
+
+    final int x = graphSize.width / 2 - viewPortSize.width / 2;
+    final int y = graphSize.height / 2 - viewPortSize.height / 2;
+    final int w = viewPortSize.width;
+    final int h = viewPortSize.height;
+
+    graphComponent.getGraphControl().scrollRectToVisible(new Rectangle(x, y, w, h));
   }
 
   private void addMouseListener() {
