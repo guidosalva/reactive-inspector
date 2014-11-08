@@ -3,16 +3,17 @@ package de.tu_darmstadt.stg.reclipse.graphview.view;
 import de.tu_darmstadt.stg.reclipse.graphview.provider.ContentModel;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
-import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
+
+import javax.swing.SwingConstants;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
@@ -22,8 +23,10 @@ import org.eclipse.swt.widgets.Composite;
 import com.mxgraph.layout.mxGraphLayout;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxGraph;
+import com.mxgraph.view.mxStylesheet;
 
 /**
  * 
@@ -43,11 +46,14 @@ public class CustomGraph extends mxGraph {
   public CustomGraph(final Composite parent) {
     super();
 
+    // create stylesheets
+    createStylesheets();
+
     // create new content model
     contentModel = new ContentModel();
 
     // set graph layout
-    graphLayout = new mxHierarchicalLayout(this);
+    graphLayout = new mxHierarchicalLayout(this, SwingConstants.WEST);
 
     // create child composite
     final Composite composite = new Composite(parent, SWT.EMBEDDED | SWT.BACKGROUND);
@@ -71,11 +77,71 @@ public class CustomGraph extends mxGraph {
     updateGraph();
   }
 
+  private void createStylesheets() {
+    final mxStylesheet stylesheet = getStylesheet();
+
+    // set base style
+    final Hashtable<String, Object> baseStyle = new Hashtable<>();
+
+    // set VAR style
+    final Hashtable<String, Object> varStyle = new Hashtable<>(baseStyle);
+    varStyle.put(mxConstants.STYLE_FILLCOLOR, "#FFD633");
+    varStyle.put(mxConstants.STYLE_GRADIENTCOLOR, "#FFE680");
+    varStyle.put(mxConstants.STYLE_STROKECOLOR, "#FFCC00");
+    varStyle.put(mxConstants.STYLE_ROUNDED, "1");
+    stylesheet.putCellStyle("VAR", varStyle);
+
+    // set SIGNAL style
+    final Hashtable<String, Object> signalStyle = new Hashtable<>(baseStyle);
+    signalStyle.put(mxConstants.STYLE_FILLCOLOR, "#FF8533");
+    signalStyle.put(mxConstants.STYLE_GRADIENTCOLOR, "#FFA366");
+    signalStyle.put(mxConstants.STYLE_STROKECOLOR, "#FF6600");
+    signalStyle.put(mxConstants.STYLE_ROUNDED, "1");
+    stylesheet.putCellStyle("SIGNAL", signalStyle);
+
+    // set EVENT style
+    final Hashtable<String, Object> eventStyle = new Hashtable<>(baseStyle);
+    eventStyle.put(mxConstants.STYLE_FILLCOLOR, "#85FF5C");
+    eventStyle.put(mxConstants.STYLE_GRADIENTCOLOR, "#A3FF85");
+    eventStyle.put(mxConstants.STYLE_STROKECOLOR, "#66FF33");
+    eventStyle.put(mxConstants.STYLE_ROUNDED, "1");
+    stylesheet.putCellStyle("EVENT", eventStyle);
+
+    // set EVENT_HANDLER style
+    final Hashtable<String, Object> eventHandlerStyle = new Hashtable<>(baseStyle);
+    eventHandlerStyle.put(mxConstants.STYLE_FILLCOLOR, "#85FF5C");
+    eventHandlerStyle.put(mxConstants.STYLE_GRADIENTCOLOR, "#A3FF85");
+    eventHandlerStyle.put(mxConstants.STYLE_STROKECOLOR, "#66FF33");
+    eventHandlerStyle.put(mxConstants.STYLE_ROUNDED, "1");
+    stylesheet.putCellStyle("EVENT_HANDLER", eventHandlerStyle);
+
+    // set edge style
+    final Hashtable<String, Object> edgeStyle = new Hashtable<>();
+    edgeStyle.put(mxConstants.STYLE_STROKECOLOR, "#000000");
+    edgeStyle.put(mxConstants.STYLE_STROKEWIDTH, "2");
+    stylesheet.putCellStyle("EDGE", edgeStyle);
+  }
+
   public void setPointInTime(final int pointInTime) {
     // set point in time in content model
     contentModel.setPointInTime(pointInTime);
 
     updateGraph();
+  }
+
+  private String determineStyle(final ReactiveVariable reVar) {
+    switch (reVar.getReactiveVariableType()) {
+      case VAR:
+        return "VAR";
+      case SIGNAL:
+        return "SIGNAL";
+      case EVENT:
+        return "EVENT";
+      case EVENT_HANDLER:
+        return "EVENT_HANDLER";
+      default:
+        return "";
+    }
   }
 
   public void updateGraph() {
@@ -101,7 +167,7 @@ public class CustomGraph extends mxGraph {
       final String label = reVar.getName() + "\n\n" + "Value: " + reVar.getValueString() + "\n" + "Type: " + reVar.getTypeSimple();
 
       // create vertex
-      final Object vertex = insertVertex(defaultParent, id.toString(), label, 0, 0, 160, 80, "align=left");
+      final Object vertex = insertVertex(defaultParent, id.toString(), label, 0, 0, 160, 80, determineStyle(reVar));
 
       // add vertex to mapping
       mapping.put(id, vertex);
@@ -119,7 +185,7 @@ public class CustomGraph extends mxGraph {
         // get destination vertex
         final Object destinationVertex = mapping.get(connectedId);
 
-        insertEdge(defaultParent, null, "", sourceVertex, destinationVertex); //$NON-NLS-1$
+        insertEdge(defaultParent, null, "", sourceVertex, destinationVertex, "EDGE"); //$NON-NLS-1$
       }
     }
 
@@ -139,7 +205,8 @@ public class CustomGraph extends mxGraph {
       graphLayout.execute(getDefaultParent());
 
       // center cells
-      moveCells(getChildCells(getDefaultParent(), true, true), xTranslate, 20);
+      // moveCells(getChildCells(getDefaultParent(), true, true), xTranslate,
+      // 20);
     }
     finally {
       getModel().endUpdate();
@@ -164,18 +231,6 @@ public class CustomGraph extends mxGraph {
         }
       }
     });
-  }
-
-  private void center() {
-    final Dimension graphSize = graphComponent.getGraphControl().getSize();
-    final Dimension viewPortSize = graphComponent.getViewport().getSize();
-
-    final int x = graphSize.width / 2 - viewPortSize.width / 2;
-    final int y = graphSize.height / 2 - viewPortSize.height / 2;
-    final int w = viewPortSize.width;
-    final int h = viewPortSize.height;
-
-    graphComponent.getGraphControl().scrollRectToVisible(new Rectangle(x, y, w, h));
   }
 
   private void addMouseListener() {
