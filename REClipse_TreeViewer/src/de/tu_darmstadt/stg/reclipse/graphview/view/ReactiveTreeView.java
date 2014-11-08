@@ -91,7 +91,9 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
 
       @Override
       public void handleEvent(final Event event) {
-        rebuildGraph();
+        if (event.detail == SWT.NONE) {
+          rebuildGraph();
+        }
       }
     });
 

@@ -24,7 +24,6 @@ import com.mxgraph.layout.mxGraphLayout;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxConstants;
-import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxStylesheet;
 
@@ -40,8 +39,6 @@ public class CustomGraph extends mxGraph {
   protected ContentModel contentModel;
 
   private final mxGraphLayout graphLayout;
-
-  private double xTranslate;
 
   public CustomGraph(final Composite parent) {
     super();
@@ -189,15 +186,6 @@ public class CustomGraph extends mxGraph {
       }
     }
 
-    // calculate bounds for vertices (and edges)
-    final mxRectangle cellBounds = getBoundsForCells(mapping.values().toArray(), true, true, true);
-
-    // calculate x translation
-    xTranslate = graphComponent.getWidth() / 2.0;
-    if (cellBounds != null) {
-      xTranslate -= (cellBounds.getWidth() / 2.0);
-    }
-
     // execute layout
     getModel().beginUpdate();
     try {
@@ -205,8 +193,7 @@ public class CustomGraph extends mxGraph {
       graphLayout.execute(getDefaultParent());
 
       // center cells
-      // moveCells(getChildCells(getDefaultParent(), true, true), xTranslate,
-      // 20);
+      moveCells(getChildCells(getDefaultParent(), true, true), 50, 50);
     }
     finally {
       getModel().endUpdate();
