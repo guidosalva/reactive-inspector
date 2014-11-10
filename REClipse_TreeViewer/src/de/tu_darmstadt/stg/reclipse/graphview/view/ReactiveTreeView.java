@@ -1,7 +1,6 @@
 package de.tu_darmstadt.stg.reclipse.graphview.view;
 
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
-import de.tu_darmstadt.stg.reclipse.graphview.action.ChooseLayoutAlgorithm;
 import de.tu_darmstadt.stg.reclipse.graphview.action.Relayout;
 import de.tu_darmstadt.stg.reclipse.graphview.action.SaveGraphAsImage;
 import de.tu_darmstadt.stg.reclipse.graphview.action.ZoomIn;
@@ -14,10 +13,6 @@ import de.tu_darmstadt.stg.reclipse.graphview.model.RemoteLoggerImpl;
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IDebugEventSetListener;
-import org.eclipse.jface.action.IMenuListener;
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.TraverseEvent;
@@ -32,7 +27,6 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Slider;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.part.ViewPart;
 
 /**
@@ -46,7 +40,6 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
    */
   public static final String ID = "de.tu-darmstadt.stg.reclipse.graphview.ReactiveTreeView"; //$NON-NLS-1$
 
-  protected CustomGraphViewer viewer;
   protected CustomGraph graph;
 
   protected Slider slider;
@@ -126,36 +119,10 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
 
   private void createActions() {
     // creating the toolbar entries
-    getViewSite().getActionBars().getToolBarManager().add(new SaveGraphAsImage(getSite(), viewer));
-    getViewSite().getActionBars().getToolBarManager().add(new ZoomIn(viewer));
-    getViewSite().getActionBars().getToolBarManager().add(new ZoomOut(viewer));
-
-    // create the context menu
-    final MenuManager menuMgr = new MenuManager();
-    menuMgr.setRemoveAllWhenShown(true);
-    menuMgr.addMenuListener(new IMenuListener() {
-
-      @Override
-      public void menuAboutToShow(final IMenuManager manager) {
-        manager.add(new Relayout(viewer));
-        // append layout algorithm submenu
-        final MenuManager subMenu = new MenuManager(Texts.Menu_Layouts);
-        ChooseLayoutAlgorithm.addActions(subMenu, viewer);
-        manager.add(subMenu);
-
-        manager.add(new Separator());
-        manager.add(new ZoomIn(viewer));
-        manager.add(new ZoomOut(viewer));
-        manager.add(new Separator());
-        manager.add(new SaveGraphAsImage(getSite(), viewer));
-        manager.add(new Separator());
-        // Other plug-ins can contribute there actions here
-        manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-      }
-    });
-    // final Menu menu = menuMgr.createContextMenu(viewer.getControl());
-    // viewer.getControl().setMenu(menu);
-    // getSite().registerContextMenu(menuMgr, viewer);
+    getViewSite().getActionBars().getToolBarManager().add(new Relayout(graph));
+    getViewSite().getActionBars().getToolBarManager().add(new SaveGraphAsImage(getSite(), graph));
+    getViewSite().getActionBars().getToolBarManager().add(new ZoomIn(graph));
+    getViewSite().getActionBars().getToolBarManager().add(new ZoomOut(graph));
   }
 
   @Override

@@ -3,7 +3,7 @@ package de.tu_darmstadt.stg.reclipse.graphview.action;
 import de.tu_darmstadt.stg.reclipse.graphview.Activator;
 import de.tu_darmstadt.stg.reclipse.graphview.Images;
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
-import de.tu_darmstadt.stg.reclipse.graphview.view.CustomGraphViewer;
+import de.tu_darmstadt.stg.reclipse.graphview.view.CustomGraph;
 
 import org.eclipse.jface.action.Action;
 
@@ -12,10 +12,10 @@ import org.eclipse.jface.action.Action;
  */
 public class ZoomOut extends Action {
 
-  private final CustomGraphViewer viewer;
+  private final CustomGraph graph;
 
-  public ZoomOut(final CustomGraphViewer v) {
-    viewer = v;
+  public ZoomOut(final CustomGraph g) {
+    graph = g;
 
     setText(Texts.ZoomOut_Text);
     setToolTipText(Texts.ZoomOut_Tooltip);
@@ -24,6 +24,6 @@ public class ZoomOut extends Action {
 
   @Override
   public void run() {
-    viewer.zoomOut();
+    graph.zoomOut();
   }
 }

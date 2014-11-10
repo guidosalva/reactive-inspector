@@ -4,20 +4,21 @@ import de.tu_darmstadt.stg.reclipse.graphview.Activator;
 import de.tu_darmstadt.stg.reclipse.graphview.Images;
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
 
-import org.eclipse.draw2d.SWTGraphics;
-import org.eclipse.draw2d.geometry.Point;
-import org.eclipse.draw2d.geometry.Rectangle;
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageData;
-import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.ui.IWorkbenchPartSite;
-import org.eclipse.zest.core.viewers.GraphViewer;
-import org.eclipse.zest.core.widgets.Graph;
+
+import com.mxgraph.util.mxCellRenderer;
+import com.mxgraph.view.mxGraph;
 
 /**
  * Provides the action to save the current graph as an image.
@@ -25,11 +26,11 @@ import org.eclipse.zest.core.widgets.Graph;
 public class SaveGraphAsImage extends Action {
 
   private final IWorkbenchPartSite site;
-  private final GraphViewer viewer;
+  private final mxGraph graph;
 
-  public SaveGraphAsImage(final IWorkbenchPartSite ps, final GraphViewer v) {
+  public SaveGraphAsImage(final IWorkbenchPartSite ps, final mxGraph g) {
     site = ps;
-    viewer = v;
+    graph = g;
 
     setText(Texts.SaveImage_Text);
     setToolTipText(Texts.SaveImage_Tooltip);
@@ -40,26 +41,18 @@ public class SaveGraphAsImage extends Action {
   public void run() {
     final FileDialog dialog = new FileDialog(site.getShell(), SWT.SAVE);
     dialog.setFilterExtensions(new String[] {
-            "*.png" //$NON-NLS-1$
+      "*.png" //$NON-NLS-1$
     });
     final String path = dialog.open();
     if (path != null) {
-      final Graph g = viewer.getGraphControl();
-      final Rectangle bounds = g.getContents().getBounds();
-      final Point size = new Point(g.getContents().getSize().width, g.getContents().getSize().height);
-      final org.eclipse.draw2d.geometry.Point viewLocation = g.getViewport().getViewLocation();
-      final Image image = new Image(null, size.x, size.y);
-      final GC gc = new GC(image);
-      final SWTGraphics swtGraphics = new SWTGraphics(gc);
-      swtGraphics.translate(-1 * bounds.x + viewLocation.x, -1 * bounds.y + viewLocation.y);
-      g.getViewport().paint(swtGraphics);
-      gc.copyArea(image, 0, 0);
-      gc.dispose();
-      final ImageLoader loader = new ImageLoader();
-      loader.data = new ImageData[] {
-              image.getImageData()
-      };
-      loader.save(path, SWT.IMAGE_PNG);
+      final BufferedImage image = mxCellRenderer.createBufferedImage(graph, null, 1, Color.WHITE, true, null);
+      try {
+        ImageIO.write(image, "PNG", new File(path)); //$NON-NLS-1$
+      }
+      catch (final IOException e) {
+        // display error message
+        MessageDialog.openInformation(site.getShell(), "", Texts.SaveImage_Error); //$NON-NLS-1$
+      }
 
       MessageDialog.openInformation(site.getShell(), "", Texts.SaveImage_Result); //$NON-NLS-1$
     }

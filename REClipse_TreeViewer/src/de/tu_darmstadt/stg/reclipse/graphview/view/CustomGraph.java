@@ -37,7 +37,7 @@ public class CustomGraph extends mxGraph {
 
   protected ContentModel contentModel;
 
-  final mxGraphLayout graphLayout;
+  private mxGraphLayout graphLayout;
 
   private final Map<mxCell, Set<Object>> collapsedVertices;
 
@@ -76,6 +76,24 @@ public class CustomGraph extends mxGraph {
     addMouseListener();
 
     updateGraph();
+  }
+
+  public void relayoutGraph() {
+    getModel().beginUpdate();
+    try {
+      // execute layout
+      graphLayout.execute(getDefaultParent());
+
+      // center cells
+      moveCells(getChildCells(getDefaultParent(), true, true), 50, 50);
+    }
+    finally {
+      getModel().endUpdate();
+    }
+  }
+
+  public void setGraphLayout(final mxGraphLayout l) {
+    graphLayout = l;
   }
 
   public void setPointInTime(final int pointInTime) {
@@ -123,18 +141,7 @@ public class CustomGraph extends mxGraph {
       }
     }
 
-    // execute layout
-    getModel().beginUpdate();
-    try {
-      // execute layout
-      graphLayout.execute(getDefaultParent());
-
-      // center cells
-      moveCells(getChildCells(getDefaultParent(), true, true), 50, 50);
-    }
-    finally {
-      getModel().endUpdate();
-    }
+    relayoutGraph();
   }
 
   private void addMouseWheelListener() {
