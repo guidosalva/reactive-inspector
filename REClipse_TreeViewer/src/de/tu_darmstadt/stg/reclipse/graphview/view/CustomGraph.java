@@ -9,6 +9,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
@@ -22,6 +23,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.mxgraph.layout.mxGraphLayout;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
+import com.mxgraph.model.mxCell;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.view.mxGraph;
@@ -38,13 +40,18 @@ public class CustomGraph extends mxGraph {
 
   protected ContentModel contentModel;
 
-  private final mxGraphLayout graphLayout;
+  final mxGraphLayout graphLayout;
+
+  private final Map<mxCell, Set<Object>> collapsedVertices;
 
   public CustomGraph(final Composite parent) {
     super();
 
     // create stylesheets
     createStylesheets();
+
+    // initialize collapsed vertices map
+    collapsedVertices = new HashMap<>();
 
     // create new content model
     contentModel = new ContentModel();
@@ -82,18 +89,20 @@ public class CustomGraph extends mxGraph {
 
     // set VAR style
     final Hashtable<String, Object> varStyle = new Hashtable<>(baseStyle);
-    varStyle.put(mxConstants.STYLE_FILLCOLOR, "#FFD633");
-    varStyle.put(mxConstants.STYLE_GRADIENTCOLOR, "#FFE680");
-    varStyle.put(mxConstants.STYLE_STROKECOLOR, "#FFCC00");
+    varStyle.put(mxConstants.STYLE_FILLCOLOR, "#FF1919");
+    varStyle.put(mxConstants.STYLE_GRADIENTCOLOR, "#FF6666");
+    varStyle.put(mxConstants.STYLE_STROKECOLOR, "#FF1919");
+    varStyle.put(mxConstants.STYLE_FONTCOLOR, "#000000");
     varStyle.put(mxConstants.STYLE_ROUNDED, "1");
     stylesheet.putCellStyle("VAR", varStyle);
 
     // set SIGNAL style
     final Hashtable<String, Object> signalStyle = new Hashtable<>(baseStyle);
-    signalStyle.put(mxConstants.STYLE_FILLCOLOR, "#FF8533");
-    signalStyle.put(mxConstants.STYLE_GRADIENTCOLOR, "#FFA366");
-    signalStyle.put(mxConstants.STYLE_STROKECOLOR, "#FF6600");
+    signalStyle.put(mxConstants.STYLE_FILLCOLOR, "#FFA347");
+    signalStyle.put(mxConstants.STYLE_GRADIENTCOLOR, "#FFB870");
+    signalStyle.put(mxConstants.STYLE_STROKECOLOR, "#FFA347");
     signalStyle.put(mxConstants.STYLE_ROUNDED, "1");
+    signalStyle.put(mxConstants.STYLE_FONTCOLOR, "#000000");
     stylesheet.putCellStyle("SIGNAL", signalStyle);
 
     // set EVENT style
@@ -102,6 +111,7 @@ public class CustomGraph extends mxGraph {
     eventStyle.put(mxConstants.STYLE_GRADIENTCOLOR, "#A3FF85");
     eventStyle.put(mxConstants.STYLE_STROKECOLOR, "#66FF33");
     eventStyle.put(mxConstants.STYLE_ROUNDED, "1");
+    eventStyle.put(mxConstants.STYLE_FONTCOLOR, "#000000");
     stylesheet.putCellStyle("EVENT", eventStyle);
 
     // set EVENT_HANDLER style
@@ -110,6 +120,7 @@ public class CustomGraph extends mxGraph {
     eventHandlerStyle.put(mxConstants.STYLE_GRADIENTCOLOR, "#A3FF85");
     eventHandlerStyle.put(mxConstants.STYLE_STROKECOLOR, "#66FF33");
     eventHandlerStyle.put(mxConstants.STYLE_ROUNDED, "1");
+    eventStyle.put(mxConstants.STYLE_FONTCOLOR, "#000000");
     stylesheet.putCellStyle("EVENT_HANDLER", eventHandlerStyle);
 
     // set edge style
@@ -144,6 +155,9 @@ public class CustomGraph extends mxGraph {
   public void updateGraph() {
     // remove cells, if any
     removeCells(getChildVertices(getDefaultParent()));
+
+    // clear collapsed map
+    collapsedVertices.clear();
 
     // load vertices from content model
     final Map<Object, Object> vertices = contentModel.getVertices();
@@ -221,11 +235,47 @@ public class CustomGraph extends mxGraph {
   }
 
   private void addMouseListener() {
-    graphComponent.addMouseListener(new MouseAdapter() {
+    graphComponent.getGraphControl().addMouseListener(new MouseAdapter() {
 
       @Override
       public void mouseClicked(final MouseEvent e) {
-        // TODO Implement vertex toggle
+        // get clicked cell
+        final mxCell cell = (mxCell) graphComponent.getCellAt(e.getX(), e.getY());
+
+        getModel().beginUpdate();
+        try {
+          // cell collapsed?
+          if (collapsedVertices.containsKey(cell)) {
+            // show cells
+            toggleCells(true, collapsedVertices.get(cell).toArray(), true);
+
+            // remove cell from collapsed map
+            collapsedVertices.remove(cell);
+          }
+          else {
+            // collect children of cell
+            final Set<Object> children = new HashSet<>();
+            traverse(cell, true, new mxICellVisitor() {
+
+              @Override
+              public boolean visit(final Object vertex, final Object edge) {
+                if (vertex != cell) {
+                  children.add(vertex);
+                }
+                return vertex == cell || !isCellCollapsed(vertex);
+              }
+            });
+
+            // add to collapsed map
+            collapsedVertices.put(cell, children);
+
+            // hide cells
+            toggleCells(false, collapsedVertices.get(cell).toArray(), true);
+          }
+        }
+        finally {
+          getModel().endUpdate();
+        }
       }
     });
   }

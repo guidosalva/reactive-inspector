@@ -20,9 +20,6 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Point;
@@ -37,13 +34,11 @@ import org.eclipse.swt.widgets.Slider;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.part.ViewPart;
-import org.eclipse.zest.core.widgets.Graph;
 
 /**
  * Base view class containing all the elements which are shown in the
  * "Reactive Tree" view / tab.
  */
-// IZoomableWorkbenchPart,
 public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener, DependencyGraphHistoryChangedListener {
 
   /**
@@ -72,11 +67,7 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
   public void createPartControl(final Composite parent) {
     parent.setLayout(new GridLayout(1, true));
 
-    // viewer = new CustomGraphViewer(parent, SWT.NONE);
-    // viewer.getControl().setLayoutData(new GridData(GridData.FILL, SWT.FILL,
-    // true, true));
-    // viewer.getControl().addMouseListener(new MoveGraphMouseAdapter());
-    // viewer.getControl().addMouseMoveListener(new MoveGraphMoveListener());
+    // create graph
     graph = new CustomGraph(parent);
 
     // be careful: you have to set environment variable LIBOVERLAY_SCROLLBAR=0
@@ -138,8 +129,6 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
     getViewSite().getActionBars().getToolBarManager().add(new SaveGraphAsImage(getSite(), viewer));
     getViewSite().getActionBars().getToolBarManager().add(new ZoomIn(viewer));
     getViewSite().getActionBars().getToolBarManager().add(new ZoomOut(viewer));
-    // getViewSite().getActionBars().getToolBarManager().add(new
-    // ZoomContributionViewItem(this));
 
     // create the context menu
     final MenuManager menuMgr = new MenuManager();
@@ -169,15 +158,9 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
     // getSite().registerContextMenu(menuMgr, viewer);
   }
 
-  // @Override
-  // public AbstractZoomableViewer getZoomableViewer() {
-  // return viewer;
-  // }
-
   @Override
   public void setFocus() {
     rebuildGraph();
-    // viewer.getControl().setFocus();
   }
 
   @Override
@@ -263,48 +246,6 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
       updateSliderValues();
     }
     rebuildGraph();
-  }
-
-  private class MoveGraphMouseAdapter extends MouseAdapter {
-
-    public MoveGraphMouseAdapter() {
-      // just to avoid the "emulated by a synthetic accessor method" warning
-    }
-
-    @Override
-    public void mouseDown(final MouseEvent e) {
-      // do nothing if clicked on node
-      if (e.getSource() instanceof Graph && ((Graph) e.getSource()).getSelection().size() == 0) {
-        moveGraphActive = e.button == 1;
-        if (moveGraphActive) {
-          moveStartPos.x = e.x;
-          moveStartPos.y = e.y;
-          viewLocationStartPos = new Point(viewer.getGraphControl().getViewport().getViewLocation().x, viewer.getGraphControl().getViewport().getViewLocation().y);
-        }
-      }
-    }
-
-    @Override
-    public void mouseUp(final MouseEvent e) {
-      moveGraphActive = false;
-    }
-  }
-
-  private class MoveGraphMoveListener implements MouseMoveListener {
-
-    public MoveGraphMoveListener() {
-      // just to avoid the "emulated by a synthetic accessor method" warning
-    }
-
-    @Override
-    public void mouseMove(final MouseEvent e) {
-      if (moveGraphActive) {
-        final int newX = viewLocationStartPos.x + moveStartPos.x - e.x;
-        final int newY = viewLocationStartPos.y + moveStartPos.y - e.y;
-        viewer.getGraphControl().scrollTo(newX, newY);
-      }
-    }
-
   }
 
   @Override
