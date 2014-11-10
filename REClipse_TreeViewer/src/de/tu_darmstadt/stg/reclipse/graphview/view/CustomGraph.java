@@ -1,7 +1,6 @@
 package de.tu_darmstadt.stg.reclipse.graphview.view;
 
 import de.tu_darmstadt.stg.reclipse.graphview.provider.ContentModel;
-import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
 import java.awt.Frame;
 import java.awt.event.MouseAdapter;
@@ -10,9 +9,9 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.swing.SwingConstants;
 
@@ -25,9 +24,7 @@ import com.mxgraph.layout.mxGraphLayout;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.util.mxConstants;
 import com.mxgraph.view.mxGraph;
-import com.mxgraph.view.mxStylesheet;
 
 /**
  * 
@@ -47,8 +44,8 @@ public class CustomGraph extends mxGraph {
   public CustomGraph(final Composite parent) {
     super();
 
-    // create stylesheets
-    createStylesheets();
+    // set custom stylesheet
+    setStylesheet(new CustomGraphStylesheet());
 
     // initialize collapsed vertices map
     collapsedVertices = new HashMap<>();
@@ -81,75 +78,11 @@ public class CustomGraph extends mxGraph {
     updateGraph();
   }
 
-  private void createStylesheets() {
-    final mxStylesheet stylesheet = getStylesheet();
-
-    // set base style
-    final Hashtable<String, Object> baseStyle = new Hashtable<>();
-
-    // set VAR style
-    final Hashtable<String, Object> varStyle = new Hashtable<>(baseStyle);
-    varStyle.put(mxConstants.STYLE_FILLCOLOR, "#FF1919");
-    varStyle.put(mxConstants.STYLE_GRADIENTCOLOR, "#FF6666");
-    varStyle.put(mxConstants.STYLE_STROKECOLOR, "#FF1919");
-    varStyle.put(mxConstants.STYLE_FONTCOLOR, "#000000");
-    varStyle.put(mxConstants.STYLE_ROUNDED, "1");
-    stylesheet.putCellStyle("VAR", varStyle);
-
-    // set SIGNAL style
-    final Hashtable<String, Object> signalStyle = new Hashtable<>(baseStyle);
-    signalStyle.put(mxConstants.STYLE_FILLCOLOR, "#FFA347");
-    signalStyle.put(mxConstants.STYLE_GRADIENTCOLOR, "#FFB870");
-    signalStyle.put(mxConstants.STYLE_STROKECOLOR, "#FFA347");
-    signalStyle.put(mxConstants.STYLE_ROUNDED, "1");
-    signalStyle.put(mxConstants.STYLE_FONTCOLOR, "#000000");
-    stylesheet.putCellStyle("SIGNAL", signalStyle);
-
-    // set EVENT style
-    final Hashtable<String, Object> eventStyle = new Hashtable<>(baseStyle);
-    eventStyle.put(mxConstants.STYLE_FILLCOLOR, "#85FF5C");
-    eventStyle.put(mxConstants.STYLE_GRADIENTCOLOR, "#A3FF85");
-    eventStyle.put(mxConstants.STYLE_STROKECOLOR, "#66FF33");
-    eventStyle.put(mxConstants.STYLE_ROUNDED, "1");
-    eventStyle.put(mxConstants.STYLE_FONTCOLOR, "#000000");
-    stylesheet.putCellStyle("EVENT", eventStyle);
-
-    // set EVENT_HANDLER style
-    final Hashtable<String, Object> eventHandlerStyle = new Hashtable<>(baseStyle);
-    eventHandlerStyle.put(mxConstants.STYLE_FILLCOLOR, "#85FF5C");
-    eventHandlerStyle.put(mxConstants.STYLE_GRADIENTCOLOR, "#A3FF85");
-    eventHandlerStyle.put(mxConstants.STYLE_STROKECOLOR, "#66FF33");
-    eventHandlerStyle.put(mxConstants.STYLE_ROUNDED, "1");
-    eventStyle.put(mxConstants.STYLE_FONTCOLOR, "#000000");
-    stylesheet.putCellStyle("EVENT_HANDLER", eventHandlerStyle);
-
-    // set edge style
-    final Hashtable<String, Object> edgeStyle = new Hashtable<>();
-    edgeStyle.put(mxConstants.STYLE_STROKECOLOR, "#000000");
-    edgeStyle.put(mxConstants.STYLE_STROKEWIDTH, "2");
-    stylesheet.putCellStyle("EDGE", edgeStyle);
-  }
-
   public void setPointInTime(final int pointInTime) {
     // set point in time in content model
     contentModel.setPointInTime(pointInTime);
 
     updateGraph();
-  }
-
-  private String determineStyle(final ReactiveVariable reVar) {
-    switch (reVar.getReactiveVariableType()) {
-      case VAR:
-        return "VAR";
-      case SIGNAL:
-        return "SIGNAL";
-      case EVENT:
-        return "EVENT";
-      case EVENT_HANDLER:
-        return "EVENT_HANDLER";
-      default:
-        return "";
-    }
   }
 
   public void updateGraph() {
@@ -160,43 +93,33 @@ public class CustomGraph extends mxGraph {
     collapsedVertices.clear();
 
     // load vertices from content model
-    final Map<Object, Object> vertices = contentModel.getVertices();
+    final Set<ReactiveVariableVertex> vertices = contentModel.getVertices();
 
     // load edges from content model
-    final Map<Object, Set<Object>> edges = contentModel.getEdges();
-
-    // set default parent
-    final Object defaultParent = getDefaultParent();
+    final Map<UUID, Set<UUID>> edges = contentModel.getEdges();
 
     // insert vertices
-    final Map<Object, Object> mapping = new HashMap<>();
-    for (final Object id : vertices.keySet()) {
-      // get reactive variable
-      final ReactiveVariable reVar = (ReactiveVariable) vertices.get(id);
+    final Map<UUID, Object> mapping = new HashMap<>();
+    for (final ReactiveVariableVertex vertex : vertices) {
+      final Object cell = vertex.draw(this);
 
-      // create label
-      final String label = reVar.getName() + "\n\n" + "Value: " + reVar.getValueString() + "\n" + "Type: " + reVar.getTypeSimple();
-
-      // create vertex
-      final Object vertex = insertVertex(defaultParent, id.toString(), label, 0, 0, 160, 80, determineStyle(reVar));
-
-      // add vertex to mapping
-      mapping.put(id, vertex);
+      // add cell to mapping
+      mapping.put(vertex.getVar().getId(), cell);
     }
 
     // insert edges
-    for (final Object id : edges.keySet()) {
+    for (final Object sourceId : edges.keySet()) {
       // get source vertex
-      final Object sourceVertex = mapping.get(id);
+      final Object source = mapping.get(sourceId);
 
       // get destinations
-      final Set<Object> destinations = edges.get(id);
+      final Set<UUID> destinations = edges.get(sourceId);
 
-      for (final Object connectedId : destinations) {
+      for (final UUID destinationId : destinations) {
         // get destination vertex
-        final Object destinationVertex = mapping.get(connectedId);
+        final Object destination = mapping.get(destinationId);
 
-        insertEdge(defaultParent, null, "", sourceVertex, destinationVertex, "EDGE"); //$NON-NLS-1$
+        insertEdge(defaultParent, null, "", source, destination, "EDGE"); //$NON-NLS-1$ //$NON-NLS-2$
       }
     }
 

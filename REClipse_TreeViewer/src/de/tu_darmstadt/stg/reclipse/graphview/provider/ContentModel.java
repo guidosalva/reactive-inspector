@@ -1,6 +1,7 @@
 package de.tu_darmstadt.stg.reclipse.graphview.provider;
 
 import de.tu_darmstadt.stg.reclipse.graphview.model.DatabaseHelper;
+import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableVertex;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
 import java.util.ArrayList;
@@ -23,10 +24,10 @@ public class ContentModel {
     this.pointInTime = newPointInTime;
   }
 
-  public Map<Object, Object> getVertices() {
-    final Map<Object, Object> vertices = new HashMap<>();
+  public Set<ReactiveVariableVertex> getVertices() {
+    final Set<ReactiveVariableVertex> vertices = new HashSet<>();
 
-    // make sure that point in tim eis in a valid range
+    // make sure that point in time is in a valid range
     if (pointInTime < 1 || pointInTime > DatabaseHelper.getLastPointInTime()) {
       return vertices;
     }
@@ -37,19 +38,22 @@ public class ContentModel {
     for (final ReactiveVariable reVar : reVars) {
       // return empty map if not all reactive variables are created yet
       if (reVar == null) {
-        return new HashMap<>();
+        return new HashSet<>();
       }
 
-      vertices.put(reVar.getId(), reVar);
+      // create reactive variable vertex
+      final ReactiveVariableVertex vertex = new ReactiveVariableVertex(reVar);
+
+      vertices.add(vertex);
     }
 
     return vertices;
   }
 
-  public Map<Object, Set<Object>> getEdges() {
-    final Map<Object, Set<Object>> edges = new HashMap<>();
+  public Map<UUID, Set<UUID>> getEdges() {
+    final Map<UUID, Set<UUID>> edges = new HashMap<>();
 
-    // make sure that point in tim eis in a valid range
+    // make sure that point in time is in a valid range
     if (pointInTime < 1 || pointInTime > DatabaseHelper.getLastPointInTime()) {
       return edges;
     }
@@ -63,13 +67,7 @@ public class ContentModel {
         return new HashMap<>();
       }
 
-      // collect connected variables
-      final Set<Object> connectedWith = new HashSet<>();
-      for (final UUID connectedId : reVar.getConnectedWith()) {
-        connectedWith.add(connectedId);
-      }
-
-      edges.put(reVar.getId(), connectedWith);
+      edges.put(reVar.getId(), reVar.getConnectedWith());
     }
 
     return edges;
