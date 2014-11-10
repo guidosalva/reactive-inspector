@@ -39,7 +39,7 @@ public class CustomGraph extends mxGraph {
 
   private mxGraphLayout graphLayout;
 
-  private final Map<mxCell, Set<Object>> collapsedVertices;
+  final Map<mxCell, Set<Object>> collapsedVertices;
 
   public CustomGraph(final Composite parent) {
     super();
@@ -78,7 +78,10 @@ public class CustomGraph extends mxGraph {
     updateGraph();
   }
 
-  public void relayoutGraph() {
+  /**
+   * Layouts the graph.
+   */
+  public void layoutGraph() {
     getModel().beginUpdate();
     try {
       // execute layout
@@ -96,6 +99,12 @@ public class CustomGraph extends mxGraph {
     graphLayout = l;
   }
 
+  /**
+   * Updates the point in time the graph should visualize.
+   * 
+   * @param pointInTime
+   *          A point in time.
+   */
   public void setPointInTime(final int pointInTime) {
     // set point in time in content model
     contentModel.setPointInTime(pointInTime);
@@ -103,6 +112,10 @@ public class CustomGraph extends mxGraph {
     updateGraph();
   }
 
+  /**
+   * Redraws the graph by loading the necessary vertices and connecting them
+   * appropriately.
+   */
   public void updateGraph() {
     // remove cells, if any
     removeCells(getChildVertices(getDefaultParent()));
@@ -141,7 +154,7 @@ public class CustomGraph extends mxGraph {
       }
     }
 
-    relayoutGraph();
+    layoutGraph();
   }
 
   private void addMouseWheelListener() {
@@ -196,11 +209,11 @@ public class CustomGraph extends mxGraph {
               }
             });
 
-            // add to collapsed map
-            collapsedVertices.put(cell, children);
-
             // hide cells
             toggleCells(false, collapsedVertices.get(cell).toArray(), true);
+
+            // add to collapsed map
+            collapsedVertices.put(cell, children);
           }
         }
         finally {
@@ -210,10 +223,16 @@ public class CustomGraph extends mxGraph {
     });
   }
 
+  /**
+   * Zooms into the graph.
+   */
   public void zoomIn() {
     graphComponent.zoomIn();
   }
 
+  /**
+   * Zooms out of the graph.
+   */
   public void zoomOut() {
     graphComponent.zoomOut();
   }

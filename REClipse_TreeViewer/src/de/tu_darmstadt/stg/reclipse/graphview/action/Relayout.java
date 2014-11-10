@@ -26,6 +26,6 @@ public class Relayout extends Action {
 
   @Override
   public void run() {
-    graph.relayoutGraph();
+    graph.layoutGraph();
   }
 }
