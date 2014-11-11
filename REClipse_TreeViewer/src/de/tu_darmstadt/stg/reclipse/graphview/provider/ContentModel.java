@@ -20,10 +20,20 @@ public class ContentModel {
 
   private int pointInTime = 0;
 
+  /**
+   * Updates the point in time.
+   * 
+   * @param newPointInTime
+   *          The new point in time.
+   */
   public void setPointInTime(final int newPointInTime) {
     this.pointInTime = newPointInTime;
   }
 
+  /**
+   * 
+   * @return A set of reactive variable vertices.
+   */
   public Set<ReactiveVariableVertex> getVertices() {
     final Set<ReactiveVariableVertex> vertices = new HashSet<>();
 
@@ -50,6 +60,10 @@ public class ContentModel {
     return vertices;
   }
 
+  /**
+   * 
+   * @return A map containing information about the edges between vertices.
+   */
   public Map<UUID, Set<UUID>> getEdges() {
     final Map<UUID, Set<UUID>> edges = new HashMap<>();
 
