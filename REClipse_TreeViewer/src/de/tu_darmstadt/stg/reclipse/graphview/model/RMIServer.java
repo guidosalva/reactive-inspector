@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.Platform;
  * {@link RemoteLoggerImpl} and providing them to clients via Java RMI with the
  * name {@value RMIConstants#REMOTE_REFERENCE_NAME}.
  */
+@SuppressWarnings("deprecation")
 public class RMIServer implements Runnable {
 
   @Override

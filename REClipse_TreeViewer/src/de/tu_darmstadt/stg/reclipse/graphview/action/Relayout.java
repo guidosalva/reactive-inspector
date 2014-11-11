@@ -1,11 +1,11 @@
 package de.tu_darmstadt.stg.reclipse.graphview.action;
 
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
+import de.tu_darmstadt.stg.reclipse.graphview.view.CustomGraph;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.zest.core.viewers.GraphViewer;
 
 /**
  * Provides the relayout action, which applies the currently selected layout
@@ -14,10 +14,10 @@ import org.eclipse.zest.core.viewers.GraphViewer;
  */
 public class Relayout extends Action {
 
-  private final GraphViewer viewer;
+  private final CustomGraph graph;
 
-  public Relayout(final GraphViewer v) {
-    viewer = v;
+  public Relayout(final CustomGraph g) {
+    graph = g;
 
     setText(Texts.Relayout_Text);
     setToolTipText(Texts.Relayout_Tooltip);
@@ -26,6 +26,6 @@ public class Relayout extends Action {
 
   @Override
   public void run() {
-    viewer.applyLayout();
+    graph.layoutGraph();
   }
 }
