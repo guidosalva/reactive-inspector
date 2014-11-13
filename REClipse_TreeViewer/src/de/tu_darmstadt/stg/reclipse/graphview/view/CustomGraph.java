@@ -46,6 +46,8 @@ public class CustomGraph extends mxGraph {
 
   final Map<mxCell, Set<Object>> collapsedVertices;
 
+  final Map<mxCell, Set<Object>> highlightedVertices;
+
   public CustomGraph(final Composite parent) {
     super();
 
@@ -54,6 +56,9 @@ public class CustomGraph extends mxGraph {
 
     // initialize collapsed vertices map
     collapsedVertices = new HashMap<>();
+
+    // initialize highlighted vertices map
+    highlightedVertices = new HashMap<>();
 
     // create new content model
     contentModel = new ContentModel();
@@ -223,14 +228,21 @@ public class CustomGraph extends mxGraph {
         }
 
         // highlight menu item
-        final JMenuItem highlightItem = new JMenuItem("Highlight Change Propagation");
+        final JMenuItem highlightItem = new JMenuItem();
         highlightItem.addActionListener(new ActionListener() {
 
           @Override
           public void actionPerformed(final ActionEvent e) {
-            // TODO Implement highlighting
+            highlightCell(cell);
           }
         });
+
+        if (isHighlighted(cell)) {
+          highlightItem.setText("Remove Highlight");
+        }
+        else {
+          highlightItem.setText("Highlight Change Propagation");
+        }
 
         // add menu items
         popupMenu.add(collapseItem);
@@ -271,18 +283,7 @@ public class CustomGraph extends mxGraph {
         collapsedVertices.remove(cell);
       }
       else {
-        // collect children of cell
-        final Set<Object> children = new HashSet<>();
-        traverse(cell, true, new mxICellVisitor() {
-
-          @Override
-          public boolean visit(final Object vertex, final Object edge) {
-            if (vertex != cell) {
-              children.add(vertex);
-            }
-            return vertex == cell || !isCellCollapsed(vertex);
-          }
-        });
+        final Set<Object> children = getChildrenOfCell(cell);
 
         // add to collapsed map
         collapsedVertices.put(cell, children);
@@ -294,6 +295,66 @@ public class CustomGraph extends mxGraph {
     finally {
       getModel().endUpdate();
     }
+  }
+
+  public boolean isHighlighted(final mxCell cell) {
+    return highlightedVertices.containsKey(cell);
+  }
+
+  public void highlightCell(final mxCell cell) {
+    if (cell == null) {
+      return;
+    }
+
+    getModel().beginUpdate();
+    try {
+      // cell highlighted?
+      if (highlightedVertices.containsKey(cell)) {
+        for (final Object child : highlightedVertices.get(cell)) {
+          final mxCell childCell = (mxCell) child;
+
+          childCell.setStyle(childCell.getStyle().replace("HIGHLIGHTED", ""));
+        }
+
+        // remove cell from highlighted map
+        highlightedVertices.remove(cell);
+      }
+      else {
+        final Set<Object> children = getChildrenOfCell(cell);
+
+        // add to highlighted mpa
+        highlightedVertices.put(cell, children);
+
+        // remove highlight from cells
+        for (final Object child : highlightedVertices.get(cell)) {
+          final mxCell childCell = (mxCell) child;
+
+          childCell.setStyle(childCell.getStyle() + "HIGHLIGHTED");
+        }
+      }
+    }
+    finally {
+      getModel().endUpdate();
+    }
+
+    this.refresh();
+  }
+
+  public Set<Object> getChildrenOfCell(final mxCell cell) {
+    // collect children of cell
+    final Set<Object> children = new HashSet<>();
+    traverse(cell, true, new mxICellVisitor() {
+
+      @Override
+      public boolean visit(final Object vertex, final Object edge) {
+        if (vertex != cell) {
+          children.add(vertex);
+        }
+        return vertex == cell || !isCellCollapsed(vertex);
+      }
+    });
+
+    return children;
   }
 
   /**

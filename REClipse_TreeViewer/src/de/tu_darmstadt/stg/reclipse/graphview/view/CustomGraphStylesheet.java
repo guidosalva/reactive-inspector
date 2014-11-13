@@ -40,6 +40,15 @@ public class CustomGraphStylesheet extends mxStylesheet {
     signalStyle.put(mxConstants.STYLE_FONTCOLOR, "#000000"); //$NON-NLS-1$
     putCellStyle("SIGNAL", signalStyle); //$NON-NLS-1$
 
+    // set style for highlighted SIGNAL vertices
+    final Hashtable<String, Object> highlightedSignalStyle = new Hashtable<>(baseStyle);
+    highlightedSignalStyle.put(mxConstants.STYLE_FILLCOLOR, "#000000"); //$NON-NLS-1$
+    highlightedSignalStyle.put(mxConstants.STYLE_GRADIENTCOLOR, "#FFB870"); //$NON-NLS-1$
+    highlightedSignalStyle.put(mxConstants.STYLE_STROKECOLOR, "#FFA347"); //$NON-NLS-1$
+    highlightedSignalStyle.put(mxConstants.STYLE_ROUNDED, "1"); //$NON-NLS-1$
+    highlightedSignalStyle.put(mxConstants.STYLE_FONTCOLOR, "#000000"); //$NON-NLS-1$
+    putCellStyle("SIGNALHIGHLIGHT", highlightedSignalStyle); //$NON-NLS-1$
+
     // set style for EVENT vertices
     final Hashtable<String, Object> eventStyle = new Hashtable<>(baseStyle);
     eventStyle.put(mxConstants.STYLE_FILLCOLOR, "#85FF5C"); //$NON-NLS-1$
