@@ -3,6 +3,8 @@ package de.tu_darmstadt.stg.reclipse.graphview.view;
 import de.tu_darmstadt.stg.reclipse.graphview.provider.ContentModel;
 
 import java.awt.Frame;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
@@ -13,7 +15,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
@@ -182,45 +187,113 @@ public class CustomGraph extends mxGraph {
 
       @Override
       public void mouseClicked(final MouseEvent e) {
-        // get clicked cell
+      }
+
+      @Override
+      public void mouseReleased(final MouseEvent e) {
+        if (!SwingUtilities.isRightMouseButton(e)) {
+          return;
+        }
+
+        // find clicked cell
         final mxCell cell = (mxCell) graphComponent.getCellAt(e.getX(), e.getY());
 
-        getModel().beginUpdate();
-        try {
-          // cell collapsed?
-          if (collapsedVertices.containsKey(cell)) {
-            // show cells
-            toggleCells(true, collapsedVertices.get(cell).toArray(), true);
-
-            // remove cell from collapsed map
-            collapsedVertices.remove(cell);
-          }
-          else {
-            // collect children of cell
-            final Set<Object> children = new HashSet<>();
-            traverse(cell, true, new mxICellVisitor() {
-
-              @Override
-              public boolean visit(final Object vertex, final Object edge) {
-                if (vertex != cell) {
-                  children.add(vertex);
-                }
-                return vertex == cell || !isCellCollapsed(vertex);
-              }
-            });
-
-            // hide cells
-            toggleCells(false, collapsedVertices.get(cell).toArray(), true);
-
-            // add to collapsed map
-            collapsedVertices.put(cell, children);
-          }
+        // if no cell has been clicked, return
+        if (cell == null) {
+          return;
         }
-        finally {
-          getModel().endUpdate();
+
+        final JPopupMenu popupMenu = new JPopupMenu();
+
+        // collapse menu item
+        final JMenuItem collapseItem = new JMenuItem();
+        collapseItem.addActionListener(new ActionListener() {
+
+          @Override
+          public void actionPerformed(final ActionEvent e) {
+            collapseCell(cell);
+          }
+        });
+
+        if (isCollapsed(cell)) {
+          collapseItem.setText("Unfold (" + getAmountOfCollapsedCells(cell) + " cells)");
         }
+        else {
+          collapseItem.setText("Fold");
+        }
+
+        // highlight menu item
+        final JMenuItem highlightItem = new JMenuItem("Highlight Change Propagation");
+        highlightItem.addActionListener(new ActionListener() {
+
+          @Override
+          public void actionPerformed(final ActionEvent e) {
+            // TODO Implement highlighting
+          }
+        });
+
+        // add menu items
+        popupMenu.add(collapseItem);
+        popupMenu.addSeparator();
+        popupMenu.add(highlightItem);
+
+        // show popup menu on clicked point
+        popupMenu.show(graphComponent, e.getX(), e.getY());
       }
     });
+  }
+
+  public boolean isCollapsed(final mxCell cell) {
+    return collapsedVertices.containsKey(cell);
+  }
+
+  public int getAmountOfCollapsedCells(final mxCell cell) {
+    if (!collapsedVertices.containsKey(cell)) {
+      return 0;
+    }
+
+    return collapsedVertices.get(cell).size();
+  }
+
+  public void collapseCell(final mxCell cell) {
+    if (cell == null) {
+      return;
+    }
+
+    getModel().beginUpdate();
+    try {
+      // cell collapsed?
+      if (collapsedVertices.containsKey(cell)) {
+        // show cells
+        toggleCells(true, collapsedVertices.get(cell).toArray(), true);
+
+        // remove cell from collapsed map
+        collapsedVertices.remove(cell);
+      }
+      else {
+        // collect children of cell
+        final Set<Object> children = new HashSet<>();
+        traverse(cell, true, new mxICellVisitor() {
+
+          @Override
+          public boolean visit(final Object vertex, final Object edge) {
+            if (vertex != cell) {
+              children.add(vertex);
+            }
+            return vertex == cell || !isCellCollapsed(vertex);
+          }
+        });
+
+        // add to collapsed map
+        collapsedVertices.put(cell, children);
+
+        // hide cells
+        toggleCells(false, collapsedVertices.get(cell).toArray(), true);
+      }
+    }
+    finally {
+      getModel().endUpdate();
+    }
   }
 
   /**
