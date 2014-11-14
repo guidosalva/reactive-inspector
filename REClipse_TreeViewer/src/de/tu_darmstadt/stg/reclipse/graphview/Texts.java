@@ -33,6 +33,11 @@ public class Texts extends NLS {
   public static String Query_Submit;
   public static String Query_NoResults;
 
+  public static String MenuItem_Collapse_Fold;
+  public static String MenuItem_Collapse_Unfold;
+  public static String MenuItem_Highlighter_Highlight;
+  public static String MenuItem_Highlighter_RemoveHighlight;
+
   private static final String BUNDLE_NAME = Texts.class.getPackage().getName() + ".texts"; //$NON-NLS-1$
 
   static {

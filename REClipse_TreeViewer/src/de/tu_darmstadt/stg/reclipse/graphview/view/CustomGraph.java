@@ -3,8 +3,6 @@ package de.tu_darmstadt.stg.reclipse.graphview.view;
 import de.tu_darmstadt.stg.reclipse.graphview.provider.ContentModel;
 
 import java.awt.Frame;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
@@ -15,8 +13,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.swing.ImageIcon;
-import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -45,9 +41,9 @@ public class CustomGraph extends mxGraph {
 
   private mxGraphLayout graphLayout;
 
-  final Map<mxCell, Set<Object>> collapsedVertices;
+  final GraphCollapser collapser;
 
-  final Map<mxCell, Set<Object>> highlightedVertices;
+  final GraphHighlighter highlighter;
 
   public CustomGraph(final Composite parent) {
     super();
@@ -55,11 +51,9 @@ public class CustomGraph extends mxGraph {
     // set custom stylesheet
     setStylesheet(new CustomGraphStylesheet());
 
-    // initialize collapsed vertices map
-    collapsedVertices = new HashMap<>();
-
-    // initialize highlighted vertices map
-    highlightedVertices = new HashMap<>();
+    // initialize graph collapser and highlighter
+    collapser = new GraphCollapser(this);
+    highlighter = new GraphHighlighter(this);
 
     // create new content model
     contentModel = new ContentModel();
@@ -130,9 +124,6 @@ public class CustomGraph extends mxGraph {
   public void updateGraph() {
     // remove cells, if any
     removeCells(getChildVertices(getDefaultParent()));
-
-    // clear collapsed map
-    collapsedVertices.clear();
 
     // load vertices from content model
     final Set<ReactiveVariableVertex> vertices = contentModel.getVertices();
@@ -211,140 +202,15 @@ public class CustomGraph extends mxGraph {
 
         final JPopupMenu popupMenu = new JPopupMenu();
 
-        // collapse menu item
-        final JMenuItem collapseItem = new JMenuItem();
-        collapseItem.addActionListener(new ActionListener() {
-
-          @Override
-          public void actionPerformed(final ActionEvent e) {
-            collapseCell(cell);
-          }
-        });
-
-        final ImageIcon collapseIcon = new ImageIcon(getClass().getResource("/icons/collapse.png"));
-        collapseItem.setIcon(collapseIcon);
-
-        if (isCollapsed(cell)) {
-          collapseItem.setText("Unfold (" + getAmountOfCollapsedCells(cell) + " cells)");
-        }
-        else {
-          collapseItem.setText("Fold");
-        }
-
-        // highlight menu item
-        final JMenuItem highlightItem = new JMenuItem();
-        highlightItem.addActionListener(new ActionListener() {
-
-          @Override
-          public void actionPerformed(final ActionEvent e) {
-            highlightCell(cell);
-          }
-        });
-
-        final ImageIcon highlightIcon = new ImageIcon(getClass().getResource("/icons/highlight.png"));
-        highlightItem.setIcon(highlightIcon);
-
-        if (isHighlighted(cell)) {
-          highlightItem.setText("Remove Highlight");
-        }
-        else {
-          highlightItem.setText("Highlight Change Propagation");
-        }
-
         // add menu items
-        popupMenu.add(collapseItem);
+        popupMenu.add(collapser.createMenuItem(cell));
         popupMenu.addSeparator();
-        popupMenu.add(highlightItem);
+        popupMenu.add(highlighter.createMenuItem(cell));
 
         // show popup menu on clicked point
         popupMenu.show(graphComponent, e.getX(), e.getY());
       }
     });
-  }
-
-  public boolean isCollapsed(final mxCell cell) {
-    return collapsedVertices.containsKey(cell);
-  }
-
-  public int getAmountOfCollapsedCells(final mxCell cell) {
-    if (!collapsedVertices.containsKey(cell)) {
-      return 0;
-    }
-
-    return collapsedVertices.get(cell).size();
-  }
-
-  public void collapseCell(final mxCell cell) {
-    if (cell == null) {
-      return;
-    }
-
-    getModel().beginUpdate();
-    try {
-      // cell collapsed?
-      if (collapsedVertices.containsKey(cell)) {
-        // show cells
-        toggleCells(true, collapsedVertices.get(cell).toArray(), true);
-
-        // remove cell from collapsed map
-        collapsedVertices.remove(cell);
-      }
-      else {
-        final Set<Object> children = getChildrenOfCell(cell);
-
-        // add to collapsed map
-        collapsedVertices.put(cell, children);
-
-        // hide cells
-        toggleCells(false, collapsedVertices.get(cell).toArray(), true);
-      }
-    }
-    finally {
-      getModel().endUpdate();
-    }
-  }
-
-  public boolean isHighlighted(final mxCell cell) {
-    return highlightedVertices.containsKey(cell);
-  }
-
-  public void highlightCell(final mxCell cell) {
-    if (cell == null) {
-      return;
-    }
-
-    getModel().beginUpdate();
-    try {
-      // cell highlighted?
-      if (highlightedVertices.containsKey(cell)) {
-        for (final Object child : highlightedVertices.get(cell)) {
-          final mxCell childCell = (mxCell) child;
-
-          childCell.setStyle(childCell.getStyle().replace("HIGHLIGHTED", ""));
-        }
-
-        // remove cell from highlighted map
-        highlightedVertices.remove(cell);
-      }
-      else {
-        final Set<Object> children = getChildrenOfCell(cell);
-
-        // add to highlighted mpa
-        highlightedVertices.put(cell, children);
-
-        // remove highlight from cells
-        for (final Object child : highlightedVertices.get(cell)) {
-          final mxCell childCell = (mxCell) child;
-
-          childCell.setStyle(childCell.getStyle() + "HIGHLIGHTED");
-        }
-      }
-    }
-    finally {
-      getModel().endUpdate();
-    }
-
-    this.refresh();
   }
 
   public Set<Object> getChildrenOfCell(final mxCell cell) {
