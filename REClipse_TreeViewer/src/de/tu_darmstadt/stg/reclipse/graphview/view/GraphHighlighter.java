@@ -71,7 +71,7 @@ public class GraphHighlighter {
         for (final Object child : highlighted.get(cell)) {
           final mxCell childCell = (mxCell) child;
 
-          childCell.setStyle(childCell.getStyle().replace("HIGHLIGHTED", "")); //$NON-NLS-1$ //$NON-NLS-2$
+          childCell.setStyle(CustomGraphStylesheet.Styles.removeHighlight(childCell.getStyle()).name());
         }
 
         // remove cell from highlighted map
@@ -87,7 +87,7 @@ public class GraphHighlighter {
         for (final Object child : highlighted.get(cell)) {
           final mxCell childCell = (mxCell) child;
 
-          childCell.setStyle(childCell.getStyle() + "HIGHLIGHTED"); //$NON-NLS-1$
+          childCell.setStyle(CustomGraphStylesheet.Styles.getHighlight(childCell.getStyle()).name());
         }
       }
     }

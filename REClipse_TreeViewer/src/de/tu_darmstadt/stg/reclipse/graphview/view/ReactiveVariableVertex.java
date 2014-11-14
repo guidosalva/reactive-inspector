@@ -32,13 +32,13 @@ public class ReactiveVariableVertex {
   public String getStyle() {
     switch (var.getReactiveVariableType()) {
       case VAR:
-        return "VAR"; //$NON-NLS-1$
+        return CustomGraphStylesheet.Styles.VAR.name();
       case SIGNAL:
-        return "SIGNAL"; //$NON-NLS-1$
+        return CustomGraphStylesheet.Styles.SIGNAL.name();
       case EVENT:
-        return "EVENT"; //$NON-NLS-1$
+        return CustomGraphStylesheet.Styles.EVENT.name();
       case EVENT_HANDLER:
-        return "EVENT_HANDLER"; //$NON-NLS-1$
+        return CustomGraphStylesheet.Styles.EVENTHANDLER.name();
       default:
         return ""; //$NON-NLS-1$
     }
