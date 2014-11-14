@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
@@ -220,6 +221,9 @@ public class CustomGraph extends mxGraph {
           }
         });
 
+        final ImageIcon collapseIcon = new ImageIcon(getClass().getResource("/icons/collapse.png"));
+        collapseItem.setIcon(collapseIcon);
+
         if (isCollapsed(cell)) {
           collapseItem.setText("Unfold (" + getAmountOfCollapsedCells(cell) + " cells)");
         }
@@ -236,6 +240,9 @@ public class CustomGraph extends mxGraph {
             highlightCell(cell);
           }
         });
+
+        final ImageIcon highlightIcon = new ImageIcon(getClass().getResource("/icons/highlight.png"));
+        highlightItem.setIcon(highlightIcon);
 
         if (isHighlighted(cell)) {
           highlightItem.setText("Remove Highlight");
