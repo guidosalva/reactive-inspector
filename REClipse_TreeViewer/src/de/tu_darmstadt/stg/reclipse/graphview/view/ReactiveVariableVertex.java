@@ -19,14 +19,6 @@ public class ReactiveVariableVertex {
 
   /**
    * 
-   * @return A label containing information about the reactive variable.
-   */
-  public String getLabel() {
-    return var.getName() + "\n\n" + "Value: " + var.getValueString() + "\n" + "Type: " + var.getTypeSimple(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-  }
-
-  /**
-   * 
    * @return The style to be used when displaying this vertex in the graph.
    */
   public String getStyle() {
@@ -55,8 +47,11 @@ public class ReactiveVariableVertex {
     // use default parent of graph
     final Object parent = graph.getDefaultParent();
 
+    // create label
+    final ReactiveVariableLabel label = new ReactiveVariableLabel(var);
+
     // insert vertex and return it
-    return graph.insertVertex(parent, var.getId().toString(), getLabel(), 0, 0, 160, 80, getStyle());
+    return graph.insertVertex(parent, var.getId().toString(), label, 0, 0, 160, 80, getStyle());
   }
 
   /**

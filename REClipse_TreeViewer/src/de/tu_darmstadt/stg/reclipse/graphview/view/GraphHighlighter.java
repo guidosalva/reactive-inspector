@@ -63,24 +63,43 @@ public class GraphHighlighter {
     return label;
   }
 
+  private static void setHighlightedFlag(final mxCell cell) {
+    final ReactiveVariableLabel label = (ReactiveVariableLabel) cell.getValue();
+    label.setHighlighted(true);
+  }
+
+  private static void removeHighlightedFlag(final mxCell cell) {
+    final ReactiveVariableLabel label = (ReactiveVariableLabel) cell.getValue();
+    label.setHighlighted(false);
+  }
+
   public void highlightCell(final mxCell cell) {
     graph.getModel().beginUpdate();
     try {
       // cell highlighted?
       if (highlighted.containsKey(cell)) {
+        // remove highlight from cell label
+        removeHighlightedFlag(cell);
+
         for (final Object child : highlighted.get(cell)) {
           final mxCell childCell = (mxCell) child;
 
           childCell.setStyle(CustomGraphStylesheet.Styles.removeHighlight(childCell.getStyle()).name());
+
+          // remove highlight from child cell label
+          removeHighlightedFlag(childCell);
         }
 
         // remove cell from highlighted map
         highlighted.remove(cell);
       }
       else {
+        // set highlight on cell label
+        setHighlightedFlag(cell);
+
         final Set<Object> children = graph.getChildrenOfCell(cell);
 
-        // add to highlighted mpa
+        // add to highlighted map
         highlighted.put(cell, children);
 
         // remove highlight from cells
@@ -88,6 +107,9 @@ public class GraphHighlighter {
           final mxCell childCell = (mxCell) child;
 
           childCell.setStyle(CustomGraphStylesheet.Styles.getHighlight(childCell.getStyle()).name());
+
+          // set highlight on child cell label
+          setHighlightedFlag(childCell);
         }
       }
     }
