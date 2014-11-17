@@ -13,7 +13,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
@@ -39,7 +41,9 @@ public class CustomGraph extends mxGraph {
 
   private mxGraphLayout graphLayout;
 
-  final Map<mxCell, Set<Object>> collapsedVertices;
+  final GraphCollapser collapser;
+
+  final GraphHighlighter highlighter;
 
   public CustomGraph(final Composite parent) {
     super();
@@ -47,8 +51,9 @@ public class CustomGraph extends mxGraph {
     // set custom stylesheet
     setStylesheet(new CustomGraphStylesheet());
 
-    // initialize collapsed vertices map
-    collapsedVertices = new HashMap<>();
+    // initialize graph collapser and highlighter
+    collapser = new GraphCollapser(this);
+    highlighter = new GraphHighlighter(this);
 
     // create new content model
     contentModel = new ContentModel();
@@ -120,9 +125,6 @@ public class CustomGraph extends mxGraph {
     // remove cells, if any
     removeCells(getChildVertices(getDefaultParent()));
 
-    // clear collapsed map
-    collapsedVertices.clear();
-
     // load vertices from content model
     final Set<ReactiveVariableVertex> vertices = contentModel.getVertices();
 
@@ -182,45 +184,50 @@ public class CustomGraph extends mxGraph {
 
       @Override
       public void mouseClicked(final MouseEvent e) {
-        // get clicked cell
+      }
+
+      @Override
+      public void mouseReleased(final MouseEvent e) {
+        if (!SwingUtilities.isRightMouseButton(e)) {
+          return;
+        }
+
+        // find clicked cell
         final mxCell cell = (mxCell) graphComponent.getCellAt(e.getX(), e.getY());
 
-        getModel().beginUpdate();
-        try {
-          // cell collapsed?
-          if (collapsedVertices.containsKey(cell)) {
-            // show cells
-            toggleCells(true, collapsedVertices.get(cell).toArray(), true);
-
-            // remove cell from collapsed map
-            collapsedVertices.remove(cell);
-          }
-          else {
-            // collect children of cell
-            final Set<Object> children = new HashSet<>();
-            traverse(cell, true, new mxICellVisitor() {
-
-              @Override
-              public boolean visit(final Object vertex, final Object edge) {
-                if (vertex != cell) {
-                  children.add(vertex);
-                }
-                return vertex == cell || !isCellCollapsed(vertex);
-              }
-            });
-
-            // hide cells
-            toggleCells(false, collapsedVertices.get(cell).toArray(), true);
-
-            // add to collapsed map
-            collapsedVertices.put(cell, children);
-          }
+        // if no cell has been clicked, return
+        if (cell == null) {
+          return;
         }
-        finally {
-          getModel().endUpdate();
-        }
+
+        final JPopupMenu popupMenu = new JPopupMenu();
+
+        // add menu items
+        popupMenu.add(collapser.createMenuItem(cell));
+        popupMenu.addSeparator();
+        popupMenu.add(highlighter.createMenuItem(cell));
+
+        // show popup menu on clicked point
+        popupMenu.show(graphComponent, e.getX(), e.getY());
       }
     });
+  }
+
+  public Set<Object> getChildrenOfCell(final mxCell cell) {
+    // collect children of cell
+    final Set<Object> children = new HashSet<>();
+    traverse(cell, true, new mxICellVisitor() {
+
+      @Override
+      public boolean visit(final Object vertex, final Object edge) {
+        if (vertex != cell) {
+          children.add(vertex);
+        }
+        return vertex == cell || !isCellCollapsed(vertex);
+      }
+    });
+
+    return children;
   }
 
   /**
