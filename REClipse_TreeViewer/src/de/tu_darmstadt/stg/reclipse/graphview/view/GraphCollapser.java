@@ -14,6 +14,11 @@ import javax.swing.JMenuItem;
 
 import com.mxgraph.model.mxCell;
 
+/**
+ * 
+ * @author Sebastian Ruhleder <sebastian.ruhleder@gmail.com>
+ * 
+ */
 public class GraphCollapser {
 
   private final CustomGraph graph;
@@ -27,11 +32,20 @@ public class GraphCollapser {
     collapsed = new HashMap<>();
   }
 
+  /**
+   * Creates a menu item for the cell.
+   * 
+   * @param cell
+   *          A cell in the graph.
+   * @return JMenuItem instance
+   */
   public JMenuItem createMenuItem(final mxCell cell) {
     final JMenuItem item = new JMenuItem();
 
+    // set text to label
     item.setText(createLabelForCell(cell));
 
+    // load icon
     final ImageIcon icon = new ImageIcon(getClass().getResource(Images.COLLAPSE.getPath()));
     item.setIcon(icon);
 
@@ -46,17 +60,35 @@ public class GraphCollapser {
     return item;
   }
 
+  /**
+   * Checks if a cell is currently collapsed.
+   * 
+   * @param cell
+   *          A cell in the graph.
+   * @return True, if the cell is collapsed. False, otherwise.
+   */
   private boolean isCollapsed(final mxCell cell) {
     return collapsed.containsKey(cell);
   }
 
+  /**
+   * Gets the amount of children of the cell in the graph.
+   * 
+   * @param cell
+   *          A cell in the graph.
+   * @return Amount of the cell's children.
+   */
   private int getAmountOfChildren(final mxCell cell) {
-    if (!collapsed.containsKey(cell)) {
-      return 0;
-    }
-    return collapsed.get(cell).size();
+    return collapsed.containsKey(cell) ? collapsed.get(cell).size() : 0;
   }
 
+  /**
+   * Builds a label based on whether a cell is collapsed.
+   * 
+   * @param cell
+   *          A cell in the graph.
+   * @return A label String.
+   */
   private String createLabelForCell(final mxCell cell) {
     String label;
 
@@ -85,6 +117,12 @@ public class GraphCollapser {
     return label;
   }
 
+  /**
+   * Collapses a cell in the graph.
+   * 
+   * @param cell
+   *          A cell in the graph.
+   */
   public void collapseCell(final mxCell cell) {
     graph.getModel().beginUpdate();
     try {

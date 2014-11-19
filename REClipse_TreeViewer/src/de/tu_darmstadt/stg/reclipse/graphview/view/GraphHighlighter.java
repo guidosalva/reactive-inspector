@@ -14,6 +14,11 @@ import javax.swing.JMenuItem;
 
 import com.mxgraph.model.mxCell;
 
+/**
+ * 
+ * @author Sebastian Ruhleder <sebastian.ruhleder@gmail.com>
+ * 
+ */
 public class GraphHighlighter {
 
   private final CustomGraph graph;
@@ -27,11 +32,20 @@ public class GraphHighlighter {
     highlighted = new HashMap<>();
   }
 
+  /**
+   * Creates a menu item for the cell.
+   * 
+   * @param cell
+   *          A cell in the graph.
+   * @return JMenuItem instance
+   */
   public JMenuItem createMenuItem(final mxCell cell) {
     final JMenuItem item = new JMenuItem();
 
+    // set text to label
     item.setText(createLabelForCell(cell));
 
+    // load icon
     final ImageIcon icon = new ImageIcon(getClass().getResource(Images.HIGHLIGHT.getPath()));
     item.setIcon(icon);
 
@@ -46,33 +60,56 @@ public class GraphHighlighter {
     return item;
   }
 
+  /**
+   * Checks if a cell is currently highlighted.
+   * 
+   * @param cell
+   *          A cell in the graph.
+   * @return True, if the cell is highlighted. False, otherwise.
+   */
   private boolean isHighlighted(final mxCell cell) {
     return highlighted.containsKey(cell);
   }
 
+  /**
+   * Builds a label based on whether a cell is highlighted.
+   * 
+   * @param cell
+   *          A cell in the graph.
+   * @return A label String.
+   */
   private String createLabelForCell(final mxCell cell) {
-    String label;
-
-    if (isHighlighted(cell)) {
-      label = Texts.MenuItem_Highlighter_RemoveHighlight;
-    }
-    else {
-      label = Texts.MenuItem_Highlighter_Highlight;
-    }
-
-    return label;
+    return isHighlighted(cell) ? Texts.MenuItem_Highlighter_RemoveHighlight : Texts.MenuItem_Highlighter_Highlight;
   }
 
+  /**
+   * Sets the highlighted flag in the cell's label.
+   * 
+   * @param cell
+   *          A cell in the graph.
+   */
   private static void setHighlightedFlag(final mxCell cell) {
     final ReactiveVariableLabel label = (ReactiveVariableLabel) cell.getValue();
     label.setHighlighted(true);
   }
 
+  /**
+   * Removes the highlighted flag in the cell's label.
+   * 
+   * @param cell
+   *          A cell in the graph.
+   */
   private static void removeHighlightedFlag(final mxCell cell) {
     final ReactiveVariableLabel label = (ReactiveVariableLabel) cell.getValue();
     label.setHighlighted(false);
   }
 
+  /**
+   * Highlights a cell in the graph.
+   * 
+   * @param cell
+   *          A cell in the graph.
+   */
   public void highlightCell(final mxCell cell) {
     graph.getModel().beginUpdate();
     try {
