@@ -158,7 +158,7 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
     }
   }
 
-  protected void rebuildGraph() {
+  public void rebuildGraph() {
     if (!showGraph) {
       return;
     }
@@ -221,6 +221,9 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
     if (showGraph) {
       updateSliderValues();
     }
+
+    // update the graph to reflect newest changes
+    rebuildGraph();
   }
 
   public String getQueryText() {
