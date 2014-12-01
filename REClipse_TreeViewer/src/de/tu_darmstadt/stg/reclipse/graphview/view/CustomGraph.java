@@ -110,11 +110,15 @@ public class CustomGraph extends mxGraph {
    * @param pointInTime
    *          A point in time.
    */
-  public void setPointInTime(final int pointInTime) {
+  public void setPointInTime(final int pointInTime, final boolean highlightChange) {
     // set point in time in content model
-    contentModel.setPointInTime(pointInTime);
+    contentModel.setPointInTime(pointInTime, highlightChange);
 
     updateGraph();
+  }
+
+  public void setPointInTime(final int pointInTime) {
+    setPointInTime(pointInTime, false);
   }
 
   /**

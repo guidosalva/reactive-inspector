@@ -76,7 +76,7 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
       @Override
       public void handleEvent(final Event event) {
         if (event.detail == SWT.NONE) {
-          rebuildGraph();
+          rebuildGraph(false);
         }
       }
     });
@@ -158,7 +158,7 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
     }
   }
 
-  public void rebuildGraph() {
+  public void rebuildGraph(final boolean highlightChange) {
     if (!showGraph) {
       return;
     }
@@ -171,12 +171,16 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
         }
         // just give the point in time to the graph at which the user wants to
         // see the dependency graph
-        graph.setPointInTime(getCurrentSliderValue());
+        graph.setPointInTime(getCurrentSliderValue(), highlightChange);
         if (slider != null && !slider.isDisposed()) {
           slider.redraw();
         }
       }
     });
+  }
+
+  public void rebuildGraph() {
+    rebuildGraph(true);
   }
 
   private void updateSliderValues() {

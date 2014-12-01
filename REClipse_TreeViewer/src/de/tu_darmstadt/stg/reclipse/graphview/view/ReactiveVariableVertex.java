@@ -13,8 +13,17 @@ public class ReactiveVariableVertex {
 
   protected ReactiveVariable var;
 
+  private boolean isHighlighted;
+
   public ReactiveVariableVertex(final ReactiveVariable v) {
-    var = v;
+    this.var = v;
+    this.isHighlighted = false;
+  }
+
+  public ReactiveVariableVertex(final ReactiveVariable v, final boolean h) {
+    this(v);
+
+    this.isHighlighted = h;
   }
 
   /**
@@ -22,18 +31,29 @@ public class ReactiveVariableVertex {
    * @return The style to be used when displaying this vertex in the graph.
    */
   public String getStyle() {
+    CustomGraphStylesheet.Styles style;
+
+    // determine style
     switch (var.getReactiveVariableType()) {
-      case VAR:
-        return CustomGraphStylesheet.Styles.VAR.name();
       case SIGNAL:
-        return CustomGraphStylesheet.Styles.SIGNAL.name();
+        style = CustomGraphStylesheet.Styles.SIGNAL;
+        break;
       case EVENT:
-        return CustomGraphStylesheet.Styles.EVENT.name();
+        style = CustomGraphStylesheet.Styles.EVENT;
+        break;
       case EVENT_HANDLER:
-        return CustomGraphStylesheet.Styles.EVENTHANDLER.name();
+        style = CustomGraphStylesheet.Styles.EVENTHANDLER;
+        break;
       default:
-        return ""; //$NON-NLS-1$
+        style = CustomGraphStylesheet.Styles.VAR;
     }
+
+    // set highlight, if enabled
+    if (isHighlighted) {
+      style = CustomGraphStylesheet.Styles.getHighlight(style);
+    }
+
+    return style.name();
   }
 
   /**

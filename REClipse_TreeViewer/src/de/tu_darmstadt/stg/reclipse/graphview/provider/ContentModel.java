@@ -20,6 +20,18 @@ public class ContentModel {
 
   private int pointInTime = 0;
 
+  private boolean highlightChange;
+
+  private final Map<String, String> library;
+
+  private final Map<String, Boolean> state;
+
+  public ContentModel() {
+    this.library = new HashMap<>();
+    this.state = new HashMap<>();
+    this.highlightChange = false;
+  }
+
   /**
    * Updates the point in time.
    * 
@@ -27,7 +39,12 @@ public class ContentModel {
    *          The new point in time.
    */
   public void setPointInTime(final int newPointInTime) {
+    setPointInTime(newPointInTime, false);
+  }
+
+  public void setPointInTime(final int newPointInTime, final boolean propagateChange) {
     this.pointInTime = newPointInTime;
+    this.highlightChange = propagateChange;
   }
 
   /**
@@ -45,14 +62,35 @@ public class ContentModel {
     // get reactive variables
     final ArrayList<ReactiveVariable> reVars = DatabaseHelper.getReVars(pointInTime);
 
+    // set flag if library is empty
+    final boolean emptyLibrary = library.size() == 0;
+
     for (final ReactiveVariable reVar : reVars) {
       // return empty map if not all reactive variables are created yet
       if (reVar == null) {
         return new HashSet<>();
       }
 
+      // extract name and value
+      final String name = reVar.getName();
+      final String value = reVar.getValueString();
+
+      // only update highlight status if a new variable has been added
+      if (library.size() < reVars.size()) {
+        if (library.containsKey(name)) {
+          state.put(name, !library.get(name).equals(value));
+        }
+        else {
+          state.put(name, !emptyLibrary);
+        }
+      }
+
+      // update value in library
+      library.put(name, value == null ? "null" : value); //$NON-NLS-1$
+
       // create reactive variable vertex
-      final ReactiveVariableVertex vertex = new ReactiveVariableVertex(reVar);
+      final boolean isHighlighted = state.get(name) && highlightChange;
+      final ReactiveVariableVertex vertex = new ReactiveVariableVertex(reVar, isHighlighted);
 
       vertices.add(vertex);
     }
