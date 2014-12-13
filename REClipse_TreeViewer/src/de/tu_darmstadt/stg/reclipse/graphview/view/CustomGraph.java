@@ -45,6 +45,8 @@ public class CustomGraph extends mxGraph {
 
   final GraphHighlighter highlighter;
 
+  private boolean activeHeatmap = false;
+
   public CustomGraph(final Composite parent) {
     super();
 
@@ -130,7 +132,14 @@ public class CustomGraph extends mxGraph {
     removeCells(getChildVertices(getDefaultParent()));
 
     // load vertices from content model
-    final Set<ReactiveVariableVertex> vertices = contentModel.getVertices();
+    Set<ReactiveVariableVertex> vertices;
+
+    if (activeHeatmap) {
+      vertices = contentModel.getHeatmapVertices();
+    }
+    else {
+      vertices = contentModel.getVertices();
+    }
 
     // load edges from content model
     final Map<UUID, Set<UUID>> edges = contentModel.getEdges();
@@ -246,5 +255,13 @@ public class CustomGraph extends mxGraph {
    */
   public void zoomOut() {
     graphComponent.zoomOut();
+  }
+
+  public boolean isHeatmapEnabled() {
+    return activeHeatmap;
+  }
+
+  public void setHeatmapEnabled(final boolean activeHeatmap) {
+    this.activeHeatmap = activeHeatmap;
   }
 }

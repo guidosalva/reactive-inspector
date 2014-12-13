@@ -1,6 +1,8 @@
 package de.tu_darmstadt.stg.reclipse.graphview.provider;
 
 import de.tu_darmstadt.stg.reclipse.graphview.model.DatabaseHelper;
+import de.tu_darmstadt.stg.reclipse.graphview.view.CustomGraphStylesheet;
+import de.tu_darmstadt.stg.reclipse.graphview.view.Heatmap;
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableVertex;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
@@ -91,6 +93,36 @@ public class ContentModel {
       // create reactive variable vertex
       final boolean isHighlighted = state.get(name) && highlightChange;
       final ReactiveVariableVertex vertex = new ReactiveVariableVertex(reVar, isHighlighted);
+
+      vertices.add(vertex);
+    }
+
+    return vertices;
+  }
+
+  public Set<ReactiveVariableVertex> getHeatmapVertices() {
+    final Set<ReactiveVariableVertex> vertices = new HashSet<>();
+
+    // make sure that point in time is in a valid range
+    if (pointInTime < 1 || pointInTime > DatabaseHelper.getLastPointInTime()) {
+      return vertices;
+    }
+
+    // get reactive variables
+    final ArrayList<ReactiveVariable> reVars = DatabaseHelper.getReVars(pointInTime);
+
+    // generate heatmap based on point in time
+    final Map<String, String> heatmap = Heatmap.generateHeatmap(pointInTime);
+
+    for (final ReactiveVariable reVar : reVars) {
+      // get color for reactive variable
+      final String color = heatmap.get(reVar.getName());
+
+      // generate style from color
+      final String style = CustomGraphStylesheet.calculateStyleFromColor(color);
+
+      // create vertex instance
+      final ReactiveVariableVertex vertex = new ReactiveVariableVertex(reVar, style);
 
       vertices.add(vertex);
     }

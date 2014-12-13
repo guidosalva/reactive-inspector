@@ -115,4 +115,20 @@ public class CustomGraphStylesheet extends mxStylesheet {
     // not break
     putCellStyle(Styles.VAR_HIGHLIGHT.name(), highlightedSignalStyle);
   }
+
+  public static String calculateStyleFromColor(final String color) {
+    String style = "";
+
+    style += mxConstants.STYLE_FILLCOLOR + "=" + color;
+
+    style += ",";
+
+    style += mxConstants.STYLE_GRADIENTCOLOR + "=" + color;
+
+    style += ",";
+
+    style += mxConstants.STYLE_STROKECOLOR + "=" + color;
+
+    return style;
+  }
 }
