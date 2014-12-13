@@ -5,8 +5,6 @@ import de.tu_darmstadt.stg.reclipse.graphview.provider.ContentModel;
 import java.awt.Frame;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -80,7 +78,6 @@ public class CustomGraph extends mxGraph {
     graphFrame.add(graphComponent);
 
     // add listeners
-    addMouseWheelListener();
     addMouseListener();
 
     updateGraph();
@@ -171,26 +168,6 @@ public class CustomGraph extends mxGraph {
     }
 
     layoutGraph();
-  }
-
-  private void addMouseWheelListener() {
-    graphComponent.addMouseWheelListener(new MouseWheelListener() {
-
-      @Override
-      public void mouseWheelMoved(final MouseWheelEvent e) {
-        // get rotation of mouse wheel
-        final int steps = e.getWheelRotation();
-
-        if (steps < 0) {
-          // zoom in if mouse wheel scrolls up
-          zoomIn();
-        }
-        else {
-          // zoom out if mouse wheel scrolls down
-          zoomOut();
-        }
-      }
-    });
   }
 
   private void addMouseListener() {
