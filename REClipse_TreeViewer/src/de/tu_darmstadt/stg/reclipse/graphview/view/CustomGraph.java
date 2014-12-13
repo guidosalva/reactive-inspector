@@ -9,6 +9,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -132,7 +133,7 @@ public class CustomGraph extends mxGraph {
     removeCells(getChildVertices(getDefaultParent()));
 
     // load vertices from content model
-    Set<ReactiveVariableVertex> vertices;
+    List<ReactiveVariableVertex> vertices;
 
     if (activeHeatmap) {
       vertices = contentModel.getHeatmapVertices();

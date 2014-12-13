@@ -1,14 +1,16 @@
 package de.tu_darmstadt.stg.reclipse.graphview.provider;
 
 import de.tu_darmstadt.stg.reclipse.graphview.model.DatabaseHelper;
+import de.tu_darmstadt.stg.reclipse.graphview.model.ReactiveVariableNameComparator;
 import de.tu_darmstadt.stg.reclipse.graphview.view.CustomGraphStylesheet;
 import de.tu_darmstadt.stg.reclipse.graphview.view.Heatmap;
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableVertex;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -53,8 +55,8 @@ public class ContentModel {
    * 
    * @return A set of reactive variable vertices.
    */
-  public Set<ReactiveVariableVertex> getVertices() {
-    final Set<ReactiveVariableVertex> vertices = new HashSet<>();
+  public List<ReactiveVariableVertex> getVertices() {
+    final List<ReactiveVariableVertex> vertices = new ArrayList<>();
 
     // make sure that point in time is in a valid range
     if (pointInTime < 1 || pointInTime > DatabaseHelper.getLastPointInTime()) {
@@ -64,13 +66,16 @@ public class ContentModel {
     // get reactive variables
     final ArrayList<ReactiveVariable> reVars = DatabaseHelper.getReVars(pointInTime);
 
+    // sort by name
+    Collections.sort(reVars, new ReactiveVariableNameComparator());
+
     // set flag if library is empty
     final boolean emptyLibrary = library.size() == 0;
 
     for (final ReactiveVariable reVar : reVars) {
       // return empty map if not all reactive variables are created yet
       if (reVar == null) {
-        return new HashSet<>();
+        return new ArrayList<>();
       }
 
       // extract name and value
@@ -100,8 +105,8 @@ public class ContentModel {
     return vertices;
   }
 
-  public Set<ReactiveVariableVertex> getHeatmapVertices() {
-    final Set<ReactiveVariableVertex> vertices = new HashSet<>();
+  public List<ReactiveVariableVertex> getHeatmapVertices() {
+    final List<ReactiveVariableVertex> vertices = new ArrayList<>();
 
     // make sure that point in time is in a valid range
     if (pointInTime < 1 || pointInTime > DatabaseHelper.getLastPointInTime()) {
