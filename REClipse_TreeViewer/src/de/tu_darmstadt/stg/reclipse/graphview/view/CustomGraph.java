@@ -49,6 +49,9 @@ public class CustomGraph extends mxGraph {
   public CustomGraph(final Composite parent) {
     super();
 
+    // enable html labels
+    this.setHtmlLabels(true);
+
     // set custom stylesheet
     setStylesheet(new CustomGraphStylesheet());
 
