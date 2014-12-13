@@ -132,9 +132,33 @@ public class CustomGraphStylesheet extends mxStylesheet {
     return String.format("#%02x%02x%02x", rs, gs, bs);
   }
 
+  public static String calculateFontColor(final String colorStr) {
+    final int r = Integer.valueOf(colorStr.substring(1, 3), 16);
+    final int b = Integer.valueOf(colorStr.substring(3, 5), 16);
+    final int g = Integer.valueOf(colorStr.substring(5, 7), 16);
+
+    /*
+     * Uses perceptive luminance to decide whether to use black or white
+     * font.
+     * 
+     * Source for formula: http://stackoverflow.com/a/1855903/1080221
+     */
+
+    final double a = 1 - (0.299f * r + 0.587f * g + 0.114 * b) / 255;
+
+    int d = 0;
+
+    if (a >= 0.5f) {
+      d = 255;
+    }
+
+    return String.format("#%02x%02x%02x", d, d, d);
+  }
+
   public static String calculateStyleFromColor(final String color) {
     String style = mxConstants.STYLE_ROUNDED + "=1;";
 
+    style += mxConstants.STYLE_FONTCOLOR + "=" + calculateFontColor(color) + ";";
     style += mxConstants.STYLE_FILLCOLOR + "=" + color + ";";
     style += mxConstants.STYLE_GRADIENTCOLOR + "=" + darkenColor(color, 0.85f) + ";";
     style += mxConstants.STYLE_STROKECOLOR + "=" + darkenColor(color, 0.75f);
