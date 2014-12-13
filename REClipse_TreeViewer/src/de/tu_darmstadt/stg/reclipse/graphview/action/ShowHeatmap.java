@@ -19,12 +19,19 @@ public class ShowHeatmap extends Action {
 
     setText(Texts.Show_Heatmap);
     setToolTipText(Texts.Show_Heatmap_Tooltip);
-    setImageDescriptor(Activator.getImageDescriptor(Images.ZOOM_IN));
+    setImageDescriptor(Activator.getImageDescriptor(Images.HEATMAP_GREY));
   }
 
   @Override
   public void run() {
     status = !status;
+
+    if (status) {
+      setImageDescriptor(Activator.getImageDescriptor(Images.HEATMAP));
+    }
+    else {
+      setImageDescriptor(Activator.getImageDescriptor(Images.HEATMAP_GREY));
+    }
 
     graph.setHeatmapEnabled(status);
     graph.updateGraph();

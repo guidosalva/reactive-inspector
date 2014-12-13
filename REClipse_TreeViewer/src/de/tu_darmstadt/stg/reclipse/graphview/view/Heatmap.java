@@ -44,49 +44,50 @@ public class Heatmap {
 
     final Map<String, String> values = new HashMap<>();
 
-    try {
-      for (int pointInTime = 0; pointInTime < lastPointInTime; pointInTime++) {
-        final List<ReactiveVariable> currentReVars = DatabaseHelper.getReVars(pointInTime);
+    for (int pointInTime = 0; pointInTime < lastPointInTime; pointInTime++) {
+      final List<ReactiveVariable> currentReVars = DatabaseHelper.getReVars(pointInTime);
 
-        for (final ReactiveVariable reVar : currentReVars) {
-          if (reVar == null) {
-            continue;
-          }
-
-          final String name = reVar.getName();
-
-          if (values.containsKey(name)) {
-            if (!values.get(name).equals(reVar.getValueString())) {
-              changes.put(name, changes.get(name) + 1);
-            }
-          }
-          else {
-            changes.put(name, 0);
-          }
-
-          values.put(name, reVar.getValueString());
+      for (final ReactiveVariable reVar : currentReVars) {
+        if (reVar == null) {
+          continue;
         }
+
+        final String name = reVar.getName();
+
+        String value = reVar.getValueString();
+        if (value == null) {
+          value = new String();
+        }
+
+        if (values.containsKey(name)) {
+          if (!values.get(name).equals(value)) {
+            changes.put(name, changes.get(name) + 1);
+          }
+        }
+        else {
+          changes.put(name, 0);
+        }
+
+        values.put(name, value);
       }
-    }
-    catch (final Exception e) {
-      System.out.println(e);
     }
 
     return changes;
   }
 
   private static String calculateColor(final int value, final int max) {
-    // set minimum and maximum value
-    final float minimum = 0.0f;
-    final float maximum = max * 1.0f;
+    final double norm = (value * 1.0f) / max;
 
-    // calculate ratio
-    final float ratio = 2 * (value - minimum) / (maximum - minimum);
+    final int rh = 255;
+    final int rl = 240;
+    final int gh = 237;
+    final int gl = 59;
+    final int bh = 160;
+    final int bl = 32;
 
-    // calculate color
-    final int r = (int) Math.max(0, 255 * (1 - ratio));
-    final int b = (int) Math.max(0, 255 * (ratio - 1));
-    final int g = 255 - b - r;
+    final int r = (int) (rl + (rh - rl) * norm);
+    final int g = (int) (gl + (gh - gl) * norm);
+    final int b = (int) (bl + (bh - bl) * norm);
 
     return String.format("#%02x%02x%02x", r, g, b); //$NON-NLS-1$
   }
