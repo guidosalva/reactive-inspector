@@ -19,6 +19,9 @@ public class Texts extends NLS {
   public static String ZoomOut_Text;
   public static String ZoomOut_Tooltip;
 
+  public static String Show_Heatmap;
+  public static String Show_Heatmap_Tooltip;
+
   public static String VariableNode_Collapsed;
   public static String VariableNode_Fulltype;
   public static String VariableNode_Name;

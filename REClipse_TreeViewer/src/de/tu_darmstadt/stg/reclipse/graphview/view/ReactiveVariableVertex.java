@@ -15,9 +15,18 @@ public class ReactiveVariableVertex {
 
   private boolean isHighlighted;
 
+  private String customStyle;
+
   public ReactiveVariableVertex(final ReactiveVariable v) {
     this.var = v;
     this.isHighlighted = false;
+    this.customStyle = null;
+  }
+
+  public ReactiveVariableVertex(final ReactiveVariable v, final String cs) {
+    this(v);
+
+    this.customStyle = cs;
   }
 
   public ReactiveVariableVertex(final ReactiveVariable v, final boolean h) {
@@ -70,8 +79,11 @@ public class ReactiveVariableVertex {
     // create label
     final ReactiveVariableLabel label = new ReactiveVariableLabel(var);
 
+    // set style
+    final String style = (customStyle != null) ? customStyle : getStyle();
+
     // insert vertex and return it
-    return graph.insertVertex(parent, var.getId().toString(), label, 0, 0, 160, 80, getStyle());
+    return graph.insertVertex(parent, var.getId().toString(), label, 0, 0, 160, 80, style);
   }
 
   /**

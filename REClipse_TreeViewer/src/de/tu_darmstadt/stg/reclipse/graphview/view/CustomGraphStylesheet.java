@@ -115,4 +115,30 @@ public class CustomGraphStylesheet extends mxStylesheet {
     // not break
     putCellStyle(Styles.VAR_HIGHLIGHT.name(), highlightedSignalStyle);
   }
+
+  public static String darkenColor(final String colorStr, final float factor) {
+    final int r = Integer.valueOf(colorStr.substring(1, 3), 16);
+    final int b = Integer.valueOf(colorStr.substring(3, 5), 16);
+    final int g = Integer.valueOf(colorStr.substring(5, 7), 16);
+
+    int rs = (int) (r * (1 + factor));
+    int gs = (int) (g * (1 + factor));
+    int bs = (int) (b * (1 + factor));
+
+    rs = rs > 255 ? 255 : rs;
+    gs = gs > 255 ? 255 : gs;
+    bs = bs > 255 ? 255 : bs;
+
+    return String.format("#%02x%02x%02x", rs, gs, bs);
+  }
+
+  public static String calculateStyleFromColor(final String color) {
+    String style = mxConstants.STYLE_ROUNDED + "=1;";
+
+    style += mxConstants.STYLE_FILLCOLOR + "=" + color + ";";
+    style += mxConstants.STYLE_GRADIENTCOLOR + "=" + darkenColor(color, 0.85f) + ";";
+    style += mxConstants.STYLE_STROKECOLOR + "=" + darkenColor(color, 0.75f);
+
+    return style;
+  }
 }

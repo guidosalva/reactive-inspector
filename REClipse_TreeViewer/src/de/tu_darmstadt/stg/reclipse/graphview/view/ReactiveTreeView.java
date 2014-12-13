@@ -3,6 +3,7 @@ package de.tu_darmstadt.stg.reclipse.graphview.view;
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
 import de.tu_darmstadt.stg.reclipse.graphview.action.Relayout;
 import de.tu_darmstadt.stg.reclipse.graphview.action.SaveGraphAsImage;
+import de.tu_darmstadt.stg.reclipse.graphview.action.ShowHeatmap;
 import de.tu_darmstadt.stg.reclipse.graphview.action.ZoomIn;
 import de.tu_darmstadt.stg.reclipse.graphview.action.ZoomOut;
 import de.tu_darmstadt.stg.reclipse.graphview.controller.QueryController;
@@ -123,6 +124,7 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
     getViewSite().getActionBars().getToolBarManager().add(new SaveGraphAsImage(getSite(), graph));
     getViewSite().getActionBars().getToolBarManager().add(new ZoomIn(graph));
     getViewSite().getActionBars().getToolBarManager().add(new ZoomOut(graph));
+    getViewSite().getActionBars().getToolBarManager().add(new ShowHeatmap(graph));
   }
 
   @Override
