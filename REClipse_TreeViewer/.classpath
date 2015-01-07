@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry exported="true" kind="lib" path="lib/reclipse-loggerinterface.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/sqlite-jdbc-3.8.7.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/mysql-connector-java-5.1.31-bin.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/antlr-runtime-4.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/cglib-nodep-3.1.jar"/>
@@ -12,6 +13,5 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="lib" path="lib/jgraphx.jar"/>
-	<classpathentry kind="lib" path="lib/sqlite-jdbc-3.8.7.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

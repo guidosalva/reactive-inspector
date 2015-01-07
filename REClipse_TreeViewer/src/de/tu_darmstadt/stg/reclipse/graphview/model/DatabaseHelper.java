@@ -35,7 +35,10 @@ public class DatabaseHelper {
   private static DatabaseHelper instance = null;
   private static List<String> databaseSetupQueries = Arrays
           .asList("DROP TABLE IF EXISTS " + REACTIVE_VARIABLES_TABLE_NAME, //$NON-NLS-1$
-                  "CREATE TABLE IF NOT EXISTS `" + REACTIVE_VARIABLES_TABLE_NAME + "` (`auto_increment_id` int(11) NOT NULL AUTO_INCREMENT, `id` char(36) NOT NULL, `reactiveVariableType` int(11) NOT NULL, `pointInTime` int(11) DEFAULT NULL, `dependencyGraphHistoryType` int(11) NOT NULL, `additionalInformation` varchar(200) DEFAULT NULL, `active` tinyint(1) DEFAULT NULL, `typeSimple` varchar(200) DEFAULT NULL, `typeFull` varchar(200) DEFAULT NULL, `name` varchar(200) DEFAULT NULL, `additionalKeys` varchar(500) DEFAULT NULL, `valueString` varchar(200) DEFAULT NULL, `connectedWith` varchar(500) DEFAULT NULL, PRIMARY KEY (`auto_increment_id`), KEY `pointInTime` (`pointInTime`)) ENGINE=InnoDB  DEFAULT CHARSET=latin1;"); //$NON-NLS-1$ //$NON-NLS-2$
+                  // "CREATE TABLE " + REACTIVE_VARIABLES_TABLE_NAME + " (auto_increment_id INTEGER PRIMARY KEY, id char(36) NOT NULL, reactiveVariableType INTEGER NOT NULL, pointInTime INTEGER DEFAULT NULL, dependencyGraphHistoryType INTEGER NOT NULL, additionalInformation VARCHAR(200) DEFAULT NULL, active TINYINT(1) DEFAULT NULL, typeSimple VARCHAR(200) DEFAULT NULL, typeFull VARCHAR(200) DEFAULT NULL, name VARCHAR(200) DEFAULT NULL, additionalKeys VARCHAR(500) DEFAULT NULL, valueString VARCHAR(200) DEFAULT NULL, connectedWith VARCHAR(500) DEFAULT NULL) ENGINE=InnoDB  DEFAULT CHARSET=latin1;"); //$NON-NLS-1$ //$NON-NLS-2$
+                  "CREATE TABLE IF NOT EXISTS " //$NON-NLS-1$
+                          + REACTIVE_VARIABLES_TABLE_NAME
+                          + " (\"auto_increment_id\" integer NOT NULL PRIMARY KEY AUTOINCREMENT, \"id\" char(36) NOT NULL, \"reactiveVariableType\" integer NOT NULL, \"pointInTime\" integer DEFAULT NULL, \"dependencyGraphHistoryType\" integer NOT NULL, \"additionalInformation\" varchar(200) DEFAULT NULL, \"active\" integer DEFAULT NULL, \"typeSimple\" varchar(200) DEFAULT NULL, \"typeFull\" varchar(200) DEFAULT NULL, \"name\" varchar(200) DEFAULT NULL, \"additionalKeys\" varchar(500) DEFAULT NULL, \"valueString\" varchar(200) DEFAULT NULL, \"connectedWith\" varchar(500) DEFAULT NULL)"); //$NON-NLS-1$
 
   private final CopyOnWriteArrayList<DependencyGraphHistoryChangedListener> listeners = new CopyOnWriteArrayList<>();
 
@@ -89,7 +92,7 @@ public class DatabaseHelper {
   /**
    * Reads the database connection settings from the Esper configuration file
    * and returns a fresh database connection, which automatically commits.
-   *
+   * 
    * @return a fresh database connection
    */
   private static Connection getConnection() {
@@ -167,9 +170,10 @@ public class DatabaseHelper {
       connection.setAutoCommit(false);
       final String tempTableName = REACTIVE_VARIABLES_TABLE_NAME + "_temp"; //$NON-NLS-1$
 
-      final String tempTableQuery = "CREATE TEMPORARY TABLE " + tempTableName + " SELECT * FROM " + REACTIVE_VARIABLES_TABLE_NAME + " WHERE pointInTime = ?"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+      final String tempTableQuery = "CREATE TEMP TABLE " + tempTableName + " AS SELECT * FROM " + REACTIVE_VARIABLES_TABLE_NAME + " WHERE pointInTime = ?"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
       try (final PreparedStatement tempTableStmt = connection.prepareStatement(tempTableQuery)) {
         tempTableStmt.setInt(1, lastPointInTime - 1);
+        tempTableStmt.executeUpdate();
 
         final String updateQuery = "UPDATE " + tempTableName + " SET pointInTime = ?, dependencyGraphHistoryType = ?, additionalInformation = ?, active = ?"; //$NON-NLS-1$ //$NON-NLS-2$
         try (final PreparedStatement updateStmt = connection.prepareStatement(updateQuery)) {
@@ -177,17 +181,16 @@ public class DatabaseHelper {
           updateStmt.setInt(2, newType.ordinal());
           updateStmt.setString(3, null);
           updateStmt.setBoolean(4, false);
+          updateStmt.executeUpdate();
 
           final String insertQuery = "INSERT INTO " + REACTIVE_VARIABLES_TABLE_NAME + " SELECT NULL, id, reactiveVariableType, pointInTime, dependencyGraphHistoryType, additionalInformation, active, typeSimple, typeFull, name, additionalKeys, valueString, connectedWith FROM " + tempTableName; //$NON-NLS-1$ //$NON-NLS-2$
           try (Statement insertStmt = connection.createStatement()) {
-            tempTableStmt.executeUpdate();
-            updateStmt.executeUpdate();
             insertStmt.executeUpdate(insertQuery);
             connection.commit();
           }
         }
       }
-      final String dropTempTableQuery = "DROP TEMPORARY TABLE IF EXISTS " + tempTableName; //$NON-NLS-1$
+      final String dropTempTableQuery = "DROP TABLE " + tempTableName; //$NON-NLS-1$
       try (final Statement stmt = connection.createStatement()) {
         stmt.executeUpdate(dropTempTableQuery);
         connection.commit();
@@ -202,7 +205,7 @@ public class DatabaseHelper {
   /**
    * Calls {@link #addReVar(Connection, ReactiveVariable)} with a new
    * connection.
-   *
+   * 
    * @param r
    *          the reactive variable to add
    * @return the row count
@@ -219,7 +222,7 @@ public class DatabaseHelper {
 
   /**
    * Adds a reactive variable.
-   *
+   * 
    * @param connection
    *          an existing connection
    * @param r
@@ -227,7 +230,7 @@ public class DatabaseHelper {
    * @return the row count
    */
   public int addReVar(final Connection connection, final ReactiveVariable r) {
-    final String addQuery = "INSERT INTO " + REACTIVE_VARIABLES_TABLE_NAME + " (`auto_increment_id`, `id`, `reactiveVariableType`, `pointInTime`, `dependencyGraphHistoryType`, `additionalInformation`, `active`, `typeSimple`, `typeFull`, `name`, `additionalKeys`, `valueString` , `connectedWith`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; //$NON-NLS-1$ //$NON-NLS-2$
+    final String addQuery = "INSERT INTO " + REACTIVE_VARIABLES_TABLE_NAME + " (id, reactiveVariableType, pointInTime, dependencyGraphHistoryType, additionalInformation, active, typeSimple, typeFull, name, additionalKeys, valueString , connectedWith) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; //$NON-NLS-1$ //$NON-NLS-2$
     try (final PreparedStatement addStmt = connection.prepareStatement(addQuery)) {
       final Gson gson = new Gson();
       addStmt.setString(1, r.getId().toString());
@@ -367,7 +370,7 @@ public class DatabaseHelper {
 
   public static boolean isNodeConnectionActive(final Connection connection, final int pointInTime, final UUID srcId, final UUID destId) {
     boolean result = false;
-    final String sql = "SELECT `dependencyGraphHistoryType`, `additionalInformation` FROM " + REACTIVE_VARIABLES_TABLE_NAME + " WHERE pointInTime = ?"; //$NON-NLS-1$ //$NON-NLS-2$
+    final String sql = "SELECT dependencyGraphHistoryType, additionalInformation FROM " + REACTIVE_VARIABLES_TABLE_NAME + " WHERE pointInTime = ?"; //$NON-NLS-1$ //$NON-NLS-2$
     try (final PreparedStatement stmt = connection.prepareStatement(sql)) {
       stmt.setInt(1, pointInTime);
       try (final ResultSet rs = stmt.executeQuery()) {
@@ -404,7 +407,7 @@ public class DatabaseHelper {
   }
 
   public static DependencyGraphHistoryType getDependencyGraphHistoryType(final Connection connection, final int pointInTime) {
-    final String sql = "SELECT `dependencyGraphHistoryType` FROM " + REACTIVE_VARIABLES_TABLE_NAME + " WHERE pointInTime = ? LIMIT 1"; //$NON-NLS-1$ //$NON-NLS-2$
+    final String sql = "SELECT dependencyGraphHistoryType FROM " + REACTIVE_VARIABLES_TABLE_NAME + " WHERE pointInTime = ? LIMIT 1"; //$NON-NLS-1$ //$NON-NLS-2$
     try (final PreparedStatement stmt = connection.prepareStatement(sql)) {
       stmt.setInt(1, pointInTime);
       try (final ResultSet rs = stmt.executeQuery()) {
@@ -430,7 +433,7 @@ public class DatabaseHelper {
   }
 
   public static UUID getIdFromName(final Connection connection, final String name) {
-    final String sql = "SELECT `id` FROM " + REACTIVE_VARIABLES_TABLE_NAME + " WHERE name = ? AND pointInTime = ?"; //$NON-NLS-1$ //$NON-NLS-2$
+    final String sql = "SELECT id FROM " + REACTIVE_VARIABLES_TABLE_NAME + " WHERE name = ? AND pointInTime = ?"; //$NON-NLS-1$ //$NON-NLS-2$
     try (final PreparedStatement stmt = connection.prepareStatement(sql)) {
       stmt.setString(1, name);
       stmt.setInt(2, getLastPointInTime());
