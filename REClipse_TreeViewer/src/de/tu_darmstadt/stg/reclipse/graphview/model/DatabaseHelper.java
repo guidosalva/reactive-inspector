@@ -7,7 +7,6 @@ import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariableType;
 
 import java.lang.reflect.Type;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -23,6 +22,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 /**
  * Helper class which does all the work related to the database, e.g. storing
@@ -41,6 +41,9 @@ public class DatabaseHelper {
                           + " (\"auto_increment_id\" integer NOT NULL PRIMARY KEY AUTOINCREMENT, \"id\" char(36) NOT NULL, \"reactiveVariableType\" integer NOT NULL, \"pointInTime\" integer DEFAULT NULL, \"dependencyGraphHistoryType\" integer NOT NULL, \"additionalInformation\" varchar(200) DEFAULT NULL, \"active\" integer DEFAULT NULL, \"typeSimple\" varchar(200) DEFAULT NULL, \"typeFull\" varchar(200) DEFAULT NULL, \"name\" varchar(200) DEFAULT NULL, \"additionalKeys\" varchar(500) DEFAULT NULL, \"valueString\" varchar(200) DEFAULT NULL, \"connectedWith\" varchar(500) DEFAULT NULL)"); //$NON-NLS-1$
 
   private final CopyOnWriteArrayList<DependencyGraphHistoryChangedListener> listeners = new CopyOnWriteArrayList<>();
+
+  // C3P0 connection pool
+  private static ComboPooledDataSource cpds = null;
 
   // cache this field locally, because it is queried quite often
   private static int lastPointInTime = 0;
@@ -63,7 +66,7 @@ public class DatabaseHelper {
       try (Connection connection = getConnection()) {
         instance = new DatabaseHelper(connection);
       }
-      catch (final SQLException e) {
+      catch (final Exception e) {
         Activator.log(e);
       }
     }
@@ -96,23 +99,36 @@ public class DatabaseHelper {
    * @return a fresh database connection
    */
   private static Connection getConnection() {
-    // TODO maybe always use same DB connection
+    setupConnectionPool();
+
     Connection connection = null;
     try {
-      final EsperConfigurationReader esperConfig = EsperConfigurationReader.getInstance();
-
-      // establish DB connection
-      Class.forName(esperConfig.getJdbcClassName());
-      connection = DriverManager.getConnection(esperConfig.getJdbcUrl(), esperConfig.getJdbcUser(), esperConfig.getJdbcPassword());
-      connection.setAutoCommit(true);
-    }
-    catch (final ClassNotFoundException e) {
-      Activator.log(e);
+      connection = cpds.getConnection();
     }
     catch (final SQLException e) {
       Activator.log(e);
     }
+
     return connection;
+  }
+
+  private static void setupConnectionPool() {
+    if (cpds != null) {
+      return;
+    }
+
+    try {
+      final EsperConfigurationReader esperConfig = EsperConfigurationReader.getInstance();
+
+      cpds = new ComboPooledDataSource();
+      cpds.setDriverClass(esperConfig.getJdbcClassName());
+      cpds.setJdbcUrl(esperConfig.getJdbcUrl());
+      cpds.setUser(esperConfig.getJdbcUser());
+      cpds.setPassword(esperConfig.getJdbcPassword());
+    }
+    catch (final Exception e) {
+      Activator.log(e);
+    }
   }
 
   public int truncateTable(final String table) {
