@@ -5,14 +5,29 @@
          point="org.eclipse.ui.views">
       <category
             id="de.tu-darmstadt.stg.reclipse.ReactiveViews"
-            name="%view.category.name">
+            name="%view.reactivetree.category.name">
       </category>
       <view
             category="de.tu-darmstadt.stg.reclipse.ReactiveViews"
             class="de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveTreeView"
             id="de.tu-darmstadt.stg.reclipse.graphview.ReactiveTreeView"
             icon="icons/reactivetree.png"
-            name="%view.name">
+            name="%view.reactivetree.name">
+      </view>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="de.tu-darmstadt.stg.reclipse.StatisticsViews"
+            name="%view.statistics.category.name">
+      </category>
+      <view
+            category="de.tu-darmstadt.stg.reclipse.StatisticsViews"
+            class="de.tu_darmstadt.stg.reclipse.graphview.view.StatisticsView"
+            id="de.tu-darmstadt.stg.reclipse.graphview.StatisticsView"
+            icon="icons/reactivetree.png"
+            name="%view.statistics.name">
       </view>
    </extension>
 
@@ -34,6 +49,26 @@
          </action>
       </objectContribution>
    </extension>
+   
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            objectClass="org.eclipse.debug.core.model.IVariable"
+            id="de.tu-darmstadt.stg.reclipse.graphview.debug.ui.VariableViewActions">
+         <action
+               label="%action.ViewStatistics.label"
+               tooltip="%action.ViewStatistics.tooltip"
+               icon="icons/heatmap.png"
+               class="de.tu_darmstadt.stg.reclipse.graphview.action.ShowStatistics"
+               menubarPath="reactiveGroup"
+               enablesFor="1"
+               state="false"
+               style="push"
+               id="de.tu-darmstadt.stg.reclipse.graphview.debug.action.ShowStatistics">
+         </action>
+      </objectContribution>
+   </extension>
+   
    <extension
          point="org.eclipse.ui.startup">
       <startup
