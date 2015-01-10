@@ -15,7 +15,9 @@ Bundle-ClassPath: .,
  lib/jgraphx.jar,
  lib/sqlite-jdbc-3.8.7.jar,
  lib/c3p0-0.9.5.jar,
- lib/mchange-commons-java-0.2.9.jar
+ lib/mchange-commons-java-0.2.9.jar,
+ lib/jcommon-1.0.23.jar,
+ lib/jfreechart-1.0.19.jar
 Bundle-Name: %pluginName
 Bundle-Version: 0.1.0.0
 Bundle-Activator: de.tu_darmstadt.stg.reclipse.graphview.Activator
