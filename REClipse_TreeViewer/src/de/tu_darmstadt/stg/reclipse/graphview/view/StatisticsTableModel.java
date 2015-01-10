@@ -15,7 +15,8 @@ public class StatisticsTableModel extends AbstractTableModel {
   private static String[] COLUMN_NAMES = {
       "Name",
       "Type",
-      "Value"
+      "Value",
+      "# Connected Variables"
   };
 
   public StatisticsTableModel() {
@@ -37,6 +38,7 @@ public class StatisticsTableModel extends AbstractTableModel {
       entry.add(reVar.getName());
       entry.add(reVar.getTypeSimple());
       entry.add(reVar.getValueString());
+      entry.add(reVar.getConnectedWith().size());
 
       data.add(entry);
     }
