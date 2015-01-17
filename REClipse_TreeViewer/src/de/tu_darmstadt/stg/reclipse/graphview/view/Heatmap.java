@@ -39,7 +39,7 @@ public class Heatmap {
     return heatmap;
   }
 
-  private static Map<String, Integer> calculateChangeMap(final int lastPointInTime) {
+  public static Map<String, Integer> calculateChangeMap(final int lastPointInTime) {
     final Map<String, Integer> changes = new HashMap<>();
 
     final Map<String, String> values = new HashMap<>();

@@ -4,17 +4,8 @@ import javax.swing.JTable;
 
 public class StatisticsTable extends JTable {
 
-  private final StatisticsTableModel model;
-
   public StatisticsTable() {
-    super();
-
-    model = new StatisticsTableModel();
-
-    setModel(model);
+    super(new StatisticsTableModel());
   }
 
-  public void refresh() {
-    model.loadData();
-  }
 }

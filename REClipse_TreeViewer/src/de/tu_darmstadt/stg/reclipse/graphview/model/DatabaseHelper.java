@@ -7,6 +7,7 @@ import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariableType;
 
 import java.lang.reflect.Type;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -22,7 +23,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 /**
  * Helper class which does all the work related to the database, e.g. storing
@@ -42,15 +42,14 @@ public class DatabaseHelper {
 
   private final CopyOnWriteArrayList<DependencyGraphHistoryChangedListener> listeners = new CopyOnWriteArrayList<>();
 
-  // C3P0 connection pool
-  private static ComboPooledDataSource cpds = null;
+  private Connection connection;
 
   // cache this field locally, because it is queried quite often
   private static int lastPointInTime = 0;
 
-  private DatabaseHelper(final Connection connection) {
-    // clients should not be able to create instances
-    // setup all required database tables
+  private DatabaseHelper() {
+    establishConnection();
+
     try (final Statement stmt = connection.createStatement()) {
       for (final String sql : databaseSetupQueries) {
         stmt.executeUpdate(sql);
@@ -61,21 +60,36 @@ public class DatabaseHelper {
     }
   }
 
-  public static DatabaseHelper getInstance() {
-    if (instance == null) {
-      try (Connection connection = getConnection()) {
-        instance = new DatabaseHelper(connection);
-      }
-      catch (final Exception e) {
-        Activator.log(e);
-      }
+  /**
+   * Reads the database connection settings from the Esper configuration file
+   * and returns a fresh database connection, which automatically commits.
+   * 
+   * @return a fresh database connection
+   */
+  private void establishConnection() {
+    try {
+      final EsperConfigurationReader esperConfig = EsperConfigurationReader.getInstance();
+
+      // establish DB connection
+      Class.forName(esperConfig.getJdbcClassName());
+      connection = DriverManager.getConnection(esperConfig.getJdbcUrl(), esperConfig.getJdbcUser(), esperConfig.getJdbcPassword());
+      connection.setAutoCommit(true);
     }
-    return instance;
+    catch (final ClassNotFoundException e) {
+      Activator.log(e);
+    }
+    catch (final SQLException e) {
+      Activator.log(e);
+    }
   }
 
-  public static DatabaseHelper getInstance(final Connection connection) {
+  public Connection getConnection() {
+    return connection;
+  }
+
+  public static DatabaseHelper getInstance() {
     if (instance == null) {
-      instance = new DatabaseHelper(connection);
+      instance = new DatabaseHelper();
     }
     return instance;
   }
@@ -92,56 +106,7 @@ public class DatabaseHelper {
     }
   }
 
-  /**
-   * Reads the database connection settings from the Esper configuration file
-   * and returns a fresh database connection, which automatically commits.
-   * 
-   * @return a fresh database connection
-   */
-  private static Connection getConnection() {
-    setupConnectionPool();
-
-    Connection connection = null;
-    try {
-      connection = cpds.getConnection();
-    }
-    catch (final SQLException e) {
-      Activator.log(e);
-    }
-
-    return connection;
-  }
-
-  private static void setupConnectionPool() {
-    if (cpds != null) {
-      return;
-    }
-
-    try {
-      final EsperConfigurationReader esperConfig = EsperConfigurationReader.getInstance();
-
-      cpds = new ComboPooledDataSource();
-      cpds.setDriverClass(esperConfig.getJdbcClassName());
-      cpds.setJdbcUrl(esperConfig.getJdbcUrl());
-      cpds.setUser(esperConfig.getJdbcUser());
-      cpds.setPassword(esperConfig.getJdbcPassword());
-    }
-    catch (final Exception e) {
-      Activator.log(e);
-    }
-  }
-
   public int truncateTable(final String table) {
-    try (final Connection connection = getConnection()) {
-      return truncateTable(connection, table);
-    }
-    catch (final SQLException e) {
-      Activator.log(e);
-    }
-    return -1;
-  }
-
-  public int truncateTable(final Connection connection, final String table) {
     try (final Statement stmt = connection.createStatement()) {
       final int result = stmt.executeUpdate("DELETE FROM " + table); //$NON-NLS-1$
       fireChangedEvent();
@@ -168,15 +133,8 @@ public class DatabaseHelper {
   }
 
   public static void copyLastReVars(final DependencyGraphHistoryType newType) {
-    try (Connection connection = getConnection()) {
-      copyLastReVars(connection, newType);
-    }
-    catch (final SQLException e) {
-      Activator.log(e);
-    }
-  }
+    final Connection connection = DatabaseHelper.getInstance().getConnection();
 
-  public static void copyLastReVars(final Connection connection, final DependencyGraphHistoryType newType) {
     lastPointInTime++;
     if (lastPointInTime == 1) {
       return;
@@ -227,25 +185,8 @@ public class DatabaseHelper {
    * @return the row count
    */
   public int addReVar(final ReactiveVariable r) {
-    try (final Connection connection = getConnection()) {
-      return addReVar(connection, r);
-    }
-    catch (final SQLException e) {
-      Activator.log(e);
-    }
-    return -1;
-  }
+    final Connection connection = DatabaseHelper.getInstance().getConnection();
 
-  /**
-   * Adds a reactive variable.
-   * 
-   * @param connection
-   *          an existing connection
-   * @param r
-   *          the reactive variable to add
-   * @return the row count
-   */
-  public int addReVar(final Connection connection, final ReactiveVariable r) {
     final String addQuery = "INSERT INTO " + REACTIVE_VARIABLES_TABLE_NAME + " (id, reactiveVariableType, pointInTime, dependencyGraphHistoryType, additionalInformation, active, typeSimple, typeFull, name, additionalKeys, valueString , connectedWith) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; //$NON-NLS-1$ //$NON-NLS-2$
     try (final PreparedStatement addStmt = connection.prepareStatement(addQuery)) {
       final Gson gson = new Gson();
@@ -272,16 +213,8 @@ public class DatabaseHelper {
   }
 
   public int deleteReVar(final UUID id, final int pointInTime) {
-    try (Connection connection = getConnection()) {
-      return deleteReVar(connection, id, pointInTime);
-    }
-    catch (final SQLException e) {
-      Activator.log(e);
-    }
-    return -1;
-  }
+    final Connection connection = DatabaseHelper.getInstance().getConnection();
 
-  public int deleteReVar(final Connection connection, final UUID id, final int pointInTime) {
     final String deleteQuery = "DELETE FROM " + REACTIVE_VARIABLES_TABLE_NAME + " WHERE id = ? AND pointInTime = ?"; //$NON-NLS-1$ //$NON-NLS-2$
     try (final PreparedStatement deleteStmt = connection.prepareStatement(deleteQuery)) {
       deleteStmt.setString(1, id.toString());
@@ -297,16 +230,8 @@ public class DatabaseHelper {
   }
 
   public static ArrayList<ReactiveVariable> getReVars(final int pointInTime) {
-    try (Connection connection = getConnection()) {
-      return getReVars(connection, pointInTime);
-    }
-    catch (final SQLException e) {
-      Activator.log(e);
-    }
-    return null;
-  }
+    final Connection connection = DatabaseHelper.getInstance().getConnection();
 
-  public static ArrayList<ReactiveVariable> getReVars(final Connection connection, final int pointInTime) {
     final String query = "SELECT * FROM " + REACTIVE_VARIABLES_TABLE_NAME + " WHERE pointInTime = ?"; //$NON-NLS-1$ //$NON-NLS-2$
     try (final PreparedStatement stmt = connection.prepareStatement(query)) {
       stmt.setInt(1, pointInTime);
@@ -375,16 +300,8 @@ public class DatabaseHelper {
   }
 
   public static boolean isNodeConnectionActive(final int pointInTime, final UUID srcId, final UUID destId) {
-    try (Connection connection = getConnection()) {
-      return isNodeConnectionActive(connection, pointInTime, srcId, destId);
-    }
-    catch (final SQLException e) {
-      Activator.log(e);
-    }
-    return false;
-  }
+    final Connection connection = DatabaseHelper.getInstance().getConnection();
 
-  public static boolean isNodeConnectionActive(final Connection connection, final int pointInTime, final UUID srcId, final UUID destId) {
     boolean result = false;
     final String sql = "SELECT dependencyGraphHistoryType, additionalInformation FROM " + REACTIVE_VARIABLES_TABLE_NAME + " WHERE pointInTime = ?"; //$NON-NLS-1$ //$NON-NLS-2$
     try (final PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -413,16 +330,8 @@ public class DatabaseHelper {
   }
 
   public static DependencyGraphHistoryType getDependencyGraphHistoryType(final int pointInTime) {
-    try (Connection connection = getConnection()) {
-      return getDependencyGraphHistoryType(connection, pointInTime);
-    }
-    catch (final SQLException e) {
-      Activator.log(e);
-    }
-    return null;
-  }
+    final Connection connection = DatabaseHelper.getInstance().getConnection();
 
-  public static DependencyGraphHistoryType getDependencyGraphHistoryType(final Connection connection, final int pointInTime) {
     final String sql = "SELECT dependencyGraphHistoryType FROM " + REACTIVE_VARIABLES_TABLE_NAME + " WHERE pointInTime = ? LIMIT 1"; //$NON-NLS-1$ //$NON-NLS-2$
     try (final PreparedStatement stmt = connection.prepareStatement(sql)) {
       stmt.setInt(1, pointInTime);
@@ -439,16 +348,8 @@ public class DatabaseHelper {
   }
 
   public static UUID getIdFromName(final String name) {
-    try (Connection connection = getConnection()) {
-      return getIdFromName(connection, name);
-    }
-    catch (final SQLException e) {
-      Activator.log(e);
-    }
-    return null;
-  }
+    final Connection connection = DatabaseHelper.getInstance().getConnection();
 
-  public static UUID getIdFromName(final Connection connection, final String name) {
     final String sql = "SELECT id FROM " + REACTIVE_VARIABLES_TABLE_NAME + " WHERE name = ? AND pointInTime = ?"; //$NON-NLS-1$ //$NON-NLS-2$
     try (final PreparedStatement stmt = connection.prepareStatement(sql)) {
       stmt.setString(1, name);
