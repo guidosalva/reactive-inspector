@@ -1,4 +1,4 @@
-package de.tu_darmstadt.stg.reclipse.graphview.view;
+package de.tu_darmstadt.stg.reclipse.graphview.view.statistics;
 
 import javax.swing.JTable;
 

@@ -2,9 +2,9 @@ package de.tu_darmstadt.stg.reclipse.graphview.provider;
 
 import de.tu_darmstadt.stg.reclipse.graphview.model.DatabaseHelper;
 import de.tu_darmstadt.stg.reclipse.graphview.model.ReactiveVariableNameComparator;
-import de.tu_darmstadt.stg.reclipse.graphview.view.CustomGraphStylesheet;
-import de.tu_darmstadt.stg.reclipse.graphview.view.Heatmap;
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableVertex;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.CustomGraphStylesheet;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.Heatmap;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
 import java.util.ArrayList;

@@ -1,6 +1,7 @@
-package de.tu_darmstadt.stg.reclipse.graphview.view;
+package de.tu_darmstadt.stg.reclipse.graphview.view.statistics;
 
 import de.tu_darmstadt.stg.reclipse.graphview.model.DatabaseHelper;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.Heatmap;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
 import java.util.HashMap;

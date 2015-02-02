@@ -1,6 +1,7 @@
-package de.tu_darmstadt.stg.reclipse.graphview.view;
+package de.tu_darmstadt.stg.reclipse.graphview.view.graph;
 
 import de.tu_darmstadt.stg.reclipse.graphview.provider.ContentModel;
+import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableVertex;
 
 import java.awt.Frame;
 import java.awt.event.MouseAdapter;

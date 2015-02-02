@@ -1,5 +1,6 @@
 package de.tu_darmstadt.stg.reclipse.graphview.view;
 
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.CustomGraphStylesheet;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
 import com.mxgraph.view.mxGraph;

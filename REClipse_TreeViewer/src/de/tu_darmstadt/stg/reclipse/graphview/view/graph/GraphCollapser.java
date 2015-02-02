@@ -1,4 +1,4 @@
-package de.tu_darmstadt.stg.reclipse.graphview.view;
+package de.tu_darmstadt.stg.reclipse.graphview.view.graph;
 
 import de.tu_darmstadt.stg.reclipse.graphview.Images;
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;

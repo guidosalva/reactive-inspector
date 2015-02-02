@@ -1,6 +1,6 @@
 package de.tu_darmstadt.stg.reclipse.graphview.action;
 
-import de.tu_darmstadt.stg.reclipse.graphview.view.StatisticsView;
+import de.tu_darmstadt.stg.reclipse.graphview.view.statistics.StatisticsView;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;

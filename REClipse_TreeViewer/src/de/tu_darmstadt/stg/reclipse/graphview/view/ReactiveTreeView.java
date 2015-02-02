@@ -10,6 +10,7 @@ import de.tu_darmstadt.stg.reclipse.graphview.controller.QueryController;
 import de.tu_darmstadt.stg.reclipse.graphview.model.DatabaseHelper;
 import de.tu_darmstadt.stg.reclipse.graphview.model.DependencyGraphHistoryChangedListener;
 import de.tu_darmstadt.stg.reclipse.graphview.model.RemoteLoggerImpl;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.CustomGraph;
 
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugPlugin;
