@@ -40,6 +40,8 @@ public class Texts extends NLS {
   public static String MenuItem_Collapse_Unfold;
   public static String MenuItem_Highlighter_Highlight;
   public static String MenuItem_Highlighter_RemoveHighlight;
+  public static String MenuItem_Breakpoint_Enable;
+  public static String MenuItem_Breakpoint_Disable;
 
   private static final String BUNDLE_NAME = Texts.class.getPackage().getName() + ".texts"; //$NON-NLS-1$
 

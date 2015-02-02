@@ -44,6 +44,8 @@ public class CustomGraph extends mxGraph {
 
   final GraphHighlighter highlighter;
 
+  final GraphBreakpointer breakpointer;
+
   private boolean activeHeatmap = false;
 
   public CustomGraph(final Composite parent) {
@@ -58,6 +60,7 @@ public class CustomGraph extends mxGraph {
     // initialize graph collapser and highlighter
     collapser = new GraphCollapser(this);
     highlighter = new GraphHighlighter(this);
+    breakpointer = new GraphBreakpointer(this);
 
     // create new content model
     contentModel = new ContentModel();
@@ -198,8 +201,9 @@ public class CustomGraph extends mxGraph {
 
         // add menu items
         popupMenu.add(collapser.createMenuItem(cell));
-        popupMenu.addSeparator();
         popupMenu.add(highlighter.createMenuItem(cell));
+        popupMenu.addSeparator();
+        popupMenu.add(breakpointer.createMenuItem(cell));
 
         // show popup menu on clicked point
         popupMenu.show(graphComponent, e.getX(), e.getY());
