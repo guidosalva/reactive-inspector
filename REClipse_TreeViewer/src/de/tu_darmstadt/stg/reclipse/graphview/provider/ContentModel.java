@@ -3,7 +3,7 @@ package de.tu_darmstadt.stg.reclipse.graphview.provider;
 import de.tu_darmstadt.stg.reclipse.graphview.model.DatabaseHelper;
 import de.tu_darmstadt.stg.reclipse.graphview.model.ReactiveVariableNameComparator;
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableVertex;
-import de.tu_darmstadt.stg.reclipse.graphview.view.graph.CustomGraphStylesheet;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.Stylesheet;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.Heatmap;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
@@ -124,7 +124,7 @@ public class ContentModel {
       final String color = heatmap.get(reVar.getName());
 
       // generate style from color
-      final String style = CustomGraphStylesheet.calculateStyleFromColor(color);
+      final String style = Stylesheet.calculateStyleFromColor(color);
 
       // create vertex instance
       final ReactiveVariableVertex vertex = new ReactiveVariableVertex(reVar, style);

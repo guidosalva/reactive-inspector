@@ -10,7 +10,7 @@ import com.mxgraph.view.mxStylesheet;
  * @author Sebastian Ruhleder <sebastian.ruhleder@gmail.com>
  * 
  */
-public class CustomGraphStylesheet extends mxStylesheet {
+public class Stylesheet extends mxStylesheet {
 
   private final Hashtable<String, Object> baseStyle;
 
@@ -56,7 +56,7 @@ public class CustomGraphStylesheet extends mxStylesheet {
     }
   }
 
-  public CustomGraphStylesheet() {
+  public Stylesheet() {
     super();
 
     // set base style

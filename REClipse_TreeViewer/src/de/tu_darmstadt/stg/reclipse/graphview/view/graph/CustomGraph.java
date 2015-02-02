@@ -59,7 +59,7 @@ public class CustomGraph extends mxGraph {
     this.setHtmlLabels(true);
 
     // set custom stylesheet
-    setStylesheet(new CustomGraphStylesheet());
+    setStylesheet(new Stylesheet());
 
     // initialize graph collapser and highlighter
     collapser = new Collapser(this);

@@ -4,8 +4,8 @@ import de.tu_darmstadt.stg.reclipse.graphview.Images;
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableLabel;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.CustomGraph;
-import de.tu_darmstadt.stg.reclipse.graphview.view.graph.CustomGraphStylesheet;
-import de.tu_darmstadt.stg.reclipse.graphview.view.graph.CustomGraphStylesheet.Styles;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.Stylesheet;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.Stylesheet.Styles;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -125,7 +125,7 @@ public class Highlighter {
         for (final Object child : highlighted.get(cell)) {
           final mxCell childCell = (mxCell) child;
 
-          childCell.setStyle(CustomGraphStylesheet.Styles.removeHighlight(childCell.getStyle()).name());
+          childCell.setStyle(Stylesheet.Styles.removeHighlight(childCell.getStyle()).name());
 
           // remove highlight from child cell label
           removeHighlightedFlag(childCell);
@@ -147,7 +147,7 @@ public class Highlighter {
         for (final Object child : highlighted.get(cell)) {
           final mxCell childCell = (mxCell) child;
 
-          childCell.setStyle(CustomGraphStylesheet.Styles.getHighlight(childCell.getStyle()).name());
+          childCell.setStyle(Stylesheet.Styles.getHighlight(childCell.getStyle()).name());
 
           // set highlight on child cell label
           setHighlightedFlag(childCell);

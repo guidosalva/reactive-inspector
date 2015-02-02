@@ -1,6 +1,6 @@
 package de.tu_darmstadt.stg.reclipse.graphview.view;
 
-import de.tu_darmstadt.stg.reclipse.graphview.view.graph.CustomGraphStylesheet;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.Stylesheet;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
 import com.mxgraph.view.mxGraph;
@@ -41,26 +41,26 @@ public class ReactiveVariableVertex {
    * @return The style to be used when displaying this vertex in the graph.
    */
   public String getStyle() {
-    CustomGraphStylesheet.Styles style;
+    Stylesheet.Styles style;
 
     // determine style
     switch (var.getReactiveVariableType()) {
       case SIGNAL:
-        style = CustomGraphStylesheet.Styles.SIGNAL;
+        style = Stylesheet.Styles.SIGNAL;
         break;
       case EVENT:
-        style = CustomGraphStylesheet.Styles.EVENT;
+        style = Stylesheet.Styles.EVENT;
         break;
       case EVENT_HANDLER:
-        style = CustomGraphStylesheet.Styles.EVENTHANDLER;
+        style = Stylesheet.Styles.EVENTHANDLER;
         break;
       default:
-        style = CustomGraphStylesheet.Styles.VAR;
+        style = Stylesheet.Styles.VAR;
     }
 
     // set highlight, if enabled
     if (isHighlighted) {
-      style = CustomGraphStylesheet.Styles.getHighlight(style);
+      style = Stylesheet.Styles.getHighlight(style);
     }
 
     return style.name();
