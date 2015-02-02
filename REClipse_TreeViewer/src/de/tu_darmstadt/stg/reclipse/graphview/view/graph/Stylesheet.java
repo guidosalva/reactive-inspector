@@ -116,6 +116,15 @@ public class Stylesheet extends mxStylesheet {
     putCellStyle(Styles.VAR_HIGHLIGHT.name(), highlightedSignalStyle);
   }
 
+  /**
+   * Darkens a color string by a given factor.
+   * 
+   * @param colorStr
+   *          A color string.
+   * @param factor
+   *          The factor by which to darken it.
+   * @return A darkened color string.
+   */
   public static String darkenColor(final String colorStr, final float factor) {
     final int r = Integer.valueOf(colorStr.substring(1, 3), 16);
     final int b = Integer.valueOf(colorStr.substring(3, 5), 16);
@@ -129,9 +138,16 @@ public class Stylesheet extends mxStylesheet {
     gs = gs > 255 ? 255 : gs;
     bs = bs > 255 ? 255 : bs;
 
-    return String.format("#%02x%02x%02x", rs, gs, bs);
+    return String.format("#%02x%02x%02x", rs, gs, bs); //$NON-NLS-1$
   }
 
+  /**
+   * Calculates an appropriate font color for a given background color.
+   * 
+   * @param colorStr
+   *          Background color.
+   * @return A font color string.
+   */
   public static String calculateFontColor(final String colorStr) {
     final int r = Integer.valueOf(colorStr.substring(1, 3), 16);
     final int b = Integer.valueOf(colorStr.substring(3, 5), 16);
@@ -152,16 +168,23 @@ public class Stylesheet extends mxStylesheet {
       d = 255;
     }
 
-    return String.format("#%02x%02x%02x", d, d, d);
+    return String.format("#%02x%02x%02x", d, d, d); //$NON-NLS-1$
   }
 
+  /**
+   * Generates a style string from a HEX color string.
+   * 
+   * @param color
+   *          HEX color string.
+   * @return A style string for JXGraph components.
+   */
   public static String calculateStyleFromColor(final String color) {
-    String style = mxConstants.STYLE_ROUNDED + "=1;";
+    String style = mxConstants.STYLE_ROUNDED + "=1;"; //$NON-NLS-1$
 
-    style += mxConstants.STYLE_FONTCOLOR + "=" + calculateFontColor(color) + ";";
-    style += mxConstants.STYLE_FILLCOLOR + "=" + color + ";";
-    style += mxConstants.STYLE_GRADIENTCOLOR + "=" + darkenColor(color, 0.85f) + ";";
-    style += mxConstants.STYLE_STROKECOLOR + "=" + darkenColor(color, 0.75f);
+    style += mxConstants.STYLE_FONTCOLOR + "=" + calculateFontColor(color) + ";"; //$NON-NLS-1$ //$NON-NLS-2$
+    style += mxConstants.STYLE_FILLCOLOR + "=" + color + ";"; //$NON-NLS-1$ //$NON-NLS-2$
+    style += mxConstants.STYLE_GRADIENTCOLOR + "=" + darkenColor(color, 0.85f) + ";"; //$NON-NLS-1$ //$NON-NLS-2$
+    style += mxConstants.STYLE_STROKECOLOR + "=" + darkenColor(color, 0.75f); //$NON-NLS-1$
 
     return style;
   }

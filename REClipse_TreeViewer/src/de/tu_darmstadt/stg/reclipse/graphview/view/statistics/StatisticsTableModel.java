@@ -4,11 +4,16 @@ import javax.swing.table.DefaultTableModel;
 
 public class StatisticsTableModel extends DefaultTableModel {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = -7592080310599273380L;
+
   private static String[] COLUMN_NAMES = {
-      "Name",
-      "Type",
-      "Value",
-      "# Connected Variables"
+      "Name", //$NON-NLS-1$
+      "Type", //$NON-NLS-1$
+      "Value", //$NON-NLS-1$
+      "# Connected Variables" //$NON-NLS-1$
   };
 
   public StatisticsTableModel() {

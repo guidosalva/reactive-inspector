@@ -11,6 +11,11 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PartInitException;
 
+/**
+ * 
+ * @author Sebastian Ruhleder <sebastian.ruhleder@googlemail.com>
+ * 
+ */
 public class ShowStatistics implements IObjectActionDelegate {
 
   private IWorkbenchPartSite partSite;
@@ -28,10 +33,6 @@ public class ShowStatistics implements IObjectActionDelegate {
     }
     else {
       page.bringToTop(part);
-    }
-
-    if (part != null) {
-      final StatisticsView rtv = (StatisticsView) part;
     }
   }
 

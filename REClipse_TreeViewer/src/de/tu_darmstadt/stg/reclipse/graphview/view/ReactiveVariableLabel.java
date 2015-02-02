@@ -25,7 +25,7 @@ public class ReactiveVariableLabel {
 
   @Override
   public String toString() {
-    String label = "<h4>" + var.getName() + "</h4>"; //$NON-NLS-1$
+    String label = "<h4>" + var.getName() + "</h4>"; //$NON-NLS-1$ //$NON-NLS-2$
 
     if (isHighlighted) {
       label += "Value: CHANGE\n"; //$NON-NLS-1$

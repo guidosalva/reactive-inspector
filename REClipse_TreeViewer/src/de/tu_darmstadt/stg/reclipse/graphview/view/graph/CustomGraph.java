@@ -215,6 +215,13 @@ public class CustomGraph extends mxGraph {
     });
   }
 
+  /**
+   * Returns all children of a cell.
+   * 
+   * @param cell
+   *          A cell in the graph.
+   * @return A set of mxCell objects.
+   */
   public Set<Object> getChildrenOfCell(final mxCell cell) {
     // collect children of cell
     final Set<Object> children = new HashSet<>();
@@ -246,11 +253,21 @@ public class CustomGraph extends mxGraph {
     graphComponent.zoomOut();
   }
 
+  /**
+   * 
+   * @return True, if the heatmap mode is activated. False, otherwise.
+   */
   public boolean isHeatmapEnabled() {
     return activeHeatmap;
   }
 
-  public void setHeatmapEnabled(final boolean activeHeatmap) {
-    this.activeHeatmap = activeHeatmap;
+  /**
+   * Enables or disables the heatmap mode.
+   * 
+   * @param heatmapMode
+   *          The heatmap mode.
+   */
+  public void setHeatmapEnabled(final boolean heatmapMode) {
+    this.activeHeatmap = heatmapMode;
   }
 }

@@ -28,6 +28,10 @@ import com.google.gson.reflect.TypeToken;
  * Helper class which does all the work related to the database, e.g. storing
  * variables, retrieving them etc.
  */
+@SuppressWarnings({
+    "hiding",
+    "resource"
+})
 public class DatabaseHelper {
 
   public static final String REACTIVE_VARIABLES_TABLE_NAME = "revars"; //$NON-NLS-1$
@@ -139,6 +143,7 @@ public class DatabaseHelper {
     if (lastPointInTime == 1) {
       return;
     }
+
     try {
       final boolean autoCommit = connection.getAutoCommit();
       connection.setAutoCommit(false);

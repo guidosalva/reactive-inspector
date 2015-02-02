@@ -39,7 +39,7 @@ public class StatisticsCharts {
     changeDataset = new DefaultCategoryDataset();
 
     typeChart = ChartFactory.createPieChart3D(TYPE_TITLE, typeDataset, true, true, false);
-    changeChart = ChartFactory.createBarChart3D(CHANGE_TITLE, "Variables", "Changes", changeDataset, PlotOrientation.VERTICAL, false, true, false);
+    changeChart = ChartFactory.createBarChart3D(CHANGE_TITLE, "Variables", "Changes", changeDataset, PlotOrientation.VERTICAL, false, true, false); //$NON-NLS-1$ //$NON-NLS-2$
 
     final NumberAxis rangeAxis = (NumberAxis) changeChart.getCategoryPlot().getRangeAxis();
     rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
@@ -108,7 +108,7 @@ public class StatisticsCharts {
         continue;
       }
 
-      changeDataset.setValue(value, "", name);
+      changeDataset.setValue(value, "", name); //$NON-NLS-1$
     }
   }
 }
