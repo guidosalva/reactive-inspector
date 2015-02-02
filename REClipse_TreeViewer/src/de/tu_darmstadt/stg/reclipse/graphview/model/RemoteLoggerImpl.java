@@ -36,8 +36,12 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
   protected static int currentPointInTime = 0;
   private static HashSet<IJavaLineBreakpoint> breakpoints = new HashSet<>();
 
+  private final BreakpointInformationStore store;
+
   protected RemoteLoggerImpl() throws RemoteException {
     super();
+
+    store = BreakpointInformationStore.getInstance();
   }
 
   private static void createBreakpoint(final BreakpointInformation breakpointInformation) {
@@ -64,6 +68,8 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
 
   @Override
   public void logNodeCreated(final ReactiveVariable r, final BreakpointInformation breakpointInformation) throws RemoteException {
+    store.put(r, breakpointInformation);
+
     DatabaseHelper.copyLastReVars(r.getDependencyGraphHistoryType());
     final int lastPointInTime = DatabaseHelper.getLastPointInTime();
     r.setPointInTime(lastPointInTime);
@@ -73,6 +79,8 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
 
   @Override
   public void logNodeAttached(final ReactiveVariable r, final UUID dependentId, final BreakpointInformation breakpointInformation) throws RemoteException {
+    store.put(r, breakpointInformation);
+
     DatabaseHelper.copyLastReVars(r.getDependencyGraphHistoryType());
     final int lastPointInTime = DatabaseHelper.getLastPointInTime();
     r.setPointInTime(lastPointInTime);
@@ -86,6 +94,8 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
 
   @Override
   public void logNodeEvaluationEnded(final ReactiveVariable r, final BreakpointInformation breakpointInformation) throws RemoteException {
+    store.put(r, breakpointInformation);
+
     DatabaseHelper.copyLastReVars(r.getDependencyGraphHistoryType());
     final int lastPointInTime = DatabaseHelper.getLastPointInTime();
     r.setPointInTime(lastPointInTime);
@@ -96,6 +106,8 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
 
   @Override
   public void logNodeEvaluationEndedWithException(final ReactiveVariable r, final Exception e, final BreakpointInformation breakpointInformation) throws RemoteException {
+    store.put(r, breakpointInformation);
+
     DatabaseHelper.copyLastReVars(r.getDependencyGraphHistoryType());
     final int lastPointInTime = DatabaseHelper.getLastPointInTime();
     r.setPointInTime(lastPointInTime);
@@ -107,6 +119,8 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
 
   @Override
   public void logNodeEvaluationStarted(final ReactiveVariable r, final BreakpointInformation breakpointInformation) throws RemoteException {
+    store.put(r, breakpointInformation);
+
     DatabaseHelper.copyLastReVars(r.getDependencyGraphHistoryType());
     final int lastPointInTime = DatabaseHelper.getLastPointInTime();
     r.setPointInTime(lastPointInTime);
@@ -117,6 +131,8 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
 
   @Override
   public void logNodeValueSet(final ReactiveVariable r, final BreakpointInformation breakpointInformation) throws RemoteException {
+    store.put(r, breakpointInformation);
+
     DatabaseHelper.copyLastReVars(r.getDependencyGraphHistoryType());
     final int lastPointInTime = DatabaseHelper.getLastPointInTime();
     r.setPointInTime(lastPointInTime);

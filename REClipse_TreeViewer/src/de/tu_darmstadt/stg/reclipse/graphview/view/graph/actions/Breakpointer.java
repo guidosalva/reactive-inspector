@@ -1,8 +1,12 @@
 package de.tu_darmstadt.stg.reclipse.graphview.view.graph.actions;
 
+import de.tu_darmstadt.stg.reclipse.graphview.Activator;
 import de.tu_darmstadt.stg.reclipse.graphview.Images;
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
+import de.tu_darmstadt.stg.reclipse.graphview.model.BreakpointInformationStore;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.CustomGraph;
+import de.tu_darmstadt.stg.reclipse.logger.BreakpointInformation;
+import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,19 +16,37 @@ import java.util.Map;
 import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.debug.core.IJavaWatchpoint;
+import org.eclipse.jdt.debug.core.JDIDebugModel;
+
 import com.mxgraph.model.mxCell;
 
 public class Breakpointer {
 
   private final CustomGraph graph;
 
-  private final Map<mxCell, Boolean> breakpointMap;
+  private final Map<mxCell, Boolean> breakpointStatus;
+
+  private final Map<mxCell, IJavaWatchpoint> watchpoints;
+
+  private final BreakpointInformationStore store;
 
   public Breakpointer(final CustomGraph g) {
     super();
     this.graph = g;
 
-    breakpointMap = new HashMap<>();
+    store = BreakpointInformationStore.getInstance();
+
+    breakpointStatus = new HashMap<>();
+    watchpoints = new HashMap<>();
   }
 
   public JMenuItem createMenuItem(final mxCell cell) {
@@ -49,20 +71,85 @@ public class Breakpointer {
   }
 
   void triggerBreakpoint(final mxCell cell) {
-    if (!breakpointMap.containsKey(cell)) {
-      breakpointMap.put(cell, false);
+    if (!breakpointStatus.containsKey(cell)) {
+      breakpointStatus.put(cell, false);
     }
 
-    final boolean isEnabled = breakpointMap.get(cell);
+    final boolean isEnabled = breakpointStatus.get(cell);
 
     if (isEnabled) {
+      final IJavaWatchpoint watchpoint = watchpoints.get(cell);
 
+      try {
+        watchpoint.delete();
+      }
+      catch (final CoreException e) {
+        Activator.log(e);
+      }
     }
     else {
+      // get reactive variable from cell
+      final ReactiveVariable reVar = (ReactiveVariable) cell.getValue();
 
+      // get breakpoint information from store
+      final BreakpointInformation information = store.get(reVar);
+
+      // create type and file instances
+      final IType type = createTypeFromClassName(information.getClassName());
+      final IFile file = createFile(information.getSourcePath());
+
+      // try to create watchpoint
+      IJavaWatchpoint watchpoint = null;
+      try {
+        watchpoint = JDIDebugModel.createWatchpoint(file, type.getFullyQualifiedName(), reVar.getName(), -1, -1, -1, 0, true, null);
+      }
+      catch (final CoreException e) {
+        Activator.log(e);
+      }
+
+      // save watchpoint
+      if (watchpoint != null) {
+        watchpoints.put(cell, watchpoint);
+      }
     }
 
-    breakpointMap.put(cell, !isEnabled);
+    breakpointStatus.put(cell, !isEnabled);
+  }
+
+  private static IType createTypeFromClassName(final String className) {
+    final IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+    IType resource = null;
+    for (final IProject project : projects) {
+      final IJavaProject javaProject = JavaCore.create(project);
+
+      IType type = null;
+      try {
+        type = javaProject.findType(className);
+      }
+      catch (final JavaModelException e) {
+        Activator.log(e);
+      }
+
+      if (type != null) {
+        resource = type;
+        break;
+      }
+    }
+    return resource;
+  }
+
+  private static IFile createFile(final String fileName) {
+    final IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+    IFile resource = null;
+    for (final IProject project : projects) {
+      final IFile file = project.getFile(fileName);
+
+      if (file != null) {
+        resource = file;
+        break;
+      }
+    }
+    return resource;
   }
 
   /**
@@ -77,10 +164,10 @@ public class Breakpointer {
   }
 
   public boolean isActiveBreakpoint(final mxCell cell) {
-    if (!breakpointMap.containsKey(cell)) {
+    if (!breakpointStatus.containsKey(cell)) {
       return false;
     }
 
-    return breakpointMap.get(cell);
+    return breakpointStatus.get(cell);
   }
 }
