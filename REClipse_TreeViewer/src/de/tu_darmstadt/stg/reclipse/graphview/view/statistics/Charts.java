@@ -20,7 +20,7 @@ import org.jfree.data.general.DefaultPieDataset;
  * @author Sebastian Ruhleder <sebastian.ruhleder@gmail.com>
  * 
  */
-public class StatisticsCharts {
+public class Charts {
 
   private final JFreeChart typeChart;
 
@@ -34,7 +34,7 @@ public class StatisticsCharts {
 
   private static String CHANGE_TITLE = "Amount of Updates"; //$NON-NLS-1$
 
-  public StatisticsCharts() {
+  public Charts() {
     typeDataset = new DefaultPieDataset();
     changeDataset = new DefaultCategoryDataset();
 

@@ -20,7 +20,7 @@ public class StatisticsView extends ViewPart implements DependencyGraphHistoryCh
   // ID of the view
   public static final String ID = "de.tu-darmstadt.stg.reclipse.graphview.StatisticsView"; //$NON-NLS-1$
 
-  private StatisticsCharts pieCharts;
+  private Charts pieCharts;
 
   private Frame frame;
 
@@ -32,7 +32,7 @@ public class StatisticsView extends ViewPart implements DependencyGraphHistoryCh
     frameComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     frame = SWT_AWT.new_Frame(frameComposite);
 
-    pieCharts = new StatisticsCharts();
+    pieCharts = new Charts();
     final ChartPanel typeChartPanel = new ChartPanel(pieCharts.getTypeChart());
     final ChartPanel changeChartPanel = new ChartPanel(pieCharts.getChangeChart());
 
