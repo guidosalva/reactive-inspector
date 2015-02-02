@@ -2,6 +2,9 @@ package de.tu_darmstadt.stg.reclipse.graphview.view.graph;
 
 import de.tu_darmstadt.stg.reclipse.graphview.provider.ContentModel;
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableVertex;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.actions.Breakpointer;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.actions.Collapser;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.actions.Highlighter;
 
 import java.awt.Frame;
 import java.awt.event.MouseAdapter;
@@ -41,11 +44,11 @@ public class CustomGraph extends mxGraph {
 
   private mxGraphLayout graphLayout;
 
-  final GraphCollapser collapser;
+  final Collapser collapser;
 
-  final GraphHighlighter highlighter;
+  final Highlighter highlighter;
 
-  final GraphBreakpointer breakpointer;
+  final Breakpointer breakpointer;
 
   private boolean activeHeatmap = false;
 
@@ -59,9 +62,9 @@ public class CustomGraph extends mxGraph {
     setStylesheet(new CustomGraphStylesheet());
 
     // initialize graph collapser and highlighter
-    collapser = new GraphCollapser(this);
-    highlighter = new GraphHighlighter(this);
-    breakpointer = new GraphBreakpointer(this);
+    collapser = new Collapser(this);
+    highlighter = new Highlighter(this);
+    breakpointer = new Breakpointer(this);
 
     // create new content model
     contentModel = new ContentModel();

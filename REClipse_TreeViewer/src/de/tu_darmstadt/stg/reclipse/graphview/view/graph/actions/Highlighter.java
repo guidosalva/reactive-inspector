@@ -1,8 +1,11 @@
-package de.tu_darmstadt.stg.reclipse.graphview.view.graph;
+package de.tu_darmstadt.stg.reclipse.graphview.view.graph.actions;
 
 import de.tu_darmstadt.stg.reclipse.graphview.Images;
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableLabel;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.CustomGraph;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.CustomGraphStylesheet;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.CustomGraphStylesheet.Styles;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -20,13 +23,13 @@ import com.mxgraph.model.mxCell;
  * @author Sebastian Ruhleder <sebastian.ruhleder@gmail.com>
  * 
  */
-public class GraphHighlighter {
+public class Highlighter {
 
   private final CustomGraph graph;
 
   private final Map<mxCell, Set<Object>> highlighted;
 
-  public GraphHighlighter(final CustomGraph g) {
+  public Highlighter(final CustomGraph g) {
     super();
     this.graph = g;
 

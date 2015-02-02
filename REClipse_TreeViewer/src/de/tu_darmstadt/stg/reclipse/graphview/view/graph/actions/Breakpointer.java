@@ -1,7 +1,8 @@
-package de.tu_darmstadt.stg.reclipse.graphview.view.graph;
+package de.tu_darmstadt.stg.reclipse.graphview.view.graph.actions;
 
 import de.tu_darmstadt.stg.reclipse.graphview.Images;
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.CustomGraph;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -13,13 +14,13 @@ import javax.swing.JMenuItem;
 
 import com.mxgraph.model.mxCell;
 
-public class GraphBreakpointer {
+public class Breakpointer {
 
   private final CustomGraph graph;
 
   private final Map<mxCell, Boolean> breakpointMap;
 
-  public GraphBreakpointer(final CustomGraph g) {
+  public Breakpointer(final CustomGraph g) {
     super();
     this.graph = g;
 
