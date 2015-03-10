@@ -22,13 +22,13 @@ import com.mxgraph.model.mxCell;
  * @author Sebastian Ruhleder <sebastian.ruhleder@gmail.com>
  * 
  */
-public class Highlighter {
+public class HighlightAction {
 
   private final CustomGraph graph;
 
   private final Map<mxCell, Set<Object>> highlighted;
 
-  public Highlighter(final CustomGraph g) {
+  public HighlightAction(final CustomGraph g) {
     super();
     this.graph = g;
 

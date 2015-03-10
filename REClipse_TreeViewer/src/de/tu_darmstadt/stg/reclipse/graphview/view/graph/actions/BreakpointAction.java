@@ -34,7 +34,7 @@ import com.mxgraph.model.mxCell;
  * @author Sebastian Ruhleder <sebastian.ruhleder@gmail.com>
  *
  */
-public class Breakpointer {
+public class BreakpointAction {
 
   /**
    * Currently, the graph instance is not needed.
@@ -51,7 +51,7 @@ public class Breakpointer {
   // Reference to the breakpoint information store
   private final BreakpointInformationStore store;
 
-  public Breakpointer(final CustomGraph g) {
+  public BreakpointAction(final CustomGraph g) {
     super();
     this.graph = g;
 

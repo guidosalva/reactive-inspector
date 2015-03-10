@@ -20,13 +20,13 @@ import com.mxgraph.model.mxCell;
  * @author Sebastian Ruhleder <sebastian.ruhleder@gmail.com>
  * 
  */
-public class Collapser {
+public class CollapseAction {
 
   private final CustomGraph graph;
 
   private final Map<mxCell, Set<Object>> collapsed;
 
-  public Collapser(final CustomGraph g) {
+  public CollapseAction(final CustomGraph g) {
     super();
     this.graph = g;
 
