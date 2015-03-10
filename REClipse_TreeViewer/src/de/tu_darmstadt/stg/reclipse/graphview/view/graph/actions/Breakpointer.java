@@ -29,14 +29,26 @@ import org.eclipse.jdt.debug.core.JDIDebugModel;
 
 import com.mxgraph.model.mxCell;
 
+/**
+ *
+ * @author Sebastian Ruhleder <sebastian.ruhleder@gmail.com>
+ *
+ */
 public class Breakpointer {
 
+  /**
+   * Currently, the graph instance is not needed.
+   */
+  @SuppressWarnings("unused")
   private final CustomGraph graph;
 
+  // Statuses of breakpoints
   private final Map<mxCell, Boolean> breakpointStatus;
 
+  // Tracked watchpoints
   private final Map<mxCell, IJavaWatchpoint> watchpoints;
 
+  // Reference to the breakpoint information store
   private final BreakpointInformationStore store;
 
   public Breakpointer(final CustomGraph g) {
@@ -49,6 +61,13 @@ public class Breakpointer {
     watchpoints = new HashMap<>();
   }
 
+  /**
+   * Creates a menu item for the cell.
+   *
+   * @param cell
+   *          A cell in the graph.
+   * @return JMenuItem instance
+   */
   public JMenuItem createMenuItem(final mxCell cell) {
     final JMenuItem item = new JMenuItem();
 
@@ -70,6 +89,13 @@ public class Breakpointer {
     return item;
   }
 
+  /**
+   * Activates (or deactivates) a breakpoint on a reactive variable given its
+   * cell representation in the graph.
+   *
+   * @param cell
+   *          A cell in the graph.
+   */
   void triggerBreakpoint(final mxCell cell) {
     if (!breakpointStatus.containsKey(cell)) {
       breakpointStatus.put(cell, false);
@@ -116,8 +142,18 @@ public class Breakpointer {
     breakpointStatus.put(cell, !isEnabled);
   }
 
+  /**
+   * Based on the current projects and a class name, generates an appropriate
+   * type.
+   *
+   * @param className
+   *          A class name.
+   * @return A type.
+   */
   private static IType createTypeFromClassName(final String className) {
+    // Get projects in current workspace
     final IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+
     IType resource = null;
     for (final IProject project : projects) {
       final IJavaProject javaProject = JavaCore.create(project);
@@ -138,8 +174,17 @@ public class Breakpointer {
     return resource;
   }
 
+  /**
+   * Based on a file name, generates an appropriate file instance.
+   *
+   * @param fileName
+   *          A file name.
+   * @return An IFile instance.
+   */
   private static IFile createFile(final String fileName) {
+    // Get projects in current workspace
     final IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+
     IFile resource = null;
     for (final IProject project : projects) {
       final IFile file = project.getFile(fileName);
@@ -154,7 +199,7 @@ public class Breakpointer {
 
   /**
    * Builds a label based on whether a cell is highlighted.
-   * 
+   *
    * @param cell
    *          A cell in the graph.
    * @return A label String.
@@ -163,6 +208,13 @@ public class Breakpointer {
     return isActiveBreakpoint(cell) ? Texts.MenuItem_Breakpoint_Disable : Texts.MenuItem_Breakpoint_Enable;
   }
 
+  /**
+   * Checks whether a breakpoint has been set on a cell.
+   *
+   * @param cell
+   *          A cell in the graph.
+   * @return True iff a breakpoint has been set on the cell's reactive variable.
+   */
   public boolean isActiveBreakpoint(final mxCell cell) {
     if (!breakpointStatus.containsKey(cell)) {
       return false;
