@@ -198,7 +198,7 @@ public class BreakpointAction {
   }
 
   /**
-   * Builds a label based on whether a cell is highlighted.
+   * Builds a label based on whether a cell has an active breakpoint.
    *
    * @param cell
    *          A cell in the graph.

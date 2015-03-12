@@ -103,7 +103,6 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
         }
       }
     });
-
     final Button prevButton = new Button(queryComposite, SWT.ARROW | SWT.LEFT);
     prevButton.addSelectionListener(queryController.new PrevQueryResultButtonHandler());
 

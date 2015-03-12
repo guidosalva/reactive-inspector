@@ -24,7 +24,7 @@
       </category>
       <view
             category="de.tu-darmstadt.stg.reclipse.StatisticsViews"
-            class="de.tu_darmstadt.stg.reclipse.graphview.view.StatisticsView"
+            class="de.tu_darmstadt.stg.reclipse.graphview.view.statistics.StatisticsView"
             id="de.tu-darmstadt.stg.reclipse.graphview.StatisticsView"
             icon="icons/reactivetree.png"
             name="%view.statistics.name">

@@ -18,5 +18,8 @@
 	<classpathentry exported="true" kind="lib" path="lib/jcommon-1.0.23.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jfreechart-1.0.19.jar"/>
 	<classpathentry kind="lib" path="/Users/ruhleder/Downloads/eclipse/plugins/org.eclipse.jdt.core_3.10.0.v20140902-0626.jar"/>
+	<classpathentry kind="lib" path="/Users/ruhleder/Downloads/eclipse/plugins/org.eclipse.ui_3.106.0.v20140812-1751.jar"/>
+	<classpathentry kind="lib" path="/Users/ruhleder/Downloads/eclipse/plugins/org.eclipse.ui.ide_3.10.1.v20140828-0944.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/REScala"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -5,6 +5,7 @@ import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableVertex;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.actions.BreakpointAction;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.actions.CollapseAction;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.actions.HighlightAction;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.actions.LocateAction;
 
 import java.awt.Frame;
 import java.awt.event.MouseAdapter;
@@ -32,9 +33,9 @@ import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.view.mxGraph;
 
 /**
- * 
+ *
  * @author Sebastian Ruhleder <sebastian.ruhleder@gmail.com>
- * 
+ *
  */
 public class CustomGraph extends mxGraph {
 
@@ -49,6 +50,8 @@ public class CustomGraph extends mxGraph {
   final HighlightAction highlighter;
 
   final BreakpointAction breakpointer;
+
+  final LocateAction locater;
 
   private boolean activeHeatmap = false;
 
@@ -65,6 +68,7 @@ public class CustomGraph extends mxGraph {
     collapser = new CollapseAction(this);
     highlighter = new HighlightAction(this);
     breakpointer = new BreakpointAction(this);
+    locater = new LocateAction(this);
 
     // create new content model
     contentModel = new ContentModel();
@@ -116,7 +120,7 @@ public class CustomGraph extends mxGraph {
 
   /**
    * Updates the point in time the graph should visualize.
-   * 
+   *
    * @param pointInTime
    *          A point in time.
    */
@@ -208,6 +212,7 @@ public class CustomGraph extends mxGraph {
         popupMenu.add(highlighter.createMenuItem(cell));
         popupMenu.addSeparator();
         popupMenu.add(breakpointer.createMenuItem(cell));
+        popupMenu.add(locater.createMenuItem(cell));
 
         // show popup menu on clicked point
         popupMenu.show(graphComponent, e.getX(), e.getY());
@@ -217,7 +222,7 @@ public class CustomGraph extends mxGraph {
 
   /**
    * Returns all children of a cell.
-   * 
+   *
    * @param cell
    *          A cell in the graph.
    * @return A set of mxCell objects.
@@ -254,7 +259,7 @@ public class CustomGraph extends mxGraph {
   }
 
   /**
-   * 
+   *
    * @return True, if the heatmap mode is activated. False, otherwise.
    */
   public boolean isHeatmapEnabled() {
@@ -263,7 +268,7 @@ public class CustomGraph extends mxGraph {
 
   /**
    * Enables or disables the heatmap mode.
-   * 
+   *
    * @param heatmapMode
    *          The heatmap mode.
    */
