@@ -11,7 +11,7 @@
 1. Set up the Scala IDE for Eclipse.
 2. Install both the PDE and Zest modules in Eclipse.
 3. Import this plugin into the workspace.
-4. Add the local "org.eclipse.jdt.core_XX.jar" library from the "plugins/" directory of Eclipse to the build path.
+4. Add the local "org.eclipse.jdt.core_XX.jar" and "org.eclipse.ui.ide_XX.jar" library from the "plugins/" directory of Eclipse to the build path.
 5. Import the REScala project into the workspace and add REScala to the buildpath.
 6. Done!
 
