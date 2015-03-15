@@ -113,7 +113,8 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
 
     DatabaseHelper.getInstance().addDepGraphHistoryChangedListener(this);
 
-    // update slider values, because the reactive tree view tab could be opened
+    // update slider values, because the reactive tree view tab could be
+    // opened
     // after the dependency graph history changed events have been fired
     updateSliderValues();
   }
