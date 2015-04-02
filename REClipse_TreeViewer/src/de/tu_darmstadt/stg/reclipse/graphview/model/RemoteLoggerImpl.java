@@ -50,7 +50,7 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
       IFile resource = null;
       for (final IProject project : projects) {
         final IFile file = project.getFile(breakpointInformation.getSourcePath());
-        if (file != null) {
+        if (file != null && file.exists()) {
           resource = file;
           break;
         }
