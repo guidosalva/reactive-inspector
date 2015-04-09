@@ -1,6 +1,6 @@
 package de.tu_darmstadt.stg.reclipse.graphview.view.graph;
 
-import de.tu_darmstadt.stg.reclipse.graphview.model.DatabaseHelper;
+import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
 import java.util.HashMap;
@@ -8,16 +8,16 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 
+ *
  * @author Sebastian Ruhleder <sebastian.ruhleder@gmail.com>
- * 
+ *
  */
 public class Heatmap {
 
   /**
    * Generates a heatmap for the specified point in time. The heatmap maps from
    * names of reactive variables to HEX color codes.
-   * 
+   *
    * @param lastPointInTime
    *          Point in time for which the heatmap should be generated.
    * @return A map of names and color codes.
@@ -53,7 +53,7 @@ public class Heatmap {
   /**
    * Calculates a map of names of reactive variables mapping to the amount of
    * changes until the specified point in time.
-   * 
+   *
    * @param lastPointInTime
    *          Point in time for which the change map should be calculated.
    * @return A map of names and change counters.
@@ -66,7 +66,7 @@ public class Heatmap {
     // iterate through points in time
     for (int pointInTime = 0; pointInTime < lastPointInTime; pointInTime++) {
       // get reactive variables for current point in time
-      final List<ReactiveVariable> currentReVars = DatabaseHelper.getReVars(pointInTime);
+      final List<ReactiveVariable> currentReVars = SessionContext.INSTANCE.getDbHelper().getReVars(pointInTime);
 
       for (final ReactiveVariable reVar : currentReVars) {
         if (reVar == null) {
@@ -101,7 +101,7 @@ public class Heatmap {
 
   /**
    * Calculates a "heat" color for a given value and a maximum value.
-   * 
+   *
    * @param value
    *          A value.
    * @param max

@@ -1,6 +1,6 @@
 package de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage;
 
-import de.tu_darmstadt.stg.reclipse.graphview.model.DatabaseHelper;
+import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
 import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseParser.DependencyCreatedContext;
 import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseParser.EvaluationExceptionContext;
 import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseParser.EvaluationYieldedContext;
@@ -15,6 +15,12 @@ import org.antlr.v4.runtime.misc.NotNull;
  * Translates the queries of the REClipse query language to MySQL conditions.
  */
 public class ReclipseVisitorMySQLImpl extends ReclipseBaseVisitor<String> {
+
+  private final SessionContext sessionContext;
+
+  public ReclipseVisitorMySQLImpl(final SessionContext sessionContext) {
+    this.sessionContext = sessionContext;
+  }
 
   @Override
   public String visitNodeCreatedQuery(@NotNull final ReclipseParser.NodeCreatedQueryContext ctx) {
@@ -44,8 +50,8 @@ public class ReclipseVisitorMySQLImpl extends ReclipseBaseVisitor<String> {
   public String visitDependencyCreated(final DependencyCreatedContext ctx) {
     final String nodeName1 = ctx.NODE_NAME(0).getText();
     final String nodeName2 = ctx.NODE_NAME(1).getText();
-    final UUID nodeId1 = DatabaseHelper.getIdFromName(nodeName1);
-    final UUID nodeId2 = DatabaseHelper.getIdFromName(nodeName2);
+    final UUID nodeId1 = sessionContext.getDbHelper().getIdFromName(nodeName1);
+    final UUID nodeId2 = sessionContext.getDbHelper().getIdFromName(nodeName2);
     if (nodeId1 == null || nodeId2 == null) {
       return "false"; //$NON-NLS-1$
     }

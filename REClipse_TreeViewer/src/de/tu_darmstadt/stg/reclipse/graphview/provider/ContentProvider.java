@@ -1,6 +1,7 @@
 package de.tu_darmstadt.stg.reclipse.graphview.provider;
 
 import de.tu_darmstadt.stg.reclipse.graphview.model.DatabaseHelper;
+import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
 import java.util.ArrayList;
@@ -16,7 +17,13 @@ import org.eclipse.zest.core.viewers.IGraphEntityRelationshipContentProvider;
  */
 public class ContentProvider implements IGraphEntityRelationshipContentProvider {
 
+  private final SessionContext ctx;
+
   private int lastPointInTime;
+
+  public ContentProvider(final SessionContext ctx) {
+    this.ctx = ctx;
+  }
 
   @Override
   public Object[] getElements(final Object inputElement) {
@@ -28,10 +35,10 @@ public class ContentProvider implements IGraphEntityRelationshipContentProvider 
     if (inputElement instanceof Integer) {
       lastPointInTime = (Integer) inputElement;
       // make sure that point in time is in a valid range
-      if (lastPointInTime < 1 || lastPointInTime > DatabaseHelper.getLastPointInTime()) {
+      if (lastPointInTime < 1 || lastPointInTime > ctx.getDbHelper().getLastPointInTime()) {
         return elements.toArray();
       }
-      final ArrayList<ReactiveVariable> reVars = DatabaseHelper.getReVars(lastPointInTime);
+      final ArrayList<ReactiveVariable> reVars = ctx.getDbHelper().getReVars(lastPointInTime);
 
       for (final ReactiveVariable reVar : reVars) {
         // not all reactive variables are created yet, so show nothing for the

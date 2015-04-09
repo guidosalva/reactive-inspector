@@ -1,6 +1,6 @@
 package de.tu_darmstadt.stg.reclipse.graphview.view.statistics;
 
-import de.tu_darmstadt.stg.reclipse.graphview.model.DatabaseHelper;
+import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.Heatmap;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
@@ -16,9 +16,9 @@ import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
 
 /**
- * 
+ *
  * @author Sebastian Ruhleder <sebastian.ruhleder@gmail.com>
- * 
+ *
  */
 public class Charts {
 
@@ -48,7 +48,7 @@ public class Charts {
   }
 
   /**
-   * 
+   *
    * @return Pie chart instance of JFreeChart.
    */
   public JFreeChart getTypeChart() {
@@ -77,8 +77,8 @@ public class Charts {
   private void populateTypeDataset() {
     final Map<String, Integer> types = new HashMap<>();
 
-    final int lastPointInTime = DatabaseHelper.getLastPointInTime();
-    final List<ReactiveVariable> reVars = DatabaseHelper.getReVars(lastPointInTime);
+    final int lastPointInTime = SessionContext.INSTANCE.getDbHelper().getLastPointInTime();
+    final List<ReactiveVariable> reVars = SessionContext.INSTANCE.getDbHelper().getReVars(lastPointInTime);
 
     for (final ReactiveVariable reVar : reVars) {
       final String type = reVar.getTypeSimple();
@@ -97,7 +97,7 @@ public class Charts {
   }
 
   private void populateChangeDataset() {
-    final int lastPointInTime = DatabaseHelper.getLastPointInTime();
+    final int lastPointInTime = SessionContext.INSTANCE.getDbHelper().getLastPointInTime();
 
     final Map<String, Integer> changemap = Heatmap.calculateChangeMap(lastPointInTime);
 

@@ -7,9 +7,9 @@ import de.tu_darmstadt.stg.reclipse.graphview.action.ShowHeatmap;
 import de.tu_darmstadt.stg.reclipse.graphview.action.ZoomIn;
 import de.tu_darmstadt.stg.reclipse.graphview.action.ZoomOut;
 import de.tu_darmstadt.stg.reclipse.graphview.controller.QueryController;
-import de.tu_darmstadt.stg.reclipse.graphview.model.DatabaseHelper;
 import de.tu_darmstadt.stg.reclipse.graphview.model.DependencyGraphHistoryChangedListener;
 import de.tu_darmstadt.stg.reclipse.graphview.model.RemoteLoggerImpl;
+import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.CustomGraph;
 
 import org.eclipse.debug.core.DebugEvent;
@@ -111,7 +111,7 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
 
     createActions();
 
-    DatabaseHelper.getInstance().addDepGraphHistoryChangedListener(this);
+    SessionContext.INSTANCE.getDbHelper().addDepGraphHistoryChangedListener(this);
 
     // update slider values, because the reactive tree view tab could be
     // opened
@@ -196,7 +196,7 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
         if (slider == null || slider.isDisposed()) {
           return;
         }
-        slider.setMaximum(DatabaseHelper.getLastPointInTime() + slider.getThumb());
+        slider.setMaximum(SessionContext.INSTANCE.getDbHelper().getLastPointInTime() + slider.getThumb());
         if (!manualMode) {
           slider.setSelection(slider.getMaximum());
           // notify the listeners, because this is not done automatically when

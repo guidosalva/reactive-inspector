@@ -31,12 +31,20 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
 
   private static final long serialVersionUID = -3766741205877371369L;
 
-  private final static DatabaseHelper dbHelper = DatabaseHelper.getInstance();
-  private final static EsperAdapter esperAdapter = new EsperAdapter();
+  private final static SessionContext ctx;
+  private final static DatabaseHelper dbHelper;
+  private final static EsperAdapter esperAdapter;
   protected static int currentPointInTime = 0;
   private static HashSet<IJavaLineBreakpoint> breakpoints = new HashSet<>();
 
   private final BreakpointInformationStore store;
+
+  static {
+    ctx = new SessionContext();
+    dbHelper = ctx.getDbHelper();
+    esperAdapter = new EsperAdapter(ctx);
+    SessionContext.INSTANCE = ctx;
+  }
 
   protected RemoteLoggerImpl() throws RemoteException {
     super();
@@ -70,8 +78,8 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
   public void logNodeCreated(final ReactiveVariable r, final BreakpointInformation breakpointInformation) throws RemoteException {
     store.put(r, breakpointInformation);
 
-    DatabaseHelper.copyLastReVars(r.getDependencyGraphHistoryType());
-    final int lastPointInTime = DatabaseHelper.getLastPointInTime();
+    dbHelper.copyLastReVars(r.getDependencyGraphHistoryType());
+    final int lastPointInTime = dbHelper.getLastPointInTime();
     r.setPointInTime(lastPointInTime);
     dbHelper.addReVar(r);
     sendEventToEsper(r, breakpointInformation);
@@ -81,8 +89,8 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
   public void logNodeAttached(final ReactiveVariable r, final UUID dependentId, final BreakpointInformation breakpointInformation) throws RemoteException {
     store.put(r, breakpointInformation);
 
-    DatabaseHelper.copyLastReVars(r.getDependencyGraphHistoryType());
-    final int lastPointInTime = DatabaseHelper.getLastPointInTime();
+    dbHelper.copyLastReVars(r.getDependencyGraphHistoryType());
+    final int lastPointInTime = dbHelper.getLastPointInTime();
     r.setPointInTime(lastPointInTime);
     final String additionalInformation = r.getId() + "->" + dependentId; //$NON-NLS-1$
     r.setAdditionalInformation(additionalInformation);
@@ -96,8 +104,8 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
   public void logNodeEvaluationEnded(final ReactiveVariable r, final BreakpointInformation breakpointInformation) throws RemoteException {
     store.put(r, breakpointInformation);
 
-    DatabaseHelper.copyLastReVars(r.getDependencyGraphHistoryType());
-    final int lastPointInTime = DatabaseHelper.getLastPointInTime();
+    dbHelper.copyLastReVars(r.getDependencyGraphHistoryType());
+    final int lastPointInTime = dbHelper.getLastPointInTime();
     r.setPointInTime(lastPointInTime);
     dbHelper.deleteReVar(r.getId(), lastPointInTime);
     dbHelper.addReVar(r);
@@ -108,8 +116,8 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
   public void logNodeEvaluationEndedWithException(final ReactiveVariable r, final Exception e, final BreakpointInformation breakpointInformation) throws RemoteException {
     store.put(r, breakpointInformation);
 
-    DatabaseHelper.copyLastReVars(r.getDependencyGraphHistoryType());
-    final int lastPointInTime = DatabaseHelper.getLastPointInTime();
+    dbHelper.copyLastReVars(r.getDependencyGraphHistoryType());
+    final int lastPointInTime = dbHelper.getLastPointInTime();
     r.setPointInTime(lastPointInTime);
     r.setAdditionalInformation(e.getMessage());
     dbHelper.deleteReVar(r.getId(), lastPointInTime);
@@ -121,8 +129,8 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
   public void logNodeEvaluationStarted(final ReactiveVariable r, final BreakpointInformation breakpointInformation) throws RemoteException {
     store.put(r, breakpointInformation);
 
-    DatabaseHelper.copyLastReVars(r.getDependencyGraphHistoryType());
-    final int lastPointInTime = DatabaseHelper.getLastPointInTime();
+    dbHelper.copyLastReVars(r.getDependencyGraphHistoryType());
+    final int lastPointInTime = dbHelper.getLastPointInTime();
     r.setPointInTime(lastPointInTime);
     dbHelper.deleteReVar(r.getId(), lastPointInTime);
     dbHelper.addReVar(r);
@@ -133,8 +141,8 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
   public void logNodeValueSet(final ReactiveVariable r, final BreakpointInformation breakpointInformation) throws RemoteException {
     store.put(r, breakpointInformation);
 
-    DatabaseHelper.copyLastReVars(r.getDependencyGraphHistoryType());
-    final int lastPointInTime = DatabaseHelper.getLastPointInTime();
+    dbHelper.copyLastReVars(r.getDependencyGraphHistoryType());
+    final int lastPointInTime = dbHelper.getLastPointInTime();
     r.setPointInTime(lastPointInTime);
     dbHelper.deleteReVar(r.getId(), lastPointInTime);
     dbHelper.addReVar(r);
@@ -185,12 +193,12 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
 
   public static boolean isNodeConnectionCurrentlyActive(final UUID srcId, final UUID destId) {
     final int pointInTime = getCurrentPointInTime();
-    return DatabaseHelper.isNodeConnectionActive(pointInTime, srcId, destId);
+    return dbHelper.isNodeConnectionActive(pointInTime, srcId, destId);
   }
 
   public static DependencyGraphHistoryType getCurrentDependencyGraphHistoryType() {
     final int pointInTime = getCurrentPointInTime();
-    return DatabaseHelper.getDependencyGraphHistoryType(pointInTime);
+    return dbHelper.getDependencyGraphHistoryType(pointInTime);
   }
 
   /**
@@ -199,7 +207,7 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
    */
   public static void debuggingTerminated() {
     dbHelper.truncateTable(DatabaseHelper.REACTIVE_VARIABLES_TABLE_NAME);
-    DatabaseHelper.resetLastPointInTime();
+    dbHelper.resetLastPointInTime();
     for (final IJavaLineBreakpoint breakpoint : breakpoints) {
       try {
         breakpoint.delete();

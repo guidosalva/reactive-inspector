@@ -2,6 +2,7 @@ package de.tu_darmstadt.stg.reclipse.graphview.controller;
 
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
 import de.tu_darmstadt.stg.reclipse.graphview.model.QueryExecutor;
+import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
 import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseErrorListener;
 import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseLexer;
 import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseParser;
@@ -52,7 +53,7 @@ public class QueryController {
     parser.removeErrorListeners();
     parser.addErrorListener(new ReclipseErrorListener(rtv));
     final ParseTree tree = parser.query();
-    final ReclipseVisitorMySQLImpl visitor = new ReclipseVisitorMySQLImpl();
+    final ReclipseVisitorMySQLImpl visitor = new ReclipseVisitorMySQLImpl(SessionContext.INSTANCE);
     return visitor.visit(tree);
   }
 

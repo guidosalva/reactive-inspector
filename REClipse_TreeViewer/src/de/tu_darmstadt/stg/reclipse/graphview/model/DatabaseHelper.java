@@ -5,6 +5,7 @@ import de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariableType;
 
+import java.io.File;
 import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -28,30 +29,31 @@ import com.google.gson.reflect.TypeToken;
  * Helper class which does all the work related to the database, e.g. storing
  * variables, retrieving them etc.
  */
-@SuppressWarnings({
-    "hiding",
-    "resource"
-})
 public class DatabaseHelper {
 
   public static final String REACTIVE_VARIABLES_TABLE_NAME = "revars"; //$NON-NLS-1$
 
-  private static DatabaseHelper instance = null;
+  private static final String JDBC_CLASS_NAME = "org.sqlite.JDBC"; //$NON-NLS-1$
+  private static final String JDBC_USER = ""; //$NON-NLS-1$
+  private static final String JDBC_PASSWORD = ""; //$NON-NLS-1$
+
   private static List<String> databaseSetupQueries = Arrays
           .asList("DROP TABLE IF EXISTS " + REACTIVE_VARIABLES_TABLE_NAME, //$NON-NLS-1$
-                  // "CREATE TABLE " + REACTIVE_VARIABLES_TABLE_NAME + " (auto_increment_id INTEGER PRIMARY KEY, id char(36) NOT NULL, reactiveVariableType INTEGER NOT NULL, pointInTime INTEGER DEFAULT NULL, dependencyGraphHistoryType INTEGER NOT NULL, additionalInformation VARCHAR(200) DEFAULT NULL, active TINYINT(1) DEFAULT NULL, typeSimple VARCHAR(200) DEFAULT NULL, typeFull VARCHAR(200) DEFAULT NULL, name VARCHAR(200) DEFAULT NULL, additionalKeys VARCHAR(500) DEFAULT NULL, valueString VARCHAR(200) DEFAULT NULL, connectedWith VARCHAR(500) DEFAULT NULL) ENGINE=InnoDB  DEFAULT CHARSET=latin1;"); //$NON-NLS-1$ //$NON-NLS-2$
                   "CREATE TABLE IF NOT EXISTS " //$NON-NLS-1$
-                          + REACTIVE_VARIABLES_TABLE_NAME
-                          + " (\"auto_increment_id\" integer NOT NULL PRIMARY KEY AUTOINCREMENT, \"id\" char(36) NOT NULL, \"reactiveVariableType\" integer NOT NULL, \"pointInTime\" integer DEFAULT NULL, \"dependencyGraphHistoryType\" integer NOT NULL, \"additionalInformation\" varchar(200) DEFAULT NULL, \"active\" integer DEFAULT NULL, \"typeSimple\" varchar(200) DEFAULT NULL, \"typeFull\" varchar(200) DEFAULT NULL, \"name\" varchar(200) DEFAULT NULL, \"additionalKeys\" varchar(500) DEFAULT NULL, \"valueString\" varchar(200) DEFAULT NULL, \"connectedWith\" varchar(500) DEFAULT NULL)"); //$NON-NLS-1$
+                  + REACTIVE_VARIABLES_TABLE_NAME
+                  + " (\"auto_increment_id\" integer NOT NULL PRIMARY KEY AUTOINCREMENT, \"id\" char(36) NOT NULL, \"reactiveVariableType\" integer NOT NULL, \"pointInTime\" integer DEFAULT NULL, \"dependencyGraphHistoryType\" integer NOT NULL, \"additionalInformation\" varchar(200) DEFAULT NULL, \"active\" integer DEFAULT NULL, \"typeSimple\" varchar(200) DEFAULT NULL, \"typeFull\" varchar(200) DEFAULT NULL, \"name\" varchar(200) DEFAULT NULL, \"additionalKeys\" varchar(500) DEFAULT NULL, \"valueString\" varchar(200) DEFAULT NULL, \"connectedWith\" varchar(500) DEFAULT NULL)"); //$NON-NLS-1$
 
   private final CopyOnWriteArrayList<DependencyGraphHistoryChangedListener> listeners = new CopyOnWriteArrayList<>();
+  private final File dbFile;
 
   private Connection connection;
 
   // cache this field locally, because it is queried quite often
-  private static int lastPointInTime = 0;
+  private int lastPointInTime = 0;
 
-  private DatabaseHelper() {
+  public DatabaseHelper(final String id) {
+    this.dbFile = Activator.getDefault().getStateLocation().append("sessions").append(id + ".db").toFile(); //$NON-NLS-1$//$NON-NLS-2$
+
     establishConnection();
 
     try (final Statement stmt = connection.createStatement()) {
@@ -67,16 +69,17 @@ public class DatabaseHelper {
   /**
    * Reads the database connection settings from the Esper configuration file
    * and returns a fresh database connection, which automatically commits.
-   * 
+   *
    * @return a fresh database connection
    */
   private void establishConnection() {
     try {
-      final EsperConfigurationReader esperConfig = EsperConfigurationReader.getInstance();
+      dbFile.getParentFile().mkdirs();
 
       // establish DB connection
-      Class.forName(esperConfig.getJdbcClassName());
-      connection = DriverManager.getConnection(esperConfig.getJdbcUrl(), esperConfig.getJdbcUser(), esperConfig.getJdbcPassword());
+      Class.forName(JDBC_CLASS_NAME);
+      final String jdbcUrl = getJdbcUrl();
+      connection = DriverManager.getConnection(jdbcUrl, JDBC_USER, JDBC_PASSWORD);
       connection.setAutoCommit(true);
     }
     catch (final ClassNotFoundException e) {
@@ -89,13 +92,6 @@ public class DatabaseHelper {
 
   public Connection getConnection() {
     return connection;
-  }
-
-  public static DatabaseHelper getInstance() {
-    if (instance == null) {
-      instance = new DatabaseHelper();
-    }
-    return instance;
   }
 
   public void addDepGraphHistoryChangedListener(final DependencyGraphHistoryChangedListener listener) {
@@ -125,20 +121,18 @@ public class DatabaseHelper {
   /**
    * @return the last point in time of the dependency graph history
    */
-  public static int getLastPointInTime() {
+  public int getLastPointInTime() {
     return lastPointInTime;
   }
 
   /**
    * Resets the last point in time for a new debugging session.
    */
-  public static void resetLastPointInTime() {
+  public void resetLastPointInTime() {
     lastPointInTime = 0;
   }
 
-  public static void copyLastReVars(final DependencyGraphHistoryType newType) {
-    final Connection connection = DatabaseHelper.getInstance().getConnection();
-
+  public void copyLastReVars(final DependencyGraphHistoryType newType) {
     lastPointInTime++;
     if (lastPointInTime == 1) {
       return;
@@ -184,14 +178,12 @@ public class DatabaseHelper {
   /**
    * Calls {@link #addReVar(Connection, ReactiveVariable)} with a new
    * connection.
-   * 
+   *
    * @param r
    *          the reactive variable to add
    * @return the row count
    */
   public int addReVar(final ReactiveVariable r) {
-    final Connection connection = DatabaseHelper.getInstance().getConnection();
-
     final String addQuery = "INSERT INTO " + REACTIVE_VARIABLES_TABLE_NAME + " (id, reactiveVariableType, pointInTime, dependencyGraphHistoryType, additionalInformation, active, typeSimple, typeFull, name, additionalKeys, valueString , connectedWith) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; //$NON-NLS-1$ //$NON-NLS-2$
     try (final PreparedStatement addStmt = connection.prepareStatement(addQuery)) {
       final Gson gson = new Gson();
@@ -218,8 +210,6 @@ public class DatabaseHelper {
   }
 
   public int deleteReVar(final UUID id, final int pointInTime) {
-    final Connection connection = DatabaseHelper.getInstance().getConnection();
-
     final String deleteQuery = "DELETE FROM " + REACTIVE_VARIABLES_TABLE_NAME + " WHERE id = ? AND pointInTime = ?"; //$NON-NLS-1$ //$NON-NLS-2$
     try (final PreparedStatement deleteStmt = connection.prepareStatement(deleteQuery)) {
       deleteStmt.setString(1, id.toString());
@@ -234,9 +224,7 @@ public class DatabaseHelper {
     return -1;
   }
 
-  public static ArrayList<ReactiveVariable> getReVars(final int pointInTime) {
-    final Connection connection = DatabaseHelper.getInstance().getConnection();
-
+  public ArrayList<ReactiveVariable> getReVars(final int pointInTime) {
     final String query = "SELECT * FROM " + REACTIVE_VARIABLES_TABLE_NAME + " WHERE pointInTime = ?"; //$NON-NLS-1$ //$NON-NLS-2$
     try (final PreparedStatement stmt = connection.prepareStatement(query)) {
       stmt.setInt(1, pointInTime);
@@ -276,7 +264,7 @@ public class DatabaseHelper {
     return null;
   }
 
-  public static boolean isNodeChildOf(final int pointInTime, final UUID childId, final UUID parentId) {
+  public boolean isNodeChildOf(final int pointInTime, final UUID childId, final UUID parentId) {
     final ArrayList<ReactiveVariable> reVarsList = getReVars(pointInTime);
     // convert list of reactive variables into map for better handling
     final HashMap<UUID, ReactiveVariable> reVars = new HashMap<>();
@@ -304,9 +292,7 @@ public class DatabaseHelper {
     return result;
   }
 
-  public static boolean isNodeConnectionActive(final int pointInTime, final UUID srcId, final UUID destId) {
-    final Connection connection = DatabaseHelper.getInstance().getConnection();
-
+  public boolean isNodeConnectionActive(final int pointInTime, final UUID srcId, final UUID destId) {
     boolean result = false;
     final String sql = "SELECT dependencyGraphHistoryType, additionalInformation FROM " + REACTIVE_VARIABLES_TABLE_NAME + " WHERE pointInTime = ?"; //$NON-NLS-1$ //$NON-NLS-2$
     try (final PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -334,9 +320,7 @@ public class DatabaseHelper {
     return result;
   }
 
-  public static DependencyGraphHistoryType getDependencyGraphHistoryType(final int pointInTime) {
-    final Connection connection = DatabaseHelper.getInstance().getConnection();
-
+  public DependencyGraphHistoryType getDependencyGraphHistoryType(final int pointInTime) {
     final String sql = "SELECT dependencyGraphHistoryType FROM " + REACTIVE_VARIABLES_TABLE_NAME + " WHERE pointInTime = ? LIMIT 1"; //$NON-NLS-1$ //$NON-NLS-2$
     try (final PreparedStatement stmt = connection.prepareStatement(sql)) {
       stmt.setInt(1, pointInTime);
@@ -352,9 +336,7 @@ public class DatabaseHelper {
     return null;
   }
 
-  public static UUID getIdFromName(final String name) {
-    final Connection connection = DatabaseHelper.getInstance().getConnection();
-
+  public UUID getIdFromName(final String name) {
     final String sql = "SELECT id FROM " + REACTIVE_VARIABLES_TABLE_NAME + " WHERE name = ? AND pointInTime = ?"; //$NON-NLS-1$ //$NON-NLS-2$
     try (final PreparedStatement stmt = connection.prepareStatement(sql)) {
       stmt.setString(1, name);
@@ -369,5 +351,21 @@ public class DatabaseHelper {
       Activator.log(e);
     }
     return null;
+  }
+
+  protected String getJdbcUrl() {
+    return "jdbc:sqlite:" + dbFile.getAbsolutePath(); //$NON-NLS-1$
+  }
+
+  protected String getJdbcClassName() {
+    return JDBC_CLASS_NAME;
+  }
+
+  protected String getJdbcUser() {
+    return JDBC_USER;
+  }
+
+  protected String getJdbcPassword() {
+    return JDBC_PASSWORD;
   }
 }

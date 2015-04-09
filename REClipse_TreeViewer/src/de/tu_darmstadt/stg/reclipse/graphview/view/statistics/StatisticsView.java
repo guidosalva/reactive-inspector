@@ -1,7 +1,7 @@
 package de.tu_darmstadt.stg.reclipse.graphview.view.statistics;
 
-import de.tu_darmstadt.stg.reclipse.graphview.model.DatabaseHelper;
 import de.tu_darmstadt.stg.reclipse.graphview.model.DependencyGraphHistoryChangedListener;
+import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
 
 import java.awt.Frame;
 
@@ -43,7 +43,7 @@ public class StatisticsView extends ViewPart implements DependencyGraphHistoryCh
 
     frame.add(chartsPanel);
 
-    DatabaseHelper.getInstance().addDepGraphHistoryChangedListener(this);
+    SessionContext.INSTANCE.getDbHelper().addDepGraphHistoryChangedListener(this);
   }
 
   @Override
