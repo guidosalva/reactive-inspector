@@ -1,6 +1,6 @@
 package de.tu_darmstadt.stg.reclipse.graphview;
 
-import de.tu_darmstadt.stg.reclipse.graphview.model.RemoteLoggerImpl;
+import de.tu_darmstadt.stg.reclipse.graphview.model.SessionManager;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -67,8 +67,10 @@ public class Activator extends AbstractUIPlugin {
    */
   @Override
   public void stop(final BundleContext context) throws Exception {
-    RemoteLoggerImpl.debuggingTerminated();
+    SessionManager.getInstance().stop();
+
     plugin = null;
+
     // save the properties
     final File file = new File(propertiesFileName);
     try (final OutputStream stream = new BufferedOutputStream(new FileOutputStream(file))) {

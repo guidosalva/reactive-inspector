@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
+import org.sqlite.SQLiteConfig;
 
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.ConfigurationDBRef;
@@ -51,7 +52,7 @@ public class EsperAdapter {
     final Configuration engineConfig = new Configuration();
     final URL url = FileLocator.find(Platform.getBundle(Activator.PLUGIN_ID), new Path("etc/esper.cfg.xml"), null); //$NON-NLS-1$
     engineConfig.configure(url);
-    engineConfig.addDatabaseReference("reclipseDBRead", createEsperDBRef());
+    engineConfig.addDatabaseReference("reclipseDBRead", createEsperDBRef()); //$NON-NLS-1$
     engineConfig.addEventType("ReactiveVariable", ReactiveVariable.class); //$NON-NLS-1$
     provider = EPServiceProviderManager.getDefaultProvider(engineConfig);
     updateEPLStatement();
@@ -66,8 +67,12 @@ public class EsperAdapter {
 
     final ConfigurationDBRef dbRef = new ConfigurationDBRef();
 
-    dbRef.setDriverManagerConnection(className, url, user, password);
+    final SQLiteConfig sqLiteConfig = new SQLiteConfig();
+    sqLiteConfig.setReadOnly(true);
+
+    dbRef.setDriverManagerConnection(className, url, user, password, sqLiteConfig.toProperties());
     dbRef.setConnectionAutoCommit(true);
+    dbRef.setConnectionReadOnly(true);
     dbRef.setConnectionCatalog(""); //$NON-NLS-1$
 
     return dbRef;

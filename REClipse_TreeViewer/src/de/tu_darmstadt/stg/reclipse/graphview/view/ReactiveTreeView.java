@@ -8,9 +8,12 @@ import de.tu_darmstadt.stg.reclipse.graphview.action.ZoomIn;
 import de.tu_darmstadt.stg.reclipse.graphview.action.ZoomOut;
 import de.tu_darmstadt.stg.reclipse.graphview.controller.QueryController;
 import de.tu_darmstadt.stg.reclipse.graphview.model.DependencyGraphHistoryChangedListener;
-import de.tu_darmstadt.stg.reclipse.graphview.model.RemoteLoggerImpl;
+import de.tu_darmstadt.stg.reclipse.graphview.model.ISessionSelectionListener;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
+import de.tu_darmstadt.stg.reclipse.graphview.model.SessionManager;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.CustomGraph;
+
+import java.util.Optional;
 
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugPlugin;
@@ -35,7 +38,7 @@ import org.eclipse.ui.part.ViewPart;
  * Base view class containing all the elements which are shown in the
  * "Reactive Tree" view / tab.
  */
-public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener, DependencyGraphHistoryChangedListener {
+public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener, DependencyGraphHistoryChangedListener, ISessionSelectionListener {
 
   /**
    * The ID of the view as specified by the extension.
@@ -44,6 +47,7 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
 
   protected CustomGraph graph;
 
+  protected Composite graphParent;
   protected Slider slider;
   private boolean showGraph = false;
   protected boolean manualMode = false;
@@ -62,8 +66,9 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
   public void createPartControl(final Composite parent) {
     parent.setLayout(new GridLayout(1, true));
 
-    // create graph
-    graph = new CustomGraph(parent);
+    graphParent = new Composite(parent, SWT.NONE);
+    graphParent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    graphParent.setLayout(new GridLayout());
 
     // be careful: you have to set environment variable LIBOVERLAY_SCROLLBAR=0
     // under Ubuntu / OpenJDK, so that the slider works - see
@@ -111,12 +116,15 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
 
     createActions();
 
-    SessionContext.INSTANCE.getDbHelper().addDepGraphHistoryChangedListener(this);
+    final SessionManager sessionManager = SessionManager.getInstance();
 
-    // update slider values, because the reactive tree view tab could be
-    // opened
-    // after the dependency graph history changed events have been fired
-    updateSliderValues();
+    final Optional<SessionContext> ctx = sessionManager.getSelectedSession();
+
+    if (ctx.isPresent()) {
+      onSessionSelected(ctx.get());
+    }
+
+    sessionManager.addSessionSelectionListener(this);
   }
 
   private void createActions() {
@@ -126,6 +134,40 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
     getViewSite().getActionBars().getToolBarManager().add(new ZoomIn(graph));
     getViewSite().getActionBars().getToolBarManager().add(new ZoomOut(graph));
     getViewSite().getActionBars().getToolBarManager().add(new ShowHeatmap(graph));
+  }
+
+  @Override
+  public void onSessionSelected(final SessionContext ctx) {
+    ctx.getDbHelper().addDepGraphHistoryChangedListener(ReactiveTreeView.this);
+
+    Display.getDefault().syncExec(new Runnable() {
+
+      @Override
+      public void run() {
+        graph = new CustomGraph(graphParent, ctx);
+      }
+    });
+
+    // update slider values, because the reactive tree view tab could be
+    // opened
+    // after the dependency graph history changed events have been fired
+    updateSliderValues();
+  }
+
+  @Override
+  public void onSessionDeselected(final SessionContext ctx) {
+    ctx.getDbHelper().removeDepGraphHistoryChangedListener(this);
+
+    if (graph != null) {
+      Display.getDefault().syncExec(new Runnable() {
+
+        @Override
+        public void run() {
+          graph.dispose();
+          graph = null;
+        }
+      });
+    }
   }
 
   @Override
@@ -152,11 +194,7 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
       }
     }
 
-    if (terminated) {
-      RemoteLoggerImpl.debuggingTerminated();
-      rebuildGraph();
-    }
-    else if (suspended) {
+    if (terminated || suspended) {
       rebuildGraph();
     }
   }
@@ -193,10 +231,13 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
 
       @Override
       public void run() {
-        if (slider == null || slider.isDisposed()) {
+        final Optional<SessionContext> ctx = SessionManager.getInstance().getSelectedSession();
+
+        if (slider == null || slider.isDisposed() || !ctx.isPresent()) {
           return;
         }
-        slider.setMaximum(SessionContext.INSTANCE.getDbHelper().getLastPointInTime() + slider.getThumb());
+
+        slider.setMaximum(ctx.get().getDbHelper().getLastPointInTime() + slider.getThumb());
         if (!manualMode) {
           slider.setSelection(slider.getMaximum());
           // notify the listeners, because this is not done automatically when

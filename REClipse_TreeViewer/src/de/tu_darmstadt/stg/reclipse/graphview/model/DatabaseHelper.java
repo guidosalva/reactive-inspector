@@ -43,7 +43,7 @@ public class DatabaseHelper {
                   + REACTIVE_VARIABLES_TABLE_NAME
                   + " (\"auto_increment_id\" integer NOT NULL PRIMARY KEY AUTOINCREMENT, \"id\" char(36) NOT NULL, \"reactiveVariableType\" integer NOT NULL, \"pointInTime\" integer DEFAULT NULL, \"dependencyGraphHistoryType\" integer NOT NULL, \"additionalInformation\" varchar(200) DEFAULT NULL, \"active\" integer DEFAULT NULL, \"typeSimple\" varchar(200) DEFAULT NULL, \"typeFull\" varchar(200) DEFAULT NULL, \"name\" varchar(200) DEFAULT NULL, \"additionalKeys\" varchar(500) DEFAULT NULL, \"valueString\" varchar(200) DEFAULT NULL, \"connectedWith\" varchar(500) DEFAULT NULL)"); //$NON-NLS-1$
 
-  private final CopyOnWriteArrayList<DependencyGraphHistoryChangedListener> listeners = new CopyOnWriteArrayList<>();
+  private final List<DependencyGraphHistoryChangedListener> listeners = new CopyOnWriteArrayList<>();
   private final File dbFile;
 
   private Connection connection;
@@ -98,6 +98,10 @@ public class DatabaseHelper {
     if (!listeners.contains(listener)) {
       listeners.add(listener);
     }
+  }
+
+  public void removeDepGraphHistoryChangedListener(final DependencyGraphHistoryChangedListener listener) {
+    listeners.remove(listener);
   }
 
   protected void fireChangedEvent() {
@@ -351,6 +355,17 @@ public class DatabaseHelper {
       Activator.log(e);
     }
     return null;
+  }
+
+  public void close() {
+    if (connection != null) {
+      try {
+        connection.close();
+      }
+      catch (final SQLException e) {
+        Activator.log(e);
+      }
+    }
   }
 
   protected String getJdbcUrl() {

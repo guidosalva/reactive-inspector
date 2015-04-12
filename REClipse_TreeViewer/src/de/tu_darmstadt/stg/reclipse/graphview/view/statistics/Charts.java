@@ -22,6 +22,8 @@ import org.jfree.data.general.DefaultPieDataset;
  */
 public class Charts {
 
+  private final SessionContext ctx;
+
   private final JFreeChart typeChart;
 
   private final JFreeChart changeChart;
@@ -34,7 +36,9 @@ public class Charts {
 
   private static String CHANGE_TITLE = "Amount of Updates"; //$NON-NLS-1$
 
-  public Charts() {
+  public Charts(final SessionContext ctx) {
+    this.ctx = ctx;
+
     typeDataset = new DefaultPieDataset();
     changeDataset = new DefaultCategoryDataset();
 
@@ -77,8 +81,8 @@ public class Charts {
   private void populateTypeDataset() {
     final Map<String, Integer> types = new HashMap<>();
 
-    final int lastPointInTime = SessionContext.INSTANCE.getDbHelper().getLastPointInTime();
-    final List<ReactiveVariable> reVars = SessionContext.INSTANCE.getDbHelper().getReVars(lastPointInTime);
+    final int lastPointInTime = ctx.getDbHelper().getLastPointInTime();
+    final List<ReactiveVariable> reVars = ctx.getDbHelper().getReVars(lastPointInTime);
 
     for (final ReactiveVariable reVar : reVars) {
       final String type = reVar.getTypeSimple();
@@ -97,9 +101,9 @@ public class Charts {
   }
 
   private void populateChangeDataset() {
-    final int lastPointInTime = SessionContext.INSTANCE.getDbHelper().getLastPointInTime();
+    final int lastPointInTime = ctx.getDbHelper().getLastPointInTime();
 
-    final Map<String, Integer> changemap = Heatmap.calculateChangeMap(lastPointInTime);
+    final Map<String, Integer> changemap = Heatmap.calculateChangeMap(lastPointInTime, ctx);
 
     for (final String name : changemap.keySet()) {
       final Integer value = changemap.get(name);

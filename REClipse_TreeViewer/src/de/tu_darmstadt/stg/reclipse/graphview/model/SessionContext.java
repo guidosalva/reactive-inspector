@@ -3,19 +3,25 @@ package de.tu_darmstadt.stg.reclipse.graphview.model;
 import java.util.Date;
 import java.util.UUID;
 
+/**
+ * A context for a logging session. It contains session details and the database
+ * connection of the session.
+ *
+ */
 public class SessionContext {
-
-  // TODO remove global instance
-  public static SessionContext INSTANCE = null;
 
   private final UUID id;
   private final Date created;
   private final DatabaseHelper dbHelper;
 
-  public SessionContext() {
+  protected SessionContext() {
     this.id = UUID.randomUUID();
     this.created = new Date();
     this.dbHelper = new DatabaseHelper(id.toString());
+  }
+
+  public void close() {
+    dbHelper.close();
   }
 
   public UUID getId() {

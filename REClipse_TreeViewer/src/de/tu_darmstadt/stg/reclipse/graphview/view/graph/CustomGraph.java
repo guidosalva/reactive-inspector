@@ -44,6 +44,8 @@ public class CustomGraph extends mxGraph {
 
   protected ContentModel contentModel;
 
+  private final Composite composite;
+
   private mxGraphLayout graphLayout;
 
   final CollapseAction collapser;
@@ -56,7 +58,7 @@ public class CustomGraph extends mxGraph {
 
   private boolean activeHeatmap = false;
 
-  public CustomGraph(final Composite parent) {
+  public CustomGraph(final Composite parent, final SessionContext ctx) {
     super();
 
     // enable html labels
@@ -72,13 +74,13 @@ public class CustomGraph extends mxGraph {
     locater = new LocateAction(this);
 
     // create new content model
-    contentModel = new ContentModel(SessionContext.INSTANCE);
+    contentModel = new ContentModel(ctx);
 
     // set graph layout
     graphLayout = new mxHierarchicalLayout(this, SwingConstants.WEST);
 
     // create child composite
-    final Composite composite = new Composite(parent, SWT.EMBEDDED | SWT.BACKGROUND);
+    composite = new Composite(parent, SWT.EMBEDDED | SWT.BACKGROUND);
 
     // set layout data to fill parent composite
     composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -275,5 +277,9 @@ public class CustomGraph extends mxGraph {
    */
   public void setHeatmapEnabled(final boolean heatmapMode) {
     this.activeHeatmap = heatmapMode;
+  }
+
+  public void dispose() {
+    composite.dispose();
   }
 }

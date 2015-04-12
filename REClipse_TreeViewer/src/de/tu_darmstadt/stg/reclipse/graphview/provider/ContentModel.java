@@ -120,7 +120,7 @@ public class ContentModel {
     final ArrayList<ReactiveVariable> reVars = ctx.getDbHelper().getReVars(pointInTime);
 
     // generate heatmap based on point in time
-    final Map<String, String> heatmap = Heatmap.generateHeatmap(pointInTime);
+    final Map<String, String> heatmap = Heatmap.generateHeatmap(pointInTime, ctx);
 
     for (final ReactiveVariable reVar : reVars) {
       // get color for reactive variable

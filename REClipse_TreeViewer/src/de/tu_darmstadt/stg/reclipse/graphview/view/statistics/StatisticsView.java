@@ -1,9 +1,12 @@
 package de.tu_darmstadt.stg.reclipse.graphview.view.statistics;
 
 import de.tu_darmstadt.stg.reclipse.graphview.model.DependencyGraphHistoryChangedListener;
+import de.tu_darmstadt.stg.reclipse.graphview.model.ISessionSelectionListener;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
+import de.tu_darmstadt.stg.reclipse.graphview.model.SessionManager;
 
 import java.awt.Frame;
+import java.util.Optional;
 
 import javax.swing.JPanel;
 
@@ -15,7 +18,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.ViewPart;
 import org.jfree.chart.ChartPanel;
 
-public class StatisticsView extends ViewPart implements DependencyGraphHistoryChangedListener {
+public class StatisticsView extends ViewPart implements DependencyGraphHistoryChangedListener, ISessionSelectionListener {
 
   // ID of the view
   public static final String ID = "de.tu-darmstadt.stg.reclipse.graphview.StatisticsView"; //$NON-NLS-1$
@@ -28,11 +31,24 @@ public class StatisticsView extends ViewPart implements DependencyGraphHistoryCh
   public void createPartControl(final Composite parent) {
     parent.setLayout(new GridLayout(1, true));
 
+    final SessionManager sessionManager = SessionManager.getInstance();
+
     final Composite frameComposite = new Composite(parent, SWT.EMBEDDED | SWT.BACKGROUND);
     frameComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     frame = SWT_AWT.new_Frame(frameComposite);
 
-    pieCharts = new Charts();
+    final Optional<SessionContext> ctx = sessionManager.getSelectedSession();
+
+    if (ctx.isPresent()) {
+      onSessionSelected(ctx.get());
+    }
+
+    sessionManager.addSessionSelectionListener(this);
+  }
+
+  @Override
+  public void onSessionSelected(final SessionContext ctx) {
+    pieCharts = new Charts(ctx);
     final ChartPanel typeChartPanel = new ChartPanel(pieCharts.getTypeChart());
     final ChartPanel changeChartPanel = new ChartPanel(pieCharts.getChangeChart());
 
@@ -43,7 +59,14 @@ public class StatisticsView extends ViewPart implements DependencyGraphHistoryCh
 
     frame.add(chartsPanel);
 
-    SessionContext.INSTANCE.getDbHelper().addDepGraphHistoryChangedListener(this);
+    ctx.getDbHelper().addDepGraphHistoryChangedListener(this);
+  }
+
+  @Override
+  public void onSessionDeselected(final SessionContext ctx) {
+    ctx.getDbHelper().removeDepGraphHistoryChangedListener(this);
+    frame.removeAll();
+    pieCharts = null;
   }
 
   @Override
@@ -52,6 +75,8 @@ public class StatisticsView extends ViewPart implements DependencyGraphHistoryCh
 
   @Override
   public void dependencyGraphHistoryChanged() {
-    pieCharts.refresh();
+    if (pieCharts != null) {
+      pieCharts.refresh();
+    }
   }
 }
