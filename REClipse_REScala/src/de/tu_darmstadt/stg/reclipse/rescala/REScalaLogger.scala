@@ -19,6 +19,7 @@ import de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType
 import rescala.DepHolder
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariableType
 import rescala.Var
+import de.tu_darmstadt.stg.reclipse.logger.RemoteSessionInterface
 
 /**
  * Provides some static helper methods for the {@link REScalaLogger} class.
@@ -96,14 +97,20 @@ object REScalaLogger {
 class REScalaLogger extends Logging {
 
   private lazy val remoteLogger: RemoteLoggerInterface = {
+    checkSecurityManager()
+    
+    val registry = LocateRegistry.getRegistry()
+    val session = registry.lookup(RMIConstants.REMOTE_REFERENCE_NAME).asInstanceOf[RemoteSessionInterface]
+    session.startSession()
+  }
+  
+  private def checkSecurityManager() {
     if (System.getSecurityManager() == null) {
       val policyFileName = getClass().getProtectionDomain().getCodeSource().getLocation().getFile() + "../etc/client.policy"
       System.setProperty("java.security.policy", policyFileName)
       System.setProperty("java.rmi.server.hostname", "127.0.0.1")
       System.setSecurityManager(new RMISecurityManager())
     }
-    val registry = LocateRegistry.getRegistry()
-    registry.lookup(RMIConstants.REMOTE_REFERENCE_NAME).asInstanceOf[RemoteLoggerInterface]
   }
 
   private def getBreakpointInformation(): BreakpointInformation = {

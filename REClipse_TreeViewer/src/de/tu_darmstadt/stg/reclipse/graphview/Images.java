@@ -8,7 +8,8 @@ public enum Images {
   COLLAPSE("/icons/collapse.png"), //$NON-NLS-1$
   HIGHLIGHT("/icons/highlight.png"), //$NON-NLS-1$
   HEATMAP("/icons/heatmap.png"), //$NON-NLS-1$
-  HEATMAP_GREY("/icons/heatmap_grey.png"); //$NON-NLS-1$
+  HEATMAP_GREY("/icons/heatmap_grey.png"), //$NON-NLS-1$
+  MONITOR("/icons/monitor.gif"); //$NON-NLS-1$
 
   private final String path;
 

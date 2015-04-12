@@ -2,6 +2,8 @@ package de.tu_darmstadt.stg.reclipse.graphview.controller;
 
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
 import de.tu_darmstadt.stg.reclipse.graphview.model.QueryExecutor;
+import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
+import de.tu_darmstadt.stg.reclipse.graphview.model.SessionManager;
 import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseErrorListener;
 import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseLexer;
 import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseParser;
@@ -9,6 +11,7 @@ import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseVisito
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveTreeView;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -33,7 +36,13 @@ public class QueryController {
 
     @Override
     public void widgetSelected(final SelectionEvent e) {
-      final String conditions = parseReclipseQuery(rtv.getQueryText());
+      final Optional<SessionContext> ctx = SessionManager.getInstance().getSelectedSession();
+
+      if (!ctx.isPresent()) {
+        return;
+      }
+
+      final String conditions = parseReclipseQuery(rtv.getQueryText(), ctx.get());
       matches = QueryExecutor.executeQuery(conditions);
       if (matches != null && matches.size() > 0) {
         rtv.jumpToPointInTime(matches.get(0));
@@ -44,7 +53,7 @@ public class QueryController {
     }
   }
 
-  protected String parseReclipseQuery(final String queryText) {
+  protected String parseReclipseQuery(final String queryText, final SessionContext ctx) {
     final ReclipseLexer lexer = new ReclipseLexer(new ANTLRInputStream(queryText));
     final CommonTokenStream tokens = new CommonTokenStream(lexer);
     final ReclipseParser parser = new ReclipseParser(tokens);
@@ -52,7 +61,7 @@ public class QueryController {
     parser.removeErrorListeners();
     parser.addErrorListener(new ReclipseErrorListener(rtv));
     final ParseTree tree = parser.query();
-    final ReclipseVisitorMySQLImpl visitor = new ReclipseVisitorMySQLImpl();
+    final ReclipseVisitorMySQLImpl visitor = new ReclipseVisitorMySQLImpl(ctx);
     return visitor.visit(tree);
   }
 

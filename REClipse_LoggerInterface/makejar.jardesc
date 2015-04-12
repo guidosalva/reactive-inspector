@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <jardesc>
-    <jar path="REClipse_ZestViewer/lib/reclipse-loggerinterface.jar"/>
+    <jar path="REClipse_TreeViewer/lib/reclipse-loggerinterface.jar"/>
     <options buildIfNeeded="true" compress="true" descriptionLocation="/REClipse_LoggerInterface/makejar.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="true" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
     <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
     <selectedProjects/>
@@ -10,7 +10,7 @@
             <packagesToUnSeal/>
         </sealing>
     </manifest>
-    <selectedElements exportClassFiles="true" exportJavaFiles="false" exportOutputFolder="false">
+    <selectedElements exportClassFiles="true" exportJavaFiles="true" exportOutputFolder="false">
         <file path="/REClipse_LoggerInterface/.classpath"/>
         <javaElement handleIdentifier="=REClipse_LoggerInterface/src"/>
     </selectedElements>

@@ -1,10 +1,10 @@
 package de.tu_darmstadt.stg.reclipse.graphview.provider;
 
-import de.tu_darmstadt.stg.reclipse.graphview.model.DatabaseHelper;
 import de.tu_darmstadt.stg.reclipse.graphview.model.ReactiveVariableNameComparator;
+import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableVertex;
-import de.tu_darmstadt.stg.reclipse.graphview.view.graph.Stylesheet;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.Heatmap;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.Stylesheet;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
 import java.util.ArrayList;
@@ -16,11 +16,13 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * 
+ *
  * @author Sebastian Ruhleder <sebastian.ruhleder@gmail.com>
- * 
+ *
  */
 public class ContentModel {
+
+  private final SessionContext ctx;
 
   private int pointInTime = 0;
 
@@ -30,7 +32,8 @@ public class ContentModel {
 
   private final Map<String, Boolean> state;
 
-  public ContentModel() {
+  public ContentModel(final SessionContext ctx) {
+    this.ctx = ctx;
     this.library = new HashMap<>();
     this.state = new HashMap<>();
     this.highlightChange = false;
@@ -38,7 +41,7 @@ public class ContentModel {
 
   /**
    * Updates the point in time.
-   * 
+   *
    * @param newPointInTime
    *          The new point in time.
    */
@@ -52,19 +55,19 @@ public class ContentModel {
   }
 
   /**
-   * 
+   *
    * @return A set of reactive variable vertices.
    */
   public List<ReactiveVariableVertex> getVertices() {
     final List<ReactiveVariableVertex> vertices = new ArrayList<>();
 
     // make sure that point in time is in a valid range
-    if (pointInTime < 1 || pointInTime > DatabaseHelper.getLastPointInTime()) {
+    if (pointInTime < 1 || pointInTime > ctx.getDbHelper().getLastPointInTime()) {
       return vertices;
     }
 
     // get reactive variables
-    final ArrayList<ReactiveVariable> reVars = DatabaseHelper.getReVars(pointInTime);
+    final ArrayList<ReactiveVariable> reVars = ctx.getDbHelper().getReVars(pointInTime);
 
     // sort by name
     Collections.sort(reVars, new ReactiveVariableNameComparator());
@@ -109,15 +112,15 @@ public class ContentModel {
     final List<ReactiveVariableVertex> vertices = new ArrayList<>();
 
     // make sure that point in time is in a valid range
-    if (pointInTime < 1 || pointInTime > DatabaseHelper.getLastPointInTime()) {
+    if (pointInTime < 1 || pointInTime > ctx.getDbHelper().getLastPointInTime()) {
       return vertices;
     }
 
     // get reactive variables
-    final ArrayList<ReactiveVariable> reVars = DatabaseHelper.getReVars(pointInTime);
+    final ArrayList<ReactiveVariable> reVars = ctx.getDbHelper().getReVars(pointInTime);
 
     // generate heatmap based on point in time
-    final Map<String, String> heatmap = Heatmap.generateHeatmap(pointInTime);
+    final Map<String, String> heatmap = Heatmap.generateHeatmap(pointInTime, ctx);
 
     for (final ReactiveVariable reVar : reVars) {
       // get color for reactive variable
@@ -136,19 +139,19 @@ public class ContentModel {
   }
 
   /**
-   * 
+   *
    * @return A map containing information about the edges between vertices.
    */
   public Map<UUID, Set<UUID>> getEdges() {
     final Map<UUID, Set<UUID>> edges = new HashMap<>();
 
     // make sure that point in time is in a valid range
-    if (pointInTime < 1 || pointInTime > DatabaseHelper.getLastPointInTime()) {
+    if (pointInTime < 1 || pointInTime > ctx.getDbHelper().getLastPointInTime()) {
       return edges;
     }
 
     // get reactive variables
-    final ArrayList<ReactiveVariable> reVars = DatabaseHelper.getReVars(pointInTime);
+    final ArrayList<ReactiveVariable> reVars = ctx.getDbHelper().getReVars(pointInTime);
 
     for (final ReactiveVariable reVar : reVars) {
       // return empty map if not all reactive variables are created yet
