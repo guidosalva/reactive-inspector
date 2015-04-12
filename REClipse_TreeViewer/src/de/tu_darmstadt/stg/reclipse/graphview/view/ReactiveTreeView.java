@@ -3,6 +3,7 @@ package de.tu_darmstadt.stg.reclipse.graphview.view;
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
 import de.tu_darmstadt.stg.reclipse.graphview.action.Relayout;
 import de.tu_darmstadt.stg.reclipse.graphview.action.SaveGraphAsImage;
+import de.tu_darmstadt.stg.reclipse.graphview.action.SessionSelect;
 import de.tu_darmstadt.stg.reclipse.graphview.action.ShowHeatmap;
 import de.tu_darmstadt.stg.reclipse.graphview.action.ZoomIn;
 import de.tu_darmstadt.stg.reclipse.graphview.action.ZoomOut;
@@ -129,6 +130,7 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
 
   private void createActions() {
     // creating the toolbar entries
+    getViewSite().getActionBars().getToolBarManager().add(new SessionSelect());
     getViewSite().getActionBars().getToolBarManager().add(new Relayout(graph));
     getViewSite().getActionBars().getToolBarManager().add(new SaveGraphAsImage(getSite(), graph));
     getViewSite().getActionBars().getToolBarManager().add(new ZoomIn(graph));
@@ -138,6 +140,8 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
 
   @Override
   public void onSessionSelected(final SessionContext ctx) {
+    showGraph = true;
+
     ctx.getDbHelper().addDepGraphHistoryChangedListener(ReactiveTreeView.this);
 
     Display.getDefault().syncExec(new Runnable() {

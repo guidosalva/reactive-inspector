@@ -1,10 +1,13 @@
 package de.tu_darmstadt.stg.reclipse.graphview.model;
 
-import java.util.HashMap;
+import de.tu_darmstadt.stg.reclipse.graphview.Activator;
+
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -17,7 +20,7 @@ public class SessionManager {
 
   private static final SessionManager INSTANCE = new SessionManager();
 
-  private final Map<UUID, SessionContext> sessions = new HashMap<>();
+  private final Map<UUID, SessionContext> sessions = new ConcurrentHashMap<>();
   private final List<ISessionSelectionListener> listeners = new CopyOnWriteArrayList<>();
 
   private Optional<SessionContext> selectedSession = Optional.empty();
@@ -46,6 +49,20 @@ public class SessionManager {
     selectedSession = Optional.of(ctx);
 
     fireSessionSelected(ctx);
+  }
+
+  public synchronized void selectSession(final UUID sessionId) {
+    if (!sessions.containsKey(sessionId)) {
+      Activator.logMessage("unable to select session: no session wit id " + sessionId); //$NON-NLS-1$
+      return;
+    }
+
+    final SessionContext ctx = sessions.get(sessionId);
+    selectSession(ctx);
+  }
+
+  public Collection<SessionContext> getSessions() {
+    return sessions.values();
   }
 
   public Optional<SessionContext> getSelectedSession() {
@@ -79,5 +96,4 @@ public class SessionManager {
   public static SessionManager getInstance() {
     return INSTANCE;
   }
-
 }
