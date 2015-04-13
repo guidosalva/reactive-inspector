@@ -106,8 +106,8 @@ class REScalaLogger extends Logging {
   
   private def checkSecurityManager() {
     if (System.getSecurityManager() == null) {
-      val policyFileName = getClass().getProtectionDomain().getCodeSource().getLocation().getFile() + "../etc/client.policy"
-      System.setProperty("java.security.policy", policyFileName)
+      val policyFile = getClass().getResource("/client.policy")
+      System.setProperty("java.security.policy", policyFile.toString())
       System.setProperty("java.rmi.server.hostname", "127.0.0.1")
       System.setSecurityManager(new RMISecurityManager())
     }
