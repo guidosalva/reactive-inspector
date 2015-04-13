@@ -13,6 +13,7 @@ import de.tu_darmstadt.stg.reclipse.graphview.model.ISessionSelectionListener;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionManager;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.CustomGraph;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.GraphContainer;
 
 import java.util.Optional;
 
@@ -46,7 +47,7 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
    */
   public static final String ID = "de.tu-darmstadt.stg.reclipse.graphview.ReactiveTreeView"; //$NON-NLS-1$
 
-  protected CustomGraph graph;
+  private final GraphContainer graphContainer = new GraphContainer();
 
   protected Composite graphParent;
   protected Scale slider;
@@ -131,11 +132,11 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
   private void createActions() {
     // creating the toolbar entries
     getViewSite().getActionBars().getToolBarManager().add(new SessionSelect());
-    getViewSite().getActionBars().getToolBarManager().add(new Relayout(graph));
-    getViewSite().getActionBars().getToolBarManager().add(new SaveGraphAsImage(getSite(), graph));
-    getViewSite().getActionBars().getToolBarManager().add(new ZoomIn(graph));
-    getViewSite().getActionBars().getToolBarManager().add(new ZoomOut(graph));
-    getViewSite().getActionBars().getToolBarManager().add(new ShowHeatmap(graph));
+    getViewSite().getActionBars().getToolBarManager().add(new Relayout(graphContainer));
+    getViewSite().getActionBars().getToolBarManager().add(new SaveGraphAsImage(getSite(), graphContainer));
+    getViewSite().getActionBars().getToolBarManager().add(new ZoomIn(graphContainer));
+    getViewSite().getActionBars().getToolBarManager().add(new ZoomOut(graphContainer));
+    getViewSite().getActionBars().getToolBarManager().add(new ShowHeatmap(graphContainer));
   }
 
   @Override
@@ -148,7 +149,8 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
 
       @Override
       public void run() {
-        graph = new CustomGraph(graphParent, ctx);
+        final CustomGraph graph = new CustomGraph(graphParent, ctx);
+        graphContainer.setGraph(graph);
       }
     });
 
@@ -162,13 +164,13 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
   public void onSessionDeselected(final SessionContext ctx) {
     ctx.getDbHelper().removeDepGraphHistoryChangedListener(this);
 
-    if (graph != null) {
+    if (graphContainer.containsGraph()) {
       Display.getDefault().syncExec(new Runnable() {
 
         @Override
         public void run() {
-          graph.dispose();
-          graph = null;
+          graphContainer.getGraph().dispose();
+          graphContainer.setGraph(null);
         }
       });
     }
@@ -211,12 +213,12 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
 
       @Override
       public void run() {
-        if (graph == null) {
+        if (!graphContainer.containsGraph()) {
           return;
         }
         // just give the point in time to the graph at which the user wants to
         // see the dependency graph
-        graph.setPointInTime(getCurrentSliderValue(), highlightChange);
+        graphContainer.getGraph().setPointInTime(getCurrentSliderValue(), highlightChange);
         if (slider != null && !slider.isDisposed()) {
           slider.redraw();
         }

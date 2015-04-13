@@ -3,6 +3,7 @@ package de.tu_darmstadt.stg.reclipse.graphview.action;
 import de.tu_darmstadt.stg.reclipse.graphview.Activator;
 import de.tu_darmstadt.stg.reclipse.graphview.Images;
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.GraphContainer;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -18,7 +19,6 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.ui.IWorkbenchPartSite;
 
 import com.mxgraph.util.mxCellRenderer;
-import com.mxgraph.view.mxGraph;
 
 /**
  * Provides the action to save the current graph as an image.
@@ -26,11 +26,11 @@ import com.mxgraph.view.mxGraph;
 public class SaveGraphAsImage extends Action {
 
   private final IWorkbenchPartSite site;
-  private final mxGraph graph;
+  private final GraphContainer graphContainer;
 
-  public SaveGraphAsImage(final IWorkbenchPartSite ps, final mxGraph g) {
-    site = ps;
-    graph = g;
+  public SaveGraphAsImage(final IWorkbenchPartSite ps, final GraphContainer graphContainer) {
+    this.site = ps;
+    this.graphContainer = graphContainer;
 
     setText(Texts.SaveImage_Text);
     setToolTipText(Texts.SaveImage_Tooltip);
@@ -44,8 +44,8 @@ public class SaveGraphAsImage extends Action {
       "*.png" //$NON-NLS-1$
     });
     final String path = dialog.open();
-    if (path != null) {
-      final BufferedImage image = mxCellRenderer.createBufferedImage(graph, null, 1, Color.WHITE, true, null);
+    if (graphContainer.containsGraph()) {
+      final BufferedImage image = mxCellRenderer.createBufferedImage(graphContainer.getGraph(), null, 1, Color.WHITE, true, null);
       try {
         ImageIO.write(image, "PNG", new File(path)); //$NON-NLS-1$
       }
