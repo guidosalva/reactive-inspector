@@ -75,6 +75,10 @@ public class SessionManager {
     }
   }
 
+  public void removeSessionSelectionListener(final ISessionSelectionListener listener) {
+    listeners.remove(listener);
+  }
+
   private void fireSessionSelected(final SessionContext ctx) {
     for (final ISessionSelectionListener listener : listeners) {
       listener.onSessionSelected(ctx);

@@ -47,7 +47,7 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
    */
   public static final String ID = "de.tu-darmstadt.stg.reclipse.graphview.ReactiveTreeView"; //$NON-NLS-1$
 
-  private final GraphContainer graphContainer = new GraphContainer();
+  protected final GraphContainer graphContainer = new GraphContainer();
 
   protected Composite graphParent;
   protected Scale slider;
@@ -299,5 +299,19 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
 
   public void showError(final String title, final String message) {
     MessageDialog.openError(getSite().getShell(), title, message);
+  }
+
+  @Override
+  public void dispose() {
+    final SessionManager sessionManager = SessionManager.getInstance();
+    final Optional<SessionContext> ctx = sessionManager.getSelectedSession();
+
+    sessionManager.removeSessionSelectionListener(this);
+
+    if (ctx.isPresent()) {
+      ctx.get().getDbHelper().removeDepGraphHistoryChangedListener(this);
+    }
+
+    super.dispose();
   }
 }
