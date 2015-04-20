@@ -33,6 +33,8 @@ public class DatabaseHelper {
 
   public static final String REACTIVE_VARIABLES_TABLE_NAME = "revars"; //$NON-NLS-1$
 
+  private static final Gson GSON = new Gson();
+
   private static final String JDBC_CLASS_NAME = "org.sqlite.JDBC"; //$NON-NLS-1$
   private static final String JDBC_USER = ""; //$NON-NLS-1$
   private static final String JDBC_PASSWORD = ""; //$NON-NLS-1$
@@ -40,8 +42,8 @@ public class DatabaseHelper {
   private static List<String> databaseSetupQueries = Arrays
           .asList("DROP TABLE IF EXISTS " + REACTIVE_VARIABLES_TABLE_NAME, //$NON-NLS-1$
                   "CREATE TABLE IF NOT EXISTS " //$NON-NLS-1$
-                  + REACTIVE_VARIABLES_TABLE_NAME
-                  + " (\"auto_increment_id\" integer NOT NULL PRIMARY KEY AUTOINCREMENT, \"id\" char(36) NOT NULL, \"reactiveVariableType\" integer NOT NULL, \"pointInTime\" integer DEFAULT NULL, \"dependencyGraphHistoryType\" integer NOT NULL, \"additionalInformation\" varchar(200) DEFAULT NULL, \"active\" integer DEFAULT NULL, \"typeSimple\" varchar(200) DEFAULT NULL, \"typeFull\" varchar(200) DEFAULT NULL, \"name\" varchar(200) DEFAULT NULL, \"additionalKeys\" varchar(500) DEFAULT NULL, \"valueString\" varchar(200) DEFAULT NULL, \"connectedWith\" varchar(500) DEFAULT NULL)"); //$NON-NLS-1$
+                          + REACTIVE_VARIABLES_TABLE_NAME
+                          + " (\"auto_increment_id\" integer NOT NULL PRIMARY KEY AUTOINCREMENT, \"id\" char(36) NOT NULL, \"reactiveVariableType\" integer NOT NULL, \"pointInTime\" integer DEFAULT NULL, \"dependencyGraphHistoryType\" integer NOT NULL, \"additionalInformation\" varchar(200) DEFAULT NULL, \"active\" integer DEFAULT NULL, \"typeSimple\" varchar(200) DEFAULT NULL, \"typeFull\" varchar(200) DEFAULT NULL, \"name\" varchar(200) DEFAULT NULL, \"additionalKeys\" varchar(500) DEFAULT NULL, \"valueString\" varchar(200) DEFAULT NULL, \"connectedWith\" varchar(500) DEFAULT NULL)"); //$NON-NLS-1$
 
   private final List<DependencyGraphHistoryChangedListener> listeners = new CopyOnWriteArrayList<>();
   private final File dbFile;
@@ -190,7 +192,6 @@ public class DatabaseHelper {
   public int addReVar(final ReactiveVariable r) {
     final String addQuery = "INSERT INTO " + REACTIVE_VARIABLES_TABLE_NAME + " (id, reactiveVariableType, pointInTime, dependencyGraphHistoryType, additionalInformation, active, typeSimple, typeFull, name, additionalKeys, valueString , connectedWith) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; //$NON-NLS-1$ //$NON-NLS-2$
     try (final PreparedStatement addStmt = connection.prepareStatement(addQuery)) {
-      final Gson gson = new Gson();
       addStmt.setString(1, r.getId().toString());
       addStmt.setInt(2, r.getReactiveVariableType().ordinal());
       addStmt.setInt(3, r.getPointInTime());
@@ -200,9 +201,9 @@ public class DatabaseHelper {
       addStmt.setString(7, r.getTypeSimple());
       addStmt.setString(8, r.getTypeFull());
       addStmt.setString(9, r.getName());
-      addStmt.setString(10, gson.toJson(r.getAdditionalKeys()));
+      addStmt.setString(10, GSON.toJson(r.getAdditionalKeys()));
       addStmt.setString(11, r.getValueString());
-      addStmt.setString(12, gson.toJson(r.getConnectedWith()));
+      addStmt.setString(12, GSON.toJson(r.getConnectedWith()));
       final int result = addStmt.executeUpdate();
       fireChangedEvent();
       return result;
