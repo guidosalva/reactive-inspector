@@ -8,6 +8,7 @@ import de.tu_darmstadt.stg.reclipse.logger.BreakpointInformation;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 import de.tu_darmstadt.stg.reclipse.logger.RemoteLoggerInterface;
 
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashSet;
@@ -32,9 +33,41 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
 
   private static final long serialVersionUID = -3766741205877371369L;
 
+  private static final IEventLogger DUMMY_LOGGER = new IEventLogger() {
+
+    @Override
+    public void logNodeValueSet(final ReactiveVariable r) {
+    }
+
+    @Override
+    public void logNodeEvaluationStarted(final ReactiveVariable r) {
+    }
+
+    @Override
+    public void logNodeEvaluationEndedWithException(final ReactiveVariable r, final Exception e) {
+    }
+
+    @Override
+    public void logNodeEvaluationEnded(final ReactiveVariable r) {
+    }
+
+    @Override
+    public void logNodeCreated(final ReactiveVariable r) {
+    }
+
+    @Override
+    public void logNodeAttached(final ReactiveVariable r, final UUID dependentId) {
+    }
+
+    @Override
+    public void close() {
+    }
+  };
+
   private final SessionContext ctx;
   private final PersistenceFacade persistence;
   private final EsperAdapter esperAdapter;
+  private final IEventLogger logger;
   private final HashSet<IJavaLineBreakpoint> breakpoints = new HashSet<>();
 
   private final BreakpointInformationStore store;
@@ -45,8 +78,23 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
     this.ctx = ctx;
     this.persistence = ctx.getPersistence();
     this.esperAdapter = ctx.getEsperAdapter();
+    this.logger = createLogger(ctx);
 
     store = BreakpointInformationStore.getInstance();
+  }
+
+  private IEventLogger createLogger(final SessionContext ctx) {
+    if (!ctx.getConfiguration().isLogging()) {
+      return DUMMY_LOGGER;
+    }
+
+    try {
+      return new SerializationEventLogger(ctx);
+    }
+    catch (final IOException e) {
+      Activator.log(e);
+      return DUMMY_LOGGER;
+    }
   }
 
   private void createBreakpoint(final BreakpointInformation breakpointInformation) {
@@ -75,6 +123,7 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
   public void logNodeCreated(final ReactiveVariable r, final BreakpointInformation breakpointInformation) throws RemoteException {
     store.put(r, breakpointInformation);
 
+    logger.logNodeCreated(r);
     persistence.logNodeCreated(r);
 
     sendEventToEsper(r, breakpointInformation);
@@ -84,6 +133,7 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
   public void logNodeAttached(final ReactiveVariable r, final UUID dependentId, final BreakpointInformation breakpointInformation) throws RemoteException {
     store.put(r, breakpointInformation);
 
+    logger.logNodeAttached(r, dependentId);
     persistence.logNodeAttached(r, dependentId);
 
     sendEventToEsper(r, breakpointInformation);
@@ -93,6 +143,7 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
   public void logNodeEvaluationEnded(final ReactiveVariable r, final BreakpointInformation breakpointInformation) throws RemoteException {
     store.put(r, breakpointInformation);
 
+    logger.logNodeEvaluationEnded(r);
     persistence.logNodeEvaluationEnded(r);
 
     sendEventToEsper(r, breakpointInformation);
@@ -102,6 +153,7 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
   public void logNodeEvaluationEndedWithException(final ReactiveVariable r, final Exception e, final BreakpointInformation breakpointInformation) throws RemoteException {
     store.put(r, breakpointInformation);
 
+    logger.logNodeEvaluationEndedWithException(r, e);
     persistence.logNodeEvaluationEndedWithException(r, e);
 
     sendEventToEsper(r, breakpointInformation);
@@ -111,6 +163,7 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
   public void logNodeEvaluationStarted(final ReactiveVariable r, final BreakpointInformation breakpointInformation) throws RemoteException {
     store.put(r, breakpointInformation);
 
+    logger.logNodeEvaluationStarted(r);
     persistence.logNodeEvaluationStarted(r);
 
     sendEventToEsper(r, breakpointInformation);
@@ -120,6 +173,7 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
   public void logNodeValueSet(final ReactiveVariable r, final BreakpointInformation breakpointInformation) throws RemoteException {
     store.put(r, breakpointInformation);
 
+    logger.logNodeValueSet(r);
     persistence.logNodeValueSet(r);
 
     sendEventToEsper(r, breakpointInformation);
@@ -151,8 +205,8 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
   }
 
   /**
-   * Clears the database and the automatically created breakpoints for the next
-   * debugging session.
+   * Clears the the automatically created breakpoints for the next debugging
+   * session.
    */
   public void debuggingTerminated() {
     for (final IJavaLineBreakpoint breakpoint : breakpoints) {
@@ -163,6 +217,8 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
         Activator.log(e);
       }
     }
+
+    logger.close();
   }
 
 }

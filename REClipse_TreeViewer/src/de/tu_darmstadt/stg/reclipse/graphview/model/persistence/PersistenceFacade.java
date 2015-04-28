@@ -1,11 +1,12 @@
 package de.tu_darmstadt.stg.reclipse.graphview.model.persistence;
 
+import de.tu_darmstadt.stg.reclipse.graphview.model.ILoggerInterface;
 import de.tu_darmstadt.stg.reclipse.graphview.model.ISessionConfiguration;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
 import java.util.UUID;
 
-public class PersistenceFacade {
+public class PersistenceFacade implements ILoggerInterface {
 
   private final UUID sessionId;
   private final ISessionConfiguration configuration;
@@ -19,6 +20,7 @@ public class PersistenceFacade {
     this.esperAdapter = new EsperAdapter(dbHelper);
   }
 
+  @Override
   public void logNodeCreated(final ReactiveVariable r) {
     dbHelper.copyLastReVars(r.getDependencyGraphHistoryType());
     final int lastPointInTime = dbHelper.getLastPointInTime();
@@ -26,6 +28,7 @@ public class PersistenceFacade {
     dbHelper.addReVar(r);
   }
 
+  @Override
   public void logNodeAttached(final ReactiveVariable r, final UUID dependentId) {
     dbHelper.copyLastReVars(r.getDependencyGraphHistoryType());
     final int lastPointInTime = dbHelper.getLastPointInTime();
@@ -37,6 +40,7 @@ public class PersistenceFacade {
     dbHelper.addReVar(r);
   }
 
+  @Override
   public void logNodeEvaluationEnded(final ReactiveVariable r) {
     dbHelper.copyLastReVars(r.getDependencyGraphHistoryType());
     final int lastPointInTime = dbHelper.getLastPointInTime();
@@ -45,6 +49,7 @@ public class PersistenceFacade {
     dbHelper.addReVar(r);
   }
 
+  @Override
   public void logNodeEvaluationEndedWithException(final ReactiveVariable r, final Exception e) {
     dbHelper.copyLastReVars(r.getDependencyGraphHistoryType());
     final int lastPointInTime = dbHelper.getLastPointInTime();
@@ -54,6 +59,7 @@ public class PersistenceFacade {
     dbHelper.addReVar(r);
   }
 
+  @Override
   public void logNodeEvaluationStarted(final ReactiveVariable r) {
     dbHelper.copyLastReVars(r.getDependencyGraphHistoryType());
     final int lastPointInTime = dbHelper.getLastPointInTime();
@@ -62,6 +68,7 @@ public class PersistenceFacade {
     dbHelper.addReVar(r);
   }
 
+  @Override
   public void logNodeValueSet(final ReactiveVariable r) {
     dbHelper.copyLastReVars(r.getDependencyGraphHistoryType());
     final int lastPointInTime = dbHelper.getLastPointInTime();

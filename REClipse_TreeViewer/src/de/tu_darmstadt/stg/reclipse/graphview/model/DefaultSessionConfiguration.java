@@ -10,4 +10,9 @@ public class DefaultSessionConfiguration implements ISessionConfiguration {
   public IPath getDatabaseFilesDir() {
     return Activator.getDefault().getStateLocation().append("sessions"); //$NON-NLS-1$
   }
+
+  @Override
+  public boolean isLogging() {
+    return true; // TODO add plug-in property for logging
+  }
 }

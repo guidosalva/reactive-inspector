@@ -49,4 +49,8 @@ public class SessionContext {
   public EsperAdapter getEsperAdapter() {
     return persistence.getEsperAdapter();
   }
+
+  public ISessionConfiguration getConfiguration() {
+    return configuration;
+  }
 }
