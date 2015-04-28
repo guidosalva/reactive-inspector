@@ -1,9 +1,9 @@
 package de.tu_darmstadt.stg.reclipse.graphview.view.statistics;
 
-import de.tu_darmstadt.stg.reclipse.graphview.model.DependencyGraphHistoryChangedListener;
 import de.tu_darmstadt.stg.reclipse.graphview.model.ISessionSelectionListener;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionManager;
+import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.DependencyGraphHistoryChangedListener;
 
 import java.awt.Frame;
 import java.util.Optional;

@@ -23,13 +23,15 @@ public class SessionManager {
   private final Map<UUID, SessionContext> sessions = new ConcurrentHashMap<>();
   private final List<ISessionSelectionListener> listeners = new CopyOnWriteArrayList<>();
 
+  private ISessionConfiguration configuration = new DefaultSessionConfiguration();
+
   private Optional<SessionContext> selectedSession = Optional.empty();
 
   private SessionManager() {
   }
 
   public synchronized SessionContext createSession() {
-    final SessionContext ctx = new SessionContext();
+    final SessionContext ctx = new SessionContext(configuration);
     sessions.put(ctx.getId(), ctx);
     selectSession(ctx);
     return ctx;
@@ -95,6 +97,14 @@ public class SessionManager {
     for (final SessionContext ctx : sessions.values()) {
       ctx.close();
     }
+  }
+
+  public ISessionConfiguration getConfiguration() {
+    return configuration;
+  }
+
+  public void setConfiguration(final ISessionConfiguration configuration) {
+    this.configuration = configuration;
   }
 
   public static SessionManager getInstance() {

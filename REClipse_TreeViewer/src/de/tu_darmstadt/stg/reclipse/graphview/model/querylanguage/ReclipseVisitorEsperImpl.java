@@ -1,6 +1,6 @@
 package de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage;
 
-import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
+import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.DatabaseHelper;
 import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseParser.DependencyCreatedContext;
 import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseParser.EvaluationExceptionContext;
 import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseParser.EvaluationYieldedContext;
@@ -15,10 +15,10 @@ import org.antlr.v4.runtime.misc.NotNull;
  */
 public class ReclipseVisitorEsperImpl extends ReclipseBaseVisitor<String> {
 
-  private final SessionContext sessionContext;
+  private final DatabaseHelper dbHelper;
 
-  public ReclipseVisitorEsperImpl(final SessionContext sessionContext) {
-    this.sessionContext = sessionContext;
+  public ReclipseVisitorEsperImpl(final DatabaseHelper dbHelper) {
+    this.dbHelper = dbHelper;
   }
 
   @Override
@@ -49,8 +49,8 @@ public class ReclipseVisitorEsperImpl extends ReclipseBaseVisitor<String> {
   public String visitDependencyCreated(final DependencyCreatedContext ctx) {
     final String nodeName1 = ctx.NODE_NAME(0).getText();
     final String nodeName2 = ctx.NODE_NAME(1).getText();
-    final UUID nodeId1 = sessionContext.getDbHelper().getIdFromName(nodeName1);
-    final UUID nodeId2 = sessionContext.getDbHelper().getIdFromName(nodeName2);
+    final UUID nodeId1 = dbHelper.getIdFromName(nodeName1);
+    final UUID nodeId2 = dbHelper.getIdFromName(nodeName2);
     if (nodeId1 == null || nodeId2 == null) {
       return "false"; //$NON-NLS-1$
     }

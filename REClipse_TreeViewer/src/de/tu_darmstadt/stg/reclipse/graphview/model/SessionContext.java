@@ -1,5 +1,9 @@
 package de.tu_darmstadt.stg.reclipse.graphview.model;
 
+import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.DatabaseHelper;
+import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.EsperAdapter;
+import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.PersistenceFacade;
+
 import java.util.Date;
 import java.util.UUID;
 
@@ -10,18 +14,20 @@ import java.util.UUID;
  */
 public class SessionContext {
 
+  private final ISessionConfiguration configuration;
   private final UUID id;
   private final Date created;
-  private final DatabaseHelper dbHelper;
+  private final PersistenceFacade persistence;
 
-  protected SessionContext() {
+  protected SessionContext(final ISessionConfiguration configuration) {
+    this.configuration = configuration;
     this.id = UUID.randomUUID();
     this.created = new Date();
-    this.dbHelper = new DatabaseHelper(id.toString());
+    this.persistence = new PersistenceFacade(id, configuration);
   }
 
   public void close() {
-    dbHelper.close();
+    persistence.close();
   }
 
   public UUID getId() {
@@ -33,6 +39,14 @@ public class SessionContext {
   }
 
   public DatabaseHelper getDbHelper() {
-    return dbHelper;
+    return persistence.getDbHelper();
+  }
+
+  public PersistenceFacade getPersistence() {
+    return persistence;
+  }
+
+  public EsperAdapter getEsperAdapter() {
+    return persistence.getEsperAdapter();
   }
 }

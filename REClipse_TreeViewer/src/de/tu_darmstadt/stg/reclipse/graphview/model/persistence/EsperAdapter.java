@@ -1,25 +1,18 @@
-package de.tu_darmstadt.stg.reclipse.graphview.model;
+package de.tu_darmstadt.stg.reclipse.graphview.model.persistence;
 
-import de.tu_darmstadt.stg.reclipse.graphview.Activator;
-import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseErrorListener;
 import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseLexer;
 import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseParser;
 import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseVisitorEsperImpl;
-import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveTreeView;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
-import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.PlatformUI;
 import org.sqlite.SQLiteConfig;
 
 import com.espertech.esper.client.Configuration;
@@ -27,6 +20,7 @@ import com.espertech.esper.client.ConfigurationDBRef;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.EventBean;
 
 /**
  * Class which handles all the stuff related to Esper. It receives
@@ -36,30 +30,25 @@ import com.espertech.esper.client.EPStatement;
  */
 public class EsperAdapter {
 
-  private final SessionContext ctx;
+  private final DatabaseHelper dbHelper;
   private EPServiceProvider provider;
-  protected ReactiveTreeView rtv;
   protected String queryText;
-  private EPStatement stmt;
+  private EPStatement liveStmt;
   private int pointInTime = -1;
 
-  public EsperAdapter(final SessionContext ctx) {
-    this.ctx = ctx;
+  public EsperAdapter(final DatabaseHelper dbHelper) {
+    this.dbHelper = dbHelper;
     setupEsper();
   }
 
   private void setupEsper() {
     final Configuration engineConfig = new Configuration();
-    final URL url = FileLocator.find(Platform.getBundle(Activator.PLUGIN_ID), new Path("etc/esper.cfg.xml"), null); //$NON-NLS-1$
-    engineConfig.configure(url);
     engineConfig.addDatabaseReference("reclipseDBRead", createEsperDBRef()); //$NON-NLS-1$
     engineConfig.addEventType("ReactiveVariable", ReactiveVariable.class); //$NON-NLS-1$
     provider = EPServiceProviderManager.getDefaultProvider(engineConfig);
-    updateEPLStatement();
   }
 
   private ConfigurationDBRef createEsperDBRef() {
-    final DatabaseHelper dbHelper = ctx.getDbHelper();
     final String className = dbHelper.getJdbcClassName();
     final String url = dbHelper.getJdbcUrl();
     final String user = dbHelper.getJdbcUser();
@@ -78,23 +67,6 @@ public class EsperAdapter {
     return dbRef;
   }
 
-  protected ReactiveTreeView getReactiveTreeView() {
-    if (rtv == null) {
-      Display.getDefault().syncExec(new Runnable() {
-
-        @Override
-        public void run() {
-          final IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-          final IViewPart view = page.findView(ReactiveTreeView.ID);
-          if (view instanceof ReactiveTreeView) {
-            rtv = (ReactiveTreeView) view;
-          }
-        }
-      });
-    }
-    return rtv;
-  }
-
   private void updateEPLStatement() {
     final String oldQueryText = queryText;
     updateQueryText();
@@ -104,8 +76,8 @@ public class EsperAdapter {
     }
     // if query text has been deleted, delete statement
     if (queryText.equals("")) { //$NON-NLS-1$
-      if (stmt != null) {
-        stmt.destroy();
+      if (liveStmt != null) {
+        liveStmt.destroy();
       }
       return;
     }
@@ -113,34 +85,30 @@ public class EsperAdapter {
     final String conditions = parseReclipseQuery();
     final String query = "select pointInTime from ReactiveVariable where " + conditions; //$NON-NLS-1$
     // delete the old statement
-    if (stmt != null) {
-      stmt.destroy();
+    if (liveStmt != null) {
+      liveStmt.destroy();
     }
-    stmt = provider.getEPAdministrator().createEPL(query);
-    stmt.setSubscriber(this);
+    liveStmt = provider.getEPAdministrator().createEPL(query);
+    liveStmt.setSubscriber(this);
   }
 
   private void updateQueryText() {
-    Display.getDefault().syncExec(new Runnable() {
-
-      @Override
-      public void run() {
-        if (getReactiveTreeView() != null) {
-          queryText = getReactiveTreeView().getQueryText();
-        }
-      }
-    });
+    // TODO update query text via method parameter
   }
 
   private String parseReclipseQuery() {
     final ReclipseLexer lexer = new ReclipseLexer(new ANTLRInputStream(queryText));
     final CommonTokenStream tokens = new CommonTokenStream(lexer);
     final ReclipseParser parser = new ReclipseParser(tokens);
+
     // redirect parsing errors to the RTV
     parser.removeErrorListeners();
-    parser.addErrorListener(new ReclipseErrorListener(getReactiveTreeView()));
+    // parser.addErrorListener(new
+    // ReclipseErrorListener(getReactiveTreeView()));
+    // TODO add listener for ui events
+
     final ParseTree tree = parser.query();
-    final ReclipseVisitorEsperImpl visitor = new ReclipseVisitorEsperImpl(ctx);
+    final ReclipseVisitorEsperImpl visitor = new ReclipseVisitorEsperImpl(dbHelper);
     return visitor.visit(tree);
   }
 
@@ -156,6 +124,32 @@ public class EsperAdapter {
     pointInTime = -1;
     updateEPLStatement();
     provider.getEPRuntime().sendEvent(r);
+  }
+
+  /**
+   * Executes a query against the current history and returns all matching
+   * points in time.
+   *
+   * @param conditions
+   *          the query conditions
+   * @return matching points in time
+   */
+  public List<Integer> executeQuery(final String conditions) {
+    final String mySqlQuery = "SELECT pointInTime FROM " + DatabaseHelper.REACTIVE_VARIABLES_TABLE_NAME + " WHERE " + conditions; //$NON-NLS-1$ //$NON-NLS-2$
+    final String esperQuery = "select pointInTime from sql:reclipseDBRead [\"" + mySqlQuery + "\"]"; //$NON-NLS-1$ //$NON-NLS-2$
+    final EPStatement stmt = provider.getEPAdministrator().createEPL(esperQuery);
+    final Iterator<EventBean> iter = stmt.iterator();
+    final List<Integer> result = new ArrayList<>();
+    while (iter.hasNext()) {
+      final EventBean evb = iter.next();
+      final Object underlying = evb.getUnderlying();
+      if (underlying instanceof HashMap<?, ?>) {
+        for (final Object i : ((HashMap<?, ?>) underlying).values()) {
+          result.add((int) i);
+        }
+      }
+    }
+    return result;
   }
 
   /**

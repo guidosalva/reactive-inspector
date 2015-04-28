@@ -1,9 +1,10 @@
 package de.tu_darmstadt.stg.reclipse.graphview.model;
 
 import de.tu_darmstadt.stg.reclipse.graphview.Activator;
+import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.EsperAdapter;
+import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.PersistenceFacade;
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveTreeView;
 import de.tu_darmstadt.stg.reclipse.logger.BreakpointInformation;
-import de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 import de.tu_darmstadt.stg.reclipse.logger.RemoteLoggerInterface;
 
@@ -32,9 +33,8 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
   private static final long serialVersionUID = -3766741205877371369L;
 
   private final SessionContext ctx;
-  private final DatabaseHelper dbHelper;
+  private final PersistenceFacade persistence;
   private final EsperAdapter esperAdapter;
-  private int currentPointInTime = 0;
   private final HashSet<IJavaLineBreakpoint> breakpoints = new HashSet<>();
 
   private final BreakpointInformationStore store;
@@ -43,8 +43,8 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
     super();
 
     this.ctx = ctx;
-    this.dbHelper = ctx.getDbHelper();
-    this.esperAdapter = new EsperAdapter(ctx);
+    this.persistence = ctx.getPersistence();
+    this.esperAdapter = ctx.getEsperAdapter();
 
     store = BreakpointInformationStore.getInstance();
   }
@@ -75,10 +75,8 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
   public void logNodeCreated(final ReactiveVariable r, final BreakpointInformation breakpointInformation) throws RemoteException {
     store.put(r, breakpointInformation);
 
-    dbHelper.copyLastReVars(r.getDependencyGraphHistoryType());
-    final int lastPointInTime = dbHelper.getLastPointInTime();
-    r.setPointInTime(lastPointInTime);
-    dbHelper.addReVar(r);
+    persistence.logNodeCreated(r);
+
     sendEventToEsper(r, breakpointInformation);
   }
 
@@ -86,14 +84,8 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
   public void logNodeAttached(final ReactiveVariable r, final UUID dependentId, final BreakpointInformation breakpointInformation) throws RemoteException {
     store.put(r, breakpointInformation);
 
-    dbHelper.copyLastReVars(r.getDependencyGraphHistoryType());
-    final int lastPointInTime = dbHelper.getLastPointInTime();
-    r.setPointInTime(lastPointInTime);
-    final String additionalInformation = r.getId() + "->" + dependentId; //$NON-NLS-1$
-    r.setAdditionalInformation(additionalInformation);
-    r.setConnectedWith(dependentId);
-    dbHelper.deleteReVar(r.getId(), lastPointInTime);
-    dbHelper.addReVar(r);
+    persistence.logNodeAttached(r, dependentId);
+
     sendEventToEsper(r, breakpointInformation);
   }
 
@@ -101,11 +93,8 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
   public void logNodeEvaluationEnded(final ReactiveVariable r, final BreakpointInformation breakpointInformation) throws RemoteException {
     store.put(r, breakpointInformation);
 
-    dbHelper.copyLastReVars(r.getDependencyGraphHistoryType());
-    final int lastPointInTime = dbHelper.getLastPointInTime();
-    r.setPointInTime(lastPointInTime);
-    dbHelper.deleteReVar(r.getId(), lastPointInTime);
-    dbHelper.addReVar(r);
+    persistence.logNodeEvaluationEnded(r);
+
     sendEventToEsper(r, breakpointInformation);
   }
 
@@ -113,12 +102,8 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
   public void logNodeEvaluationEndedWithException(final ReactiveVariable r, final Exception e, final BreakpointInformation breakpointInformation) throws RemoteException {
     store.put(r, breakpointInformation);
 
-    dbHelper.copyLastReVars(r.getDependencyGraphHistoryType());
-    final int lastPointInTime = dbHelper.getLastPointInTime();
-    r.setPointInTime(lastPointInTime);
-    r.setAdditionalInformation(e.getMessage());
-    dbHelper.deleteReVar(r.getId(), lastPointInTime);
-    dbHelper.addReVar(r);
+    persistence.logNodeEvaluationEndedWithException(r, e);
+
     sendEventToEsper(r, breakpointInformation);
   }
 
@@ -126,11 +111,8 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
   public void logNodeEvaluationStarted(final ReactiveVariable r, final BreakpointInformation breakpointInformation) throws RemoteException {
     store.put(r, breakpointInformation);
 
-    dbHelper.copyLastReVars(r.getDependencyGraphHistoryType());
-    final int lastPointInTime = dbHelper.getLastPointInTime();
-    r.setPointInTime(lastPointInTime);
-    dbHelper.deleteReVar(r.getId(), lastPointInTime);
-    dbHelper.addReVar(r);
+    persistence.logNodeEvaluationStarted(r);
+
     sendEventToEsper(r, breakpointInformation);
   }
 
@@ -138,11 +120,8 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
   public void logNodeValueSet(final ReactiveVariable r, final BreakpointInformation breakpointInformation) throws RemoteException {
     store.put(r, breakpointInformation);
 
-    dbHelper.copyLastReVars(r.getDependencyGraphHistoryType());
-    final int lastPointInTime = dbHelper.getLastPointInTime();
-    r.setPointInTime(lastPointInTime);
-    dbHelper.deleteReVar(r.getId(), lastPointInTime);
-    dbHelper.addReVar(r);
+    persistence.logNodeValueSet(r);
+
     sendEventToEsper(r, breakpointInformation);
   }
 
@@ -169,33 +148,6 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
         rtv.jumpToPointInTime(pointInTime);
       }
     });
-  }
-
-  private int getCurrentPointInTime() {
-    Display.getDefault().syncExec(new Runnable() {
-
-      @Override
-      public void run() {
-        final IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-        final IViewPart view = page.findView(ReactiveTreeView.ID);
-        if (!(view instanceof ReactiveTreeView)) {
-          return;
-        }
-        final ReactiveTreeView rtv = (ReactiveTreeView) view;
-        currentPointInTime = rtv.getCurrentSliderValue();
-      }
-    });
-    return currentPointInTime;
-  }
-
-  public boolean isNodeConnectionCurrentlyActive(final UUID srcId, final UUID destId) {
-    final int pointInTime = getCurrentPointInTime();
-    return dbHelper.isNodeConnectionActive(pointInTime, srcId, destId);
-  }
-
-  public DependencyGraphHistoryType getCurrentDependencyGraphHistoryType() {
-    final int pointInTime = getCurrentPointInTime();
-    return dbHelper.getDependencyGraphHistoryType(pointInTime);
   }
 
   /**

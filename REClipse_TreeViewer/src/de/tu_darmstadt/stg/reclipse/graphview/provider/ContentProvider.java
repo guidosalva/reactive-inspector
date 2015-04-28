@@ -1,7 +1,7 @@
 package de.tu_darmstadt.stg.reclipse.graphview.provider;
 
-import de.tu_darmstadt.stg.reclipse.graphview.model.DatabaseHelper;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
+import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.DatabaseHelper;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
 import java.util.ArrayList;

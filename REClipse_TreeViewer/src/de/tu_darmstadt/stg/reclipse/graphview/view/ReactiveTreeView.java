@@ -8,10 +8,10 @@ import de.tu_darmstadt.stg.reclipse.graphview.action.ShowHeatmap;
 import de.tu_darmstadt.stg.reclipse.graphview.action.ZoomIn;
 import de.tu_darmstadt.stg.reclipse.graphview.action.ZoomOut;
 import de.tu_darmstadt.stg.reclipse.graphview.controller.QueryController;
-import de.tu_darmstadt.stg.reclipse.graphview.model.DependencyGraphHistoryChangedListener;
 import de.tu_darmstadt.stg.reclipse.graphview.model.ISessionSelectionListener;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionManager;
+import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.DependencyGraphHistoryChangedListener;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.CustomGraph;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.GraphContainer;
 

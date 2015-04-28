@@ -1,7 +1,6 @@
 package de.tu_darmstadt.stg.reclipse.graphview.controller;
 
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
-import de.tu_darmstadt.stg.reclipse.graphview.model.QueryExecutor;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionManager;
 import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseErrorListener;
@@ -10,7 +9,7 @@ import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseParser
 import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseVisitorMySQLImpl;
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveTreeView;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
@@ -26,7 +25,7 @@ import org.eclipse.swt.events.SelectionEvent;
 public class QueryController {
 
   protected final ReactiveTreeView rtv;
-  protected ArrayList<Integer> matches;
+  protected List<Integer> matches;
 
   public QueryController(final ReactiveTreeView reactiveTreeView) {
     rtv = reactiveTreeView;
@@ -43,7 +42,7 @@ public class QueryController {
       }
 
       final String conditions = parseReclipseQuery(rtv.getQueryText(), ctx.get());
-      matches = QueryExecutor.executeQuery(conditions);
+      matches = ctx.get().getEsperAdapter().executeQuery(conditions);
       if (matches != null && matches.size() > 0) {
         rtv.jumpToPointInTime(matches.get(0));
       }
