@@ -15,7 +15,9 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -30,14 +32,16 @@ public class DatabaseHelper {
   private static final String JDBC_PASSWORD = ""; //$NON-NLS-1$
 
   private static List<String> databaseSetupQueries = Arrays
-          .asList("CREATE TABLE variable (idVariable  INTEGER NOT NULL PRIMARY KEY, variableId varchar(36) NOT NULL, variableName varchar(200), reactiveType integer(10), typeSimple varchar(200), typeFull varchar(200))", //$NON-NLS-1$
-                  "CREATE TABLE variable_status (idVariableStatus  INTEGER NOT NULL PRIMARY KEY, idVariable integer(10) NOT NULL, active tinyint(1) NOT NULL, valueString varchar(200))", //$NON-NLS-1$
+          .asList("CREATE TABLE variable (idVariable  INTEGER NOT NULL PRIMARY KEY, variableId varchar(36) NOT NULL, variableName varchar(200), reactiveType integer(10), typeSimple varchar(200), typeFull varchar(200), idVariableStatusActive integer(10))", //$NON-NLS-1$
+                  "CREATE TABLE variable_status (idVariableStatus  INTEGER NOT NULL PRIMARY KEY, idVariable integer(10) NOT NULL, valueString varchar(200))", //$NON-NLS-1$
                   "CREATE TABLE event (pointInTime  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, type integer(10) NOT NULL, idVariable integer(10) NOT NULL, dependentVariable integer(10), exception varchar(200))", //$NON-NLS-1$
                   "CREATE TABLE xref_event_status (pointInTime integer(10) NOT NULL, idVariableStatus integer(10) NOT NULL, PRIMARY KEY (pointInTime, idVariableStatus))", //$NON-NLS-1$
                   "CREATE TABLE variable_dependency (idVariableStatus integer(10) NOT NULL, dependentVariable integer(10) NOT NULL)"); //$NON-NLS-1$
 
   private final List<DependencyGraphHistoryChangedListener> listeners = new CopyOnWriteArrayList<>();
   private final File dbFile;
+  private final Map<UUID, Integer> variableMap = new HashMap<>();
+  private final Map<Integer, Integer> variableStatusMap = new HashMap<>();
 
   private Connection connection;
 
@@ -110,13 +114,6 @@ public class DatabaseHelper {
     return lastPointInTime;
   }
 
-  /**
-   * Resets the last point in time for a new debugging session.
-   */
-  public void resetLastPointInTime() {
-    lastPointInTime = 0;
-  }
-
   private int getAutoIncrementKey(final Statement stmt) throws SQLException {
     try (final ResultSet rs = stmt.getGeneratedKeys()) {
       rs.next();
@@ -125,34 +122,21 @@ public class DatabaseHelper {
   }
 
   public int findVariableById(final UUID id) throws SQLException {
-    final String query = "SELECT idVariable FROM variable WHERE variableId = ?"; //$NON-NLS-1$
-
-    try (PreparedStatement stmt = connection.prepareStatement(query)) {
-      stmt.setString(1, id.toString());
-
-      try (ResultSet rs = stmt.executeQuery()) {
-        rs.next();
-        return rs.getInt(1);
-      }
+    if (!variableMap.containsKey(id)) {
+      // TODO throw checked persistence exception
+      throw new RuntimeException("unknown variable with id " + id);
     }
+
+    return variableMap.get(id);
   }
 
   public int findActiveVariableStatus(final int idVariable) throws SQLException {
-    final String query = "SELECT idVariableStatus FROM variable_status WHERE idVariable = ? AND active = 1"; //$NON-NLS-1$
-
-    try (PreparedStatement stmt = connection.prepareStatement(query)) {
-      stmt.setInt(1, idVariable);
-
-      try (ResultSet rs = stmt.executeQuery()) {
-        if (rs.next()) {
-          return rs.getInt(1);
-        }
-        else {
-          // TODO throw checked persistence exception
-          throw new RuntimeException("no active status for variable " + idVariable);
-        }
-      }
+    if (!variableStatusMap.containsKey(idVariable)) {
+      // TODO throw checked persistence exception
+      throw new RuntimeException("no active status for variable " + idVariable);
     }
+
+    return variableStatusMap.get(idVariable);
   }
 
   public int createVariable(final ReactiveVariable variable) throws SQLException {
@@ -166,32 +150,36 @@ public class DatabaseHelper {
       stmt.setString(5, variable.getTypeFull());
       stmt.executeUpdate();
 
-      return getAutoIncrementKey(stmt);
+      final int key = getAutoIncrementKey(stmt);
+      variableMap.put(variable.getId(), key);
+      return key;
     }
   }
 
   public int createVariableStatus(final ReactiveVariable variable, final int idVariable) throws SQLException {
-    final String insertStmt = "INSERT INTO variable_status (idVariable, active, valueString) VALUES (?, ? ,?)"; //$NON-NLS-1$
+    final String insertStmt = "INSERT INTO variable_status (idVariable, valueString) VALUES (?, ?)"; //$NON-NLS-1$
 
     try (PreparedStatement stmt = connection.prepareStatement(insertStmt)) {
       stmt.setInt(1, idVariable);
-      stmt.setInt(2, 1);
-      stmt.setString(3, variable.getValueString());
+      stmt.setString(2, variable.getValueString());
       stmt.executeUpdate();
 
-      return getAutoIncrementKey(stmt);
+      final int key = getAutoIncrementKey(stmt);
+      variableStatusMap.put(idVariable, key);
+      return key;
     }
   }
 
   public int createVariableStatus(final ReactiveVariable variable, final int idVariable, final int oldVariableStatus) throws SQLException {
-    final String updateStmt = "UPDATE variable_status SET active = 0 WHERE idVariable = ?"; //$NON-NLS-1$
+    final int id = createVariableStatus(variable, idVariable);
+
+    final String updateStmt = "UPDATE variable SET idVariableStatusActive = ? WHERE idVariable = ?"; //$NON-NLS-1$
 
     try (PreparedStatement stmt = connection.prepareStatement(updateStmt)) {
-      stmt.setInt(1, idVariable);
+      stmt.setInt(1, id);
+      stmt.setInt(2, idVariable);
       stmt.executeUpdate();
     }
-
-    final int id = createVariableStatus(variable, idVariable);
 
     final String copyStmt = "INSERT INTO variable_dependency (idVariableStatus, dependentVariable) SELECT ?, dependentVariable FROM variable_dependency WHERE idVariableStatus = ?"; //$NON-NLS-1$
 
