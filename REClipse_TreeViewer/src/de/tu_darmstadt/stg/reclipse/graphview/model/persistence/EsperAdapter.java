@@ -135,7 +135,7 @@ public class EsperAdapter {
    * @return matching points in time
    */
   public List<Integer> executeQuery(final String conditions) {
-    final String mySqlQuery = "SELECT pointInTime FROM " + DatabaseHelper.REACTIVE_VARIABLES_TABLE_NAME + " WHERE " + conditions; //$NON-NLS-1$ //$NON-NLS-2$
+    final String mySqlQuery = ""; // TODO create query for new schema
     final String esperQuery = "select pointInTime from sql:reclipseDBRead [\"" + mySqlQuery + "\"]"; //$NON-NLS-1$ //$NON-NLS-2$
     final EPStatement stmt = provider.getEPAdministrator().createEPL(esperQuery);
     final Iterator<EventBean> iter = stmt.iterator();
