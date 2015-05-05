@@ -62,18 +62,18 @@ public class ContentModel {
     final List<ReactiveVariableVertex> vertices = new ArrayList<>();
 
     // make sure that point in time is in a valid range
-    if (pointInTime < 1 || pointInTime > ctx.getDbHelper().getLastPointInTime()) {
+    if (pointInTime < 1 || pointInTime > ctx.getPersistence().getLastPointInTime()) {
       return vertices;
     }
 
     // get reactive variables
-    final ArrayList<ReactiveVariable> reVars = ctx.getDbHelper().getReVars(pointInTime);
+    final List<ReactiveVariable> reVars = ctx.getPersistence().getReVars(pointInTime);
 
     // sort by name
     Collections.sort(reVars, new ReactiveVariableNameComparator());
 
     // set flag if library is empty
-    final boolean emptyLibrary = library.size() == 0;
+    final boolean emptyLibrary = library.isEmpty();
 
     for (final ReactiveVariable reVar : reVars) {
       // return empty map if not all reactive variables are created yet
@@ -85,14 +85,11 @@ public class ContentModel {
       final String name = reVar.getName();
       final String value = reVar.getValueString();
 
-      // only update highlight status if a new variable has been added
-      if (library.size() < reVars.size()) {
-        if (library.containsKey(name)) {
-          state.put(name, !library.get(name).equals(value));
-        }
-        else {
-          state.put(name, !emptyLibrary);
-        }
+      if (library.containsKey(name)) {
+        state.put(name, !library.get(name).equals(value));
+      }
+      else {
+        state.put(name, !emptyLibrary);
       }
 
       // update value in library
@@ -112,12 +109,12 @@ public class ContentModel {
     final List<ReactiveVariableVertex> vertices = new ArrayList<>();
 
     // make sure that point in time is in a valid range
-    if (pointInTime < 1 || pointInTime > ctx.getDbHelper().getLastPointInTime()) {
+    if (pointInTime < 1 || pointInTime > ctx.getPersistence().getLastPointInTime()) {
       return vertices;
     }
 
     // get reactive variables
-    final ArrayList<ReactiveVariable> reVars = ctx.getDbHelper().getReVars(pointInTime);
+    final List<ReactiveVariable> reVars = ctx.getPersistence().getReVars(pointInTime);
 
     // generate heatmap based on point in time
     final Map<String, String> heatmap = Heatmap.generateHeatmap(pointInTime, ctx);
@@ -146,12 +143,12 @@ public class ContentModel {
     final Map<UUID, Set<UUID>> edges = new HashMap<>();
 
     // make sure that point in time is in a valid range
-    if (pointInTime < 1 || pointInTime > ctx.getDbHelper().getLastPointInTime()) {
+    if (pointInTime < 1 || pointInTime > ctx.getPersistence().getLastPointInTime()) {
       return edges;
     }
 
     // get reactive variables
-    final ArrayList<ReactiveVariable> reVars = ctx.getDbHelper().getReVars(pointInTime);
+    final List<ReactiveVariable> reVars = ctx.getPersistence().getReVars(pointInTime);
 
     for (final ReactiveVariable reVar : reVars) {
       // return empty map if not all reactive variables are created yet

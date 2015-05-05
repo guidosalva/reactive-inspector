@@ -5,6 +5,7 @@ import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.DatabaseHelper;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -35,10 +36,10 @@ public class ContentProvider implements IGraphEntityRelationshipContentProvider 
     if (inputElement instanceof Integer) {
       lastPointInTime = (Integer) inputElement;
       // make sure that point in time is in a valid range
-      if (lastPointInTime < 1 || lastPointInTime > ctx.getDbHelper().getLastPointInTime()) {
+      if (lastPointInTime < 1 || lastPointInTime > ctx.getPersistence().getLastPointInTime()) {
         return elements.toArray();
       }
-      final ArrayList<ReactiveVariable> reVars = ctx.getDbHelper().getReVars(lastPointInTime);
+      final List<ReactiveVariable> reVars = ctx.getPersistence().getReVars(lastPointInTime);
 
       for (final ReactiveVariable reVar : reVars) {
         // not all reactive variables are created yet, so show nothing for the
@@ -55,7 +56,7 @@ public class ContentProvider implements IGraphEntityRelationshipContentProvider 
 
   @Override
   public Object[] getRelationships(final Object src, final Object dest) {
-    final ArrayList<Dependency> l = new ArrayList<>();
+    final List<Dependency> l = new ArrayList<>();
     if (src instanceof ReactiveVariable && dest instanceof ReactiveVariable) {
       final ReactiveVariable source = (ReactiveVariable) src;
       final ReactiveVariable destination = (ReactiveVariable) dest;

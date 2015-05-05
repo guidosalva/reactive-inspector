@@ -6,7 +6,7 @@ import de.tu_darmstadt.stg.reclipse.graphview.model.SessionManager;
 import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseErrorListener;
 import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseLexer;
 import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseParser;
-import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseVisitorMySQLImpl;
+import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseVisitorSQLImpl;
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveTreeView;
 
 import java.util.List;
@@ -41,8 +41,8 @@ public class QueryController {
         return;
       }
 
-      final String conditions = parseReclipseQuery(rtv.getQueryText(), ctx.get());
-      matches = ctx.get().getEsperAdapter().executeQuery(conditions);
+      final String sqlQuery = parseReclipseQuery(rtv.getQueryText());
+      matches = ctx.get().getEsperAdapter().executeQuery(sqlQuery);
       if (matches != null && matches.size() > 0) {
         rtv.jumpToPointInTime(matches.get(0));
       }
@@ -52,7 +52,7 @@ public class QueryController {
     }
   }
 
-  protected String parseReclipseQuery(final String queryText, final SessionContext ctx) {
+  protected String parseReclipseQuery(final String queryText) {
     final ReclipseLexer lexer = new ReclipseLexer(new ANTLRInputStream(queryText));
     final CommonTokenStream tokens = new CommonTokenStream(lexer);
     final ReclipseParser parser = new ReclipseParser(tokens);
@@ -60,7 +60,7 @@ public class QueryController {
     parser.removeErrorListeners();
     parser.addErrorListener(new ReclipseErrorListener(rtv));
     final ParseTree tree = parser.query();
-    final ReclipseVisitorMySQLImpl visitor = new ReclipseVisitorMySQLImpl(ctx);
+    final ReclipseVisitorSQLImpl visitor = new ReclipseVisitorSQLImpl();
     return visitor.visit(tree);
   }
 

@@ -134,9 +134,8 @@ public class EsperAdapter {
    *          the query conditions
    * @return matching points in time
    */
-  public List<Integer> executeQuery(final String conditions) {
-    final String mySqlQuery = ""; // TODO create query for new schema
-    final String esperQuery = "select pointInTime from sql:reclipseDBRead [\"" + mySqlQuery + "\"]"; //$NON-NLS-1$ //$NON-NLS-2$
+  public List<Integer> executeQuery(final String sqlQuery) {
+    final String esperQuery = "select pointInTime from sql:reclipseDBRead [\"" + sqlQuery + "\"]"; //$NON-NLS-1$ //$NON-NLS-2$
     final EPStatement stmt = provider.getEPAdministrator().createEPL(esperQuery);
     final Iterator<EventBean> iter = stmt.iterator();
     final List<Integer> result = new ArrayList<>();

@@ -5,7 +5,8 @@ import de.tu_darmstadt.stg.reclipse.graphview.model.ILoggerInterface;
 import de.tu_darmstadt.stg.reclipse.graphview.model.ISessionConfiguration;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
-import java.sql.SQLException;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 public class PersistenceFacade implements ILoggerInterface {
@@ -33,7 +34,7 @@ public class PersistenceFacade implements ILoggerInterface {
 
       r.setPointInTime(pointInTime);
     }
-    catch (final SQLException e) {
+    catch (final PersistenceException e) {
       Activator.log(e);
     }
   }
@@ -56,7 +57,7 @@ public class PersistenceFacade implements ILoggerInterface {
       r.setAdditionalInformation(additionalInformation);
       r.setConnectedWith(dependentId);
     }
-    catch (final SQLException e) {
+    catch (final PersistenceException e) {
       Activator.log(e);
     }
 
@@ -74,7 +75,7 @@ public class PersistenceFacade implements ILoggerInterface {
 
       r.setPointInTime(pointInTime);
     }
-    catch (final SQLException e) {
+    catch (final PersistenceException e) {
       Activator.log(e);
     }
   }
@@ -84,7 +85,7 @@ public class PersistenceFacade implements ILoggerInterface {
     try {
       final int idVariable = dbHelper.findVariableById(r.getId());
       final int oldVariableStatus = dbHelper.findActiveVariableStatus(idVariable);
-      // TODO store exception
+
       final int idVariableStatus = dbHelper.createVariableStatus(r, idVariable, oldVariableStatus);
       final int pointInTime = dbHelper.createEvent(r, idVariable, null);
 
@@ -92,7 +93,7 @@ public class PersistenceFacade implements ILoggerInterface {
 
       r.setPointInTime(pointInTime);
     }
-    catch (final SQLException e) {
+    catch (final PersistenceException e) {
       Activator.log(e);
     }
   }
@@ -109,7 +110,7 @@ public class PersistenceFacade implements ILoggerInterface {
 
       r.setPointInTime(pointInTime);
     }
-    catch (final SQLException e) {
+    catch (final PersistenceException e) {
       Activator.log(e);
     }
   }
@@ -126,9 +127,23 @@ public class PersistenceFacade implements ILoggerInterface {
 
       r.setPointInTime(pointInTime);
     }
-    catch (final SQLException e) {
+    catch (final PersistenceException e) {
       Activator.log(e);
     }
+  }
+
+  public List<ReactiveVariable> getReVars(final int pointInTime) {
+    try {
+      return dbHelper.getReVars(pointInTime);
+    }
+    catch (final PersistenceException e) {
+      Activator.log(e);
+      return Collections.emptyList();
+    }
+  }
+
+  public int getLastPointInTime() {
+    return dbHelper.getLastPointInTime();
   }
 
   public void close() {

@@ -81,8 +81,8 @@ public class Charts {
   private void populateTypeDataset() {
     final Map<String, Integer> types = new HashMap<>();
 
-    final int lastPointInTime = ctx.getDbHelper().getLastPointInTime();
-    final List<ReactiveVariable> reVars = ctx.getDbHelper().getReVars(lastPointInTime);
+    final int lastPointInTime = ctx.getPersistence().getLastPointInTime();
+    final List<ReactiveVariable> reVars = ctx.getPersistence().getReVars(lastPointInTime);
 
     for (final ReactiveVariable reVar : reVars) {
       final String type = reVar.getTypeSimple();
@@ -101,7 +101,7 @@ public class Charts {
   }
 
   private void populateChangeDataset() {
-    final int lastPointInTime = ctx.getDbHelper().getLastPointInTime();
+    final int lastPointInTime = ctx.getPersistence().getLastPointInTime();
 
     final Map<String, Integer> changemap = Heatmap.calculateChangeMap(lastPointInTime, ctx);
 

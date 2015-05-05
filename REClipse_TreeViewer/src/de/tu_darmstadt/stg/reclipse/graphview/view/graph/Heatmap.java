@@ -66,7 +66,7 @@ public class Heatmap {
     // iterate through points in time
     for (int pointInTime = 0; pointInTime < lastPointInTime; pointInTime++) {
       // get reactive variables for current point in time
-      final List<ReactiveVariable> currentReVars = ctx.getDbHelper().getReVars(pointInTime);
+      final List<ReactiveVariable> currentReVars = ctx.getPersistence().getReVars(pointInTime);
 
       for (final ReactiveVariable reVar : currentReVars) {
         if (reVar == null) {
