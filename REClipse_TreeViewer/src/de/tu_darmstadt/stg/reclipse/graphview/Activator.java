@@ -29,7 +29,7 @@ public class Activator extends AbstractUIPlugin {
   // The shared instance
   private static Activator plugin;
 
-  // plugin specific error code for log
+  // plugin specific codes for log
   private static final int ERROR = 99;
 
   private final String propertiesFileName;
@@ -124,6 +124,16 @@ public class Activator extends AbstractUIPlugin {
    */
   public static void logMessage(final String message, final Throwable throwable) {
     log(new Status(IStatus.ERROR, PLUGIN_ID, ERROR, message, throwable));
+  }
+
+  /**
+   * Logs an info message.
+   *
+   * @param message
+   *          the message template
+   */
+  public static void logInfo(final String message) {
+    log(new Status(IStatus.INFO, PLUGIN_ID, IStatus.OK, message, null));
   }
 
   /**

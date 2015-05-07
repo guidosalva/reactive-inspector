@@ -179,6 +179,11 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
     sendEventToEsper(r, breakpointInformation);
   }
 
+  @Override
+  public void endSession() throws RemoteException {
+    debuggingTerminated();
+  }
+
   private void sendEventToEsper(final ReactiveVariable r, final BreakpointInformation breakpointInformation) {
     esperAdapter.sendEvent(r);
     final int pointInTime = esperAdapter.getPointInTime();
@@ -220,5 +225,4 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
 
     logger.close();
   }
-
 }

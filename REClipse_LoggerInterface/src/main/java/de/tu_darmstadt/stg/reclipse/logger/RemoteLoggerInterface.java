@@ -22,5 +22,6 @@ public interface RemoteLoggerInterface extends Remote {
   public void logNodeEvaluationStarted(final ReactiveVariable r, final BreakpointInformation breakpointInformation) throws RemoteException;
 
   public void logNodeValueSet(final ReactiveVariable r, final BreakpointInformation breakpointInformation) throws RemoteException;
-
+  
+  public void endSession() throws RemoteException;
 }

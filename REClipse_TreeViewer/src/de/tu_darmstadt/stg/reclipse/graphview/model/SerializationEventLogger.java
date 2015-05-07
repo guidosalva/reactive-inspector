@@ -20,6 +20,7 @@ import java.util.UUID;
 public class SerializationEventLogger implements IEventLogger {
 
   private final ObjectOutputStream out;
+  private int eventCount = 0;
 
   public SerializationEventLogger(final SessionContext ctx) throws IOException {
     this.out = createOutputStream(ctx);
@@ -44,35 +45,43 @@ public class SerializationEventLogger implements IEventLogger {
   @Override
   public void logNodeCreated(final ReactiveVariable r) {
     log(new NodeCreated(r));
+    eventCount++;
   }
 
   @Override
   public void logNodeAttached(final ReactiveVariable r, final UUID dependentId) {
     log(new NodeAttached(r, dependentId));
+    eventCount++;
   }
 
   @Override
   public void logNodeEvaluationEnded(final ReactiveVariable r) {
     log(new NodeEvaluationEnded(r));
+    eventCount++;
   }
 
   @Override
   public void logNodeEvaluationEndedWithException(final ReactiveVariable r, final Exception e) {
     log(new NodeEvaluationEndedWithException(r, e));
+    eventCount++;
   }
 
   @Override
   public void logNodeEvaluationStarted(final ReactiveVariable r) {
     log(new NodeEvaluationStarted(r));
+    eventCount++;
   }
 
   @Override
   public void logNodeValueSet(final ReactiveVariable r) {
     log(new NodeValueSet(r));
+    eventCount++;
   }
 
   @Override
   public void close() {
+    Activator.logInfo(eventCount + " events written"); //$NON-NLS-1$
+
     if (out != null) {
       try {
         out.close();

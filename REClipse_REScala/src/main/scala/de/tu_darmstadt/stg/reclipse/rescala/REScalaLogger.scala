@@ -101,7 +101,13 @@ class REScalaLogger extends Logging {
     
     val registry = LocateRegistry.getRegistry()
     val session = registry.lookup(RMIConstants.REMOTE_REFERENCE_NAME).asInstanceOf[RemoteSessionInterface]
-    session.startSession()
+    val logger = session.startSession()
+    
+    sys.addShutdownHook {
+     logger.endSession()
+    }
+    
+    logger
   }
   
   private def checkSecurityManager() {
