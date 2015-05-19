@@ -42,19 +42,14 @@ public class DatabasePerformanceTestCase extends PerformanceTestCase {
   private void emulateDebuggingSession(int i) throws Exception {
     System.out.println("Run " + i);
 
-    NodeEventIterator iter = new NodeEventIterator("profiling-example");
+    NodeEventIterator iter = new NodeEventIterator("profiling1k");
 
     SessionContext context = SessionManager.getInstance().createSession();
 
-    int count = 0;
-
     while (iter.hasNext()) {
-      count++;
       NodeEvent event = iter.next();
       dispatchEvent(event, context.getPersistence());
     }
-
-    System.out.println("processed " + count + " events");
 
     context.close();
     iter.close();
