@@ -1,6 +1,5 @@
 package de.tu_darmstadt.stg.reclipse.graphview.model;
 
-import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.DatabaseHelper;
 import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.EsperAdapter;
 import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.PersistenceFacade;
 
@@ -36,10 +35,6 @@ public class SessionContext {
 
   public Date getCreated() {
     return created;
-  }
-
-  public DatabaseHelper getDbHelper() {
-    return persistence.getDbHelper();
   }
 
   public PersistenceFacade getPersistence() {

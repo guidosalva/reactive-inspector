@@ -13,10 +13,8 @@ import java.util.List;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.sqlite.SQLiteConfig;
 
 import com.espertech.esper.client.Configuration;
-import com.espertech.esper.client.ConfigurationDBRef;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
@@ -30,41 +28,19 @@ import com.espertech.esper.client.EventBean;
  */
 public class EsperAdapter {
 
-  private final DatabaseHelper dbHelper;
   private EPServiceProvider provider;
   protected String queryText;
   private EPStatement liveStmt;
   private int pointInTime = -1;
 
-  public EsperAdapter(final DatabaseHelper dbHelper) {
-    this.dbHelper = dbHelper;
+  public EsperAdapter() {
     setupEsper();
   }
 
   private void setupEsper() {
     final Configuration engineConfig = new Configuration();
-    engineConfig.addDatabaseReference("reclipseDBRead", createEsperDBRef()); //$NON-NLS-1$
-    engineConfig.addEventType("ReactiveVariable", ReactiveVariable.class); //$NON-NLS-1$
+    // TODO add Esper configuration for Neo4j
     provider = EPServiceProviderManager.getDefaultProvider(engineConfig);
-  }
-
-  private ConfigurationDBRef createEsperDBRef() {
-    final String className = dbHelper.getJdbcClassName();
-    final String url = dbHelper.getJdbcUrl();
-    final String user = dbHelper.getJdbcUser();
-    final String password = dbHelper.getJdbcPassword();
-
-    final ConfigurationDBRef dbRef = new ConfigurationDBRef();
-
-    final SQLiteConfig sqLiteConfig = new SQLiteConfig();
-    sqLiteConfig.setReadOnly(true);
-
-    dbRef.setDriverManagerConnection(className, url, user, password, sqLiteConfig.toProperties());
-    dbRef.setConnectionAutoCommit(true);
-    dbRef.setConnectionReadOnly(true);
-    dbRef.setConnectionCatalog(""); //$NON-NLS-1$
-
-    return dbRef;
   }
 
   private void updateEPLStatement() {
@@ -108,7 +84,7 @@ public class EsperAdapter {
     // TODO add listener for ui events
 
     final ParseTree tree = parser.query();
-    final ReclipseVisitorEsperImpl visitor = new ReclipseVisitorEsperImpl(dbHelper);
+    final ReclipseVisitorEsperImpl visitor = new ReclipseVisitorEsperImpl();
     return visitor.visit(tree);
   }
 

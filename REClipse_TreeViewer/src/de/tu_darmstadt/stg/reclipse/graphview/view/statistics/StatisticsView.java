@@ -59,12 +59,12 @@ public class StatisticsView extends ViewPart implements DependencyGraphHistoryCh
 
     frame.add(chartsPanel);
 
-    ctx.getDbHelper().addDepGraphHistoryChangedListener(this);
+    // ctx.getDbHelper().addDepGraphHistoryChangedListener(this);
   }
 
   @Override
   public void onSessionDeselected(final SessionContext ctx) {
-    ctx.getDbHelper().removeDepGraphHistoryChangedListener(this);
+    // ctx.getDbHelper().removeDepGraphHistoryChangedListener(this);
     frame.removeAll();
     pieCharts = null;
   }

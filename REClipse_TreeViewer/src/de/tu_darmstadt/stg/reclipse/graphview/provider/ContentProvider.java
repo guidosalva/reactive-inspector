@@ -1,7 +1,6 @@
 package de.tu_darmstadt.stg.reclipse.graphview.provider;
 
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
-import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.DatabaseHelper;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
 import java.util.ArrayList;
@@ -13,8 +12,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.zest.core.viewers.IGraphEntityRelationshipContentProvider;
 
 /**
- * Provides the nodes and relationships for the graph by reading them from the
- * database via the {@link DatabaseHelper}.
+ * Provides the nodes and relationships for the graph.
  */
 public class ContentProvider implements IGraphEntityRelationshipContentProvider {
 

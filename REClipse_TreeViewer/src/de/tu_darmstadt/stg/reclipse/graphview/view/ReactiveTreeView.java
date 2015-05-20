@@ -143,7 +143,7 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
   public void onSessionSelected(final SessionContext ctx) {
     showGraph = true;
 
-    ctx.getDbHelper().addDepGraphHistoryChangedListener(ReactiveTreeView.this);
+    // ctx.getDbHelper().addDepGraphHistoryChangedListener(ReactiveTreeView.this);
 
     Display.getDefault().syncExec(new Runnable() {
 
@@ -162,7 +162,7 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
 
   @Override
   public void onSessionDeselected(final SessionContext ctx) {
-    ctx.getDbHelper().removeDepGraphHistoryChangedListener(this);
+    // ctx.getDbHelper().removeDepGraphHistoryChangedListener(this);
 
     if (graphContainer.containsGraph()) {
       Display.getDefault().syncExec(new Runnable() {
@@ -243,7 +243,7 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
           return;
         }
 
-        slider.setMaximum(ctx.get().getDbHelper().getLastPointInTime());
+        slider.setMaximum(ctx.get().getPersistence().getLastPointInTime());
         if (!manualMode) {
           slider.setSelection(slider.getMaximum());
           // notify the listeners, because this is not done automatically when
@@ -309,7 +309,7 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
     sessionManager.removeSessionSelectionListener(this);
 
     if (ctx.isPresent()) {
-      ctx.get().getDbHelper().removeDepGraphHistoryChangedListener(this);
+      // ctx.get().getDbHelper().removeDepGraphHistoryChangedListener(this);
     }
 
     super.dispose();
