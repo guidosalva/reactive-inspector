@@ -1,6 +1,8 @@
 package de.tu_darmstadt.stg.reclipse.graphview.model;
 
+import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.Random;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -14,9 +16,14 @@ import de.tu_darmstadt.stg.reclipse.graphview.model.SerializationEventLogger.Nod
 import de.tu_darmstadt.stg.reclipse.graphview.model.SerializationEventLogger.NodeEvent;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SerializationEventLogger.NodeValueSet;
 
-public class DatabasePerformanceTestCase extends PerformanceTestCase {
 
-  public void testInsertPerformance() throws Exception {
+public class ReadPerformanceTestCase extends PerformanceTestCase {
+  
+  private static final String SESSION = "profiling1k";
+  private static final int ITERATIONS = 10;
+  private static final int READS = 1000;
+  
+  public void testReadPerformance() throws Exception {
     SessionManager.getInstance().setConfiguration(new ISessionConfiguration() {
 
       @Override
@@ -29,20 +36,22 @@ public class DatabasePerformanceTestCase extends PerformanceTestCase {
         return false;
       }
     });
+    
+    SessionContext ctx = prepareSession();
 
     for (int i = 0; i < 10; i++) {
       startMeasuring();
-      emulateDebuggingSession(i + 1);
+      emulateReads(i + 1, ctx);
       stopMeasuring();
     }
     commitMeasurements();
     assertPerformance();
   }
 
-  private void emulateDebuggingSession(int i) throws Exception {
-    System.out.println("Run " + i);
-
-    NodeEventIterator iter = new NodeEventIterator("profiling1k");
+  private SessionContext prepareSession() throws IOException {
+    System.out.println("load data...");
+    
+    NodeEventIterator iter = new NodeEventIterator(SESSION);
 
     SessionContext context = SessionManager.getInstance().createSession();
 
@@ -51,10 +60,13 @@ public class DatabasePerformanceTestCase extends PerformanceTestCase {
       dispatchEvent(event, context.getPersistence());
     }
 
-    context.close();
     iter.close();
+    
+    System.out.println("loading data finished");
+    
+    return context;
   }
-
+  
   private void dispatchEvent(NodeEvent nodeEvent, ILoggerInterface logger) throws RemoteException {
     if (nodeEvent instanceof NodeCreated) {
       NodeCreated event = (NodeCreated) nodeEvent;
@@ -80,6 +92,19 @@ public class DatabasePerformanceTestCase extends PerformanceTestCase {
       NodeValueSet event = (NodeValueSet) nodeEvent;
       logger.logNodeValueSet(event.getReactiveVariable());
     }
+  }
+  
+  private void emulateReads(int run, SessionContext ctx) {
+    System.out.println("Run " + run);
+    
+    Random rand = new Random();
+    int last = ctx.getPersistence().getLastPointInTime();
+    
+    for(int i = 0; i < READS; i++) {
+      int point = rand.nextInt(last) + 1;
+      ctx.getPersistence().getDependencyGraph(point);
+    }
+    
   }
 
 }

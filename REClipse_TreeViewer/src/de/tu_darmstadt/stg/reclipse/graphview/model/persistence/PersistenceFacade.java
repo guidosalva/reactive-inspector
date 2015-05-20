@@ -142,6 +142,10 @@ public class PersistenceFacade implements ILoggerInterface {
     }
   }
 
+  public DependencyGraph getDependencyGraph(final int pointInTime) {
+    return null; // TODO create dependency graph
+  }
+
   public int getLastPointInTime() {
     return dbHelper.getLastPointInTime();
   }
