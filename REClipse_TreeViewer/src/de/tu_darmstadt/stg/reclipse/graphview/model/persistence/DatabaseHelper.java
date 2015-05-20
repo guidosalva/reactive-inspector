@@ -2,6 +2,7 @@ package de.tu_darmstadt.stg.reclipse.graphview.model.persistence;
 
 import de.tu_darmstadt.stg.reclipse.graphview.Activator;
 import de.tu_darmstadt.stg.reclipse.graphview.model.ISessionConfiguration;
+import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.DependencyGraph.Vertex;
 import de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariableType;
@@ -284,7 +285,7 @@ public class DatabaseHelper {
     lastPointInTime = pointInTime;
   }
 
-  public List<ReactiveVariable> getReVars(final int pointInTime) throws PersistenceException {
+  public List<ReactiveVariable> getReVarsWithDependencies(final int pointInTime) throws PersistenceException {
     final List<ReactiveVariable> variables = new ArrayList<>();
 
     final String query = "SELECT variable.variableId AS variableId, variable.variableName AS variableName, variable.reactiveType AS reactiveType, event.type AS historyType, variable.typeSimple AS typeSimple, variable.typeFull AS typeFull, variable_status.valueString AS valueString, variable_status.idVariableStatus AS idVariableStatus FROM variable JOIN variable_status ON variable_status.idVariable = variable.idVariable JOIN xref_event_status ON xref_event_status.idVariableStatus = variable_status.idVariableStatus JOIN event ON event.pointInTime = xref_event_status.pointInTime WHERE event.pointInTime = ?"; //$NON-NLS-1$
@@ -294,16 +295,13 @@ public class DatabaseHelper {
       try (final ResultSet rs = stmt.executeQuery()) {
         while (rs.next()) {
           final ReactiveVariable r = createReVar(rs, pointInTime);
+          updateConnectedWith(r, rs);
           variables.add(r);
         }
       }
     }
     catch (final SQLException e) {
       throw new PersistenceException();
-    }
-
-    for (final ReactiveVariable r : variables) {
-
     }
 
     return variables;
@@ -324,7 +322,11 @@ public class DatabaseHelper {
     // keys field
     r.setValueString(rs.getString("valueString")); //$NON-NLS-1$
 
-    final int idVariableStatus = rs.getInt("idVariableStatus");
+    return r;
+  }
+
+  private void updateConnectedWith(final ReactiveVariable r, final ResultSet rs) throws SQLException {
+    final int idVariableStatus = rs.getInt("idVariableStatus"); //$NON-NLS-1$
 
     final String query = "SELECT variableId FROM variable JOIN variable_dependency ON variable_dependency.dependentVariable = variable.idVariable WHERE variable_dependency.idVariableStatus = ?"; //$NON-NLS-1$
     try (final PreparedStatement stmt = connection.prepareStatement(query)) {
@@ -337,8 +339,6 @@ public class DatabaseHelper {
         }
       }
     }
-
-    return r;
   }
 
   public UUID getIdFromName(final String name) {
@@ -357,6 +357,76 @@ public class DatabaseHelper {
       Activator.log(e);
     }
     return null;
+  }
+
+  public DependencyGraph getDependencyGraph(final int pointInTime) throws PersistenceException {
+    final Map<Integer, Vertex> verticesByVariable = new HashMap<>();
+    final Map<Integer, Vertex> verticesByStatus = new HashMap<>();
+
+    final String query = "SELECT variable.idVariable AS idVariable, variable.variableId AS variableId, variable.variableName AS variableName, variable.reactiveType AS reactiveType, event.type AS historyType, variable.typeSimple AS typeSimple, variable.typeFull AS typeFull, variable_status.valueString AS valueString, variable_status.idVariableStatus AS idVariableStatus FROM variable JOIN variable_status ON variable_status.idVariable = variable.idVariable JOIN xref_event_status ON xref_event_status.idVariableStatus = variable_status.idVariableStatus JOIN event ON event.pointInTime = xref_event_status.pointInTime WHERE event.pointInTime = ?"; //$NON-NLS-1$
+    try (final PreparedStatement stmt = connection.prepareStatement(query)) {
+      stmt.setInt(1, pointInTime);
+
+      try (final ResultSet rs = stmt.executeQuery()) {
+        while (rs.next()) {
+          final int idVariable = rs.getInt("idVariable"); //$NON-NLS-1$
+          final int idVariableStatus = rs.getInt("idVariableStatus"); //$NON-NLS-1$
+          final ReactiveVariable r = createReVar(rs, pointInTime);
+          final Vertex vertex = new Vertex(r.getId(), r);
+          verticesByVariable.put(idVariable, vertex);
+          verticesByStatus.put(idVariableStatus, vertex);
+        }
+      }
+    }
+    catch (final SQLException e) {
+      throw new PersistenceException();
+    }
+
+    final String dependencyQuery = "SELECT variable_dependency.idVariableStatus AS idVariableStatus, variable_dependency.dependentVariable AS dependentVariable FROM variable_dependency JOIN xref_event_status ON xref_event_status.idVariableStatus = variable_dependency.idVariableStatus WHERE xref_event_status.pointInTime = ?"; //$NON-NLS-1$
+    try (final PreparedStatement stmt = connection.prepareStatement(dependencyQuery)) {
+      stmt.setInt(1, pointInTime);
+
+      try (final ResultSet rs = stmt.executeQuery()) {
+        while (rs.next()) {
+          final int idStatus = rs.getInt("idVariableStatus"); //$NON-NLS-1$
+          final int dependentId = rs.getInt("dependentVariable"); //$NON-NLS-1$
+
+          final Vertex v = verticesByStatus.get(idStatus);
+          final Vertex dependent = verticesByVariable.get(dependentId);
+          v.addConnectedVertex(dependent);
+        }
+      }
+    }
+    catch (final SQLException e) {
+      throw new PersistenceException(e);
+    }
+
+    final DependencyGraph dependencyGraph = new DependencyGraph();
+    dependencyGraph.addVertices(verticesByVariable.values());
+    return dependencyGraph;
+  }
+
+  public Map<Integer, Vertex> createVertexMap(final int pointInTime) throws PersistenceException {
+    final Map<Integer, Vertex> variables = new HashMap<>();
+
+    final String query = "SELECT variable.idVariable AS idVariable, variable.variableId AS variableId, variable.variableName AS variableName, variable.reactiveType AS reactiveType, event.type AS historyType, variable.typeSimple AS typeSimple, variable.typeFull AS typeFull, variable_status.valueString AS valueString, variable_status.idVariableStatus AS idVariableStatus FROM variable JOIN variable_status ON variable_status.idVariable = variable.idVariable JOIN xref_event_status ON xref_event_status.idVariableStatus = variable_status.idVariableStatus JOIN event ON event.pointInTime = xref_event_status.pointInTime WHERE event.pointInTime = ?"; //$NON-NLS-1$
+    try (final PreparedStatement stmt = connection.prepareStatement(query)) {
+      stmt.setInt(1, pointInTime);
+
+      try (final ResultSet rs = stmt.executeQuery()) {
+        while (rs.next()) {
+          final int id = rs.getInt("idVariable"); //$NON-NLS-1$
+          final ReactiveVariable r = createReVar(rs, pointInTime);
+          final Vertex vertex = new Vertex(r.getId(), r);
+          variables.put(id, vertex);
+        }
+      }
+    }
+    catch (final SQLException e) {
+      throw new PersistenceException();
+    }
+
+    return variables;
   }
 
   public void close() {

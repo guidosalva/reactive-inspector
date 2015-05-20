@@ -134,7 +134,7 @@ public class PersistenceFacade implements ILoggerInterface {
 
   public List<ReactiveVariable> getReVars(final int pointInTime) {
     try {
-      return dbHelper.getReVars(pointInTime);
+      return dbHelper.getReVarsWithDependencies(pointInTime);
     }
     catch (final PersistenceException e) {
       Activator.log(e);
@@ -143,7 +143,13 @@ public class PersistenceFacade implements ILoggerInterface {
   }
 
   public DependencyGraph getDependencyGraph(final int pointInTime) {
-    return null; // TODO create dependency graph
+    try {
+      return dbHelper.getDependencyGraph(pointInTime);
+    }
+    catch (final PersistenceException e) {
+      Activator.log(e);
+      return null;
+    }
   }
 
   public int getLastPointInTime() {
