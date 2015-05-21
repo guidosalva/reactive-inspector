@@ -34,7 +34,7 @@ public class DatabaseHelper {
   private static final String JDBC_PASSWORD = ""; //$NON-NLS-1$
 
   private static List<String> databaseSetupQueries = Arrays
-          .asList("CREATE TABLE variable (idVariable  INTEGER NOT NULL PRIMARY KEY, variableId varchar(36) NOT NULL, variableName varchar(200), reactiveType integer(10), typeSimple varchar(200), typeFull varchar(200), idVariableStatusActive integer(10))", //$NON-NLS-1$
+          .asList("CREATE TABLE variable (idVariable  INTEGER NOT NULL PRIMARY KEY, variableId varchar(36) NOT NULL, variableName varchar(200), reactiveType integer(10), typeSimple varchar(200), typeFull varchar(200))", //$NON-NLS-1$
                   "CREATE TABLE variable_status (idVariableStatus  INTEGER NOT NULL PRIMARY KEY, idVariable integer(10) NOT NULL, valueString varchar(200))", //$NON-NLS-1$
                   "CREATE TABLE event (pointInTime  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, type integer(10) NOT NULL, idVariable integer(10) NOT NULL, dependentVariable integer(10), exception varchar(200))", //$NON-NLS-1$
                   "CREATE TABLE xref_event_status (pointInTime integer(10) NOT NULL, idVariableStatus integer(10) NOT NULL, PRIMARY KEY (pointInTime, idVariableStatus))", //$NON-NLS-1$
@@ -367,17 +367,6 @@ public class DatabaseHelper {
   public int createVariableStatus(final ReactiveVariable variable, final int idVariable, final int oldVariableStatus) throws PersistenceException {
     final int id = createVariableStatus(variable, idVariable);
 
-    final String updateStmt = "UPDATE variable SET idVariableStatusActive = ? WHERE idVariable = ?"; //$NON-NLS-1$
-
-    try (PreparedStatement stmt = connection.prepareStatement(updateStmt)) {
-      stmt.setInt(1, id);
-      stmt.setInt(2, idVariable);
-      stmt.executeUpdate();
-    }
-    catch (final SQLException e) {
-      throw new PersistenceException(e);
-    }
-
     final String copyStmt = "INSERT INTO variable_dependency (idVariableStatus, dependentVariable) SELECT ?, dependentVariable FROM variable_dependency WHERE idVariableStatus = ?"; //$NON-NLS-1$
 
     try (PreparedStatement stmt = connection.prepareStatement(copyStmt)) {
@@ -589,29 +578,6 @@ public class DatabaseHelper {
     final DependencyGraph dependencyGraph = new DependencyGraph();
     dependencyGraph.addVertices(verticesByVariable.values());
     return dependencyGraph;
-  }
-
-  public Map<Integer, Vertex> createVertexMap(final int pointInTime) throws PersistenceException {
-    final Map<Integer, Vertex> variables = new HashMap<>();
-
-    final String query = "SELECT variable.idVariable AS idVariable, variable.variableId AS variableId, variable.variableName AS variableName, variable.reactiveType AS reactiveType, event.type AS historyType, variable.typeSimple AS typeSimple, variable.typeFull AS typeFull, variable_status.valueString AS valueString, variable_status.idVariableStatus AS idVariableStatus FROM variable JOIN variable_status ON variable_status.idVariable = variable.idVariable JOIN xref_event_status ON xref_event_status.idVariableStatus = variable_status.idVariableStatus JOIN event ON event.pointInTime = xref_event_status.pointInTime WHERE event.pointInTime = ?"; //$NON-NLS-1$
-    try (final PreparedStatement stmt = connection.prepareStatement(query)) {
-      stmt.setInt(1, pointInTime);
-
-      try (final ResultSet rs = stmt.executeQuery()) {
-        while (rs.next()) {
-          final int id = rs.getInt("idVariable"); //$NON-NLS-1$
-          final ReactiveVariable r = createReVar(rs, pointInTime);
-          final Vertex vertex = new Vertex(r.getId(), r);
-          variables.put(id, vertex);
-        }
-      }
-    }
-    catch (final SQLException e) {
-      throw new PersistenceException();
-    }
-
-    return variables;
   }
 
   public void close() {
