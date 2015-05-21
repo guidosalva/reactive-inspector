@@ -34,10 +34,9 @@ public class DatabaseHelper {
   private static final String JDBC_PASSWORD = ""; //$NON-NLS-1$
 
   private static List<String> databaseSetupQueries = Arrays
-          .asList("CREATE TABLE variable (idVariable  INTEGER NOT NULL PRIMARY KEY, variableId varchar(36) NOT NULL, variableName varchar(200), reactiveType integer(10), typeSimple varchar(200), typeFull varchar(200), idVariableStatusActive integer(10))", //$NON-NLS-1$
-                  "CREATE TABLE variable_status (idVariableStatus  INTEGER NOT NULL PRIMARY KEY, idVariable integer(10) NOT NULL, valueString varchar(200))", //$NON-NLS-1$
+          .asList("CREATE TABLE variable (idVariable  INTEGER NOT NULL PRIMARY KEY, variableId varchar(36) NOT NULL, variableName varchar(200), reactiveType integer(10), typeSimple varchar(200), typeFull varchar(200), timeFrom integer(10) NOT NULL)", //$NON-NLS-1$
+                  "CREATE TABLE variable_status (idVariableStatus  INTEGER NOT NULL PRIMARY KEY, idVariable integer(10) NOT NULL, valueString varchar(200), timeFrom integer(10) NOT NULL, timeTo integer(10) NOT NULL)", //$NON-NLS-1$
                   "CREATE TABLE event (pointInTime  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, type integer(10) NOT NULL, idVariable integer(10) NOT NULL, dependentVariable integer(10), exception varchar(200))", //$NON-NLS-1$
-                  "CREATE TABLE xref_event_status (pointInTime integer(10) NOT NULL, idVariableStatus integer(10) NOT NULL, PRIMARY KEY (pointInTime, idVariableStatus))", //$NON-NLS-1$
                   "CREATE TABLE variable_dependency (idVariableStatus integer(10) NOT NULL, dependentVariable integer(10) NOT NULL)"); //$NON-NLS-1$
 
   private final List<DependencyGraphHistoryChangedListener> listeners = new CopyOnWriteArrayList<>();
@@ -156,13 +155,13 @@ public class DatabaseHelper {
     try {
       beginTx();
 
+      nextPointInTime();
+
       final int idVariable = createVariable(r);
-      final int idVariableStatus = createVariableStatus(r, idVariable);
-      final int pointInTime = createEvent(r, idVariableStatus, null);
+      createVariableStatus(r, idVariable);
+      createEvent(r, idVariable, null);
 
-      nextPointInTime(pointInTime, idVariableStatus, null);
-
-      r.setPointInTime(pointInTime);
+      r.setPointInTime(lastPointInTime);
 
       commit();
     }
@@ -179,18 +178,18 @@ public class DatabaseHelper {
     try {
       beginTx();
 
+      nextPointInTime();
+
       final int idVariable = findVariableById(r.getId());
       final int dependentVariable = findVariableById(dependentId);
 
       final int oldVariableStatus = findActiveVariableStatus(idVariable);
 
-      final int idVariableStatus = createVariableStatus(r, idVariable, oldVariableStatus, dependentVariable);
-      final int pointInTime = createEvent(r, idVariable, dependentVariable);
-
-      nextPointInTime(pointInTime, idVariableStatus, oldVariableStatus);
+      createVariableStatus(r, idVariable, oldVariableStatus, dependentVariable);
+      createEvent(r, idVariable, dependentVariable);
 
       final String additionalInformation = r.getId() + "->" + dependentId; //$NON-NLS-1$
-      r.setPointInTime(pointInTime);
+      r.setPointInTime(lastPointInTime);
       r.setAdditionalInformation(additionalInformation);
       r.setConnectedWith(dependentId);
       commit();
@@ -208,14 +207,14 @@ public class DatabaseHelper {
     try {
       beginTx();
 
+      nextPointInTime();
+
       final int idVariable = findVariableById(r.getId());
       final int oldVariableStatus = findActiveVariableStatus(idVariable);
-      final int idVariableStatus = createVariableStatus(r, idVariable, oldVariableStatus);
-      final int pointInTime = createEvent(r, idVariable, null);
+      createVariableStatus(r, idVariable, oldVariableStatus);
+      createEvent(r, idVariable, null);
 
-      nextPointInTime(pointInTime, idVariableStatus, oldVariableStatus);
-
-      r.setPointInTime(pointInTime);
+      r.setPointInTime(lastPointInTime);
 
       commit();
     }
@@ -232,15 +231,15 @@ public class DatabaseHelper {
     try {
       beginTx();
 
+      nextPointInTime();
+
       final int idVariable = findVariableById(r.getId());
       final int oldVariableStatus = findActiveVariableStatus(idVariable);
 
-      final int idVariableStatus = createVariableStatus(r, idVariable, oldVariableStatus);
-      final int pointInTime = createEvent(r, idVariable, null);
+      createVariableStatus(r, idVariable, oldVariableStatus);
+      createEvent(r, idVariable, null);
 
-      nextPointInTime(pointInTime, idVariableStatus, oldVariableStatus);
-
-      r.setPointInTime(pointInTime);
+      r.setPointInTime(lastPointInTime);
 
       commit();
     }
@@ -257,14 +256,14 @@ public class DatabaseHelper {
     try {
       beginTx();
 
+      nextPointInTime();
+
       final int idVariable = findVariableById(r.getId());
       final int oldVariableStatus = findActiveVariableStatus(idVariable);
-      final int idVariableStatus = createVariableStatus(r, idVariable, oldVariableStatus);
-      final int pointInTime = createEvent(r, idVariable, null);
+      createVariableStatus(r, idVariable, oldVariableStatus);
+      createEvent(r, idVariable, null);
 
-      nextPointInTime(pointInTime, idVariableStatus, oldVariableStatus);
-
-      r.setPointInTime(pointInTime);
+      r.setPointInTime(lastPointInTime);
 
       commit();
     }
@@ -281,14 +280,14 @@ public class DatabaseHelper {
     try {
       beginTx();
 
+      nextPointInTime();
+
       final int idVariable = findVariableById(r.getId());
       final int oldVariableStatus = findActiveVariableStatus(idVariable);
-      final int idVariableStatus = createVariableStatus(r, idVariable, oldVariableStatus);
-      final int pointInTime = createEvent(r, idVariable, null);
+      createVariableStatus(r, idVariable, oldVariableStatus);
+      createEvent(r, idVariable, null);
 
-      nextPointInTime(pointInTime, idVariableStatus, oldVariableStatus);
-
-      r.setPointInTime(pointInTime);
+      r.setPointInTime(lastPointInTime);
 
       commit();
     }
@@ -299,6 +298,10 @@ public class DatabaseHelper {
     finally {
       closeTx();
     }
+  }
+
+  private void nextPointInTime() {
+    lastPointInTime++;
   }
 
   private int getAutoIncrementKey(final Statement stmt) throws PersistenceException {
@@ -328,7 +331,7 @@ public class DatabaseHelper {
   }
 
   public int createVariable(final ReactiveVariable variable) throws PersistenceException {
-    final String insertStmt = "INSERT INTO variable (variableId, variableName, reactiveType, typeSimple, typeFull) VALUES (?, ?, ?, ?, ?)"; //$NON-NLS-1$
+    final String insertStmt = "INSERT INTO variable (variableId, variableName, reactiveType, typeSimple, typeFull, timeFrom) VALUES (?, ?, ?, ?, ?, ?)"; //$NON-NLS-1$
 
     try (final PreparedStatement stmt = connection.prepareStatement(insertStmt)) {
       stmt.setString(1, variable.getId().toString());
@@ -336,6 +339,7 @@ public class DatabaseHelper {
       stmt.setInt(3, variable.getReactiveVariableType().ordinal());
       stmt.setString(4, variable.getTypeSimple());
       stmt.setString(5, variable.getTypeFull());
+      stmt.setInt(6, lastPointInTime);
       stmt.executeUpdate();
 
       final int key = getAutoIncrementKey(stmt);
@@ -348,11 +352,13 @@ public class DatabaseHelper {
   }
 
   public int createVariableStatus(final ReactiveVariable variable, final int idVariable) throws PersistenceException {
-    final String insertStmt = "INSERT INTO variable_status (idVariable, valueString) VALUES (?, ?)"; //$NON-NLS-1$
+    final String insertStmt = "INSERT INTO variable_status (idVariable, valueString, timeFrom, timeTo) VALUES (?, ?, ?, ?)"; //$NON-NLS-1$
 
     try (PreparedStatement stmt = connection.prepareStatement(insertStmt)) {
       stmt.setInt(1, idVariable);
       stmt.setString(2, variable.getValueString());
+      stmt.setInt(3, lastPointInTime);
+      stmt.setInt(4, Integer.MAX_VALUE);
       stmt.executeUpdate();
 
       final int key = getAutoIncrementKey(stmt);
@@ -365,18 +371,18 @@ public class DatabaseHelper {
   }
 
   public int createVariableStatus(final ReactiveVariable variable, final int idVariable, final int oldVariableStatus) throws PersistenceException {
-    final int id = createVariableStatus(variable, idVariable);
-
-    final String updateStmt = "UPDATE variable SET idVariableStatusActive = ? WHERE idVariable = ?"; //$NON-NLS-1$
+    final String updateStmt = "UPDATE variable_status SET timeTo = ? WHERE idVariableStatus = ?"; //$NON-NLS-1$
 
     try (PreparedStatement stmt = connection.prepareStatement(updateStmt)) {
-      stmt.setInt(1, id);
-      stmt.setInt(2, idVariable);
+      stmt.setInt(1, lastPointInTime - 1);
+      stmt.setInt(2, oldVariableStatus);
       stmt.executeUpdate();
     }
     catch (final SQLException e) {
       throw new PersistenceException(e);
     }
+
+    final int id = createVariableStatus(variable, idVariable);
 
     final String copyStmt = "INSERT INTO variable_dependency (idVariableStatus, dependentVariable) SELECT ?, dependentVariable FROM variable_dependency WHERE idVariableStatus = ?"; //$NON-NLS-1$
 
@@ -409,46 +415,26 @@ public class DatabaseHelper {
     return id;
   }
 
-  public int createEvent(final ReactiveVariable variable, final int idVariable, final Integer dependentVariable) throws PersistenceException {
-    final String insertStmt = "INSERT INTO event (type, idVariable, dependentVariable, exception) VALUES (?, ? ,?, ?)"; //$NON-NLS-1$
+  public void createEvent(final ReactiveVariable variable, final int idVariable, final Integer dependentVariable) throws PersistenceException {
+    final String insertStmt = "INSERT INTO event (pointInTime, type, idVariable, dependentVariable, exception) VALUES (?, ? ,?, ?, ?)"; //$NON-NLS-1$
 
     try (PreparedStatement stmt = connection.prepareStatement(insertStmt)) {
-      stmt.setInt(1, variable.getDependencyGraphHistoryType().ordinal());
-      stmt.setInt(2, idVariable);
+      stmt.setInt(1, lastPointInTime);
+      stmt.setInt(2, variable.getDependencyGraphHistoryType().ordinal());
+      stmt.setInt(3, idVariable);
 
       if (dependentVariable != null) {
-        stmt.setInt(3, dependentVariable);
+        stmt.setInt(4, dependentVariable);
       }
       else {
-        stmt.setNull(3, Types.INTEGER);
+        stmt.setNull(4, Types.INTEGER);
       }
 
       if (variable.getDependencyGraphHistoryType() == DependencyGraphHistoryType.NODE_EVALUATION_ENDED_WITH_EXCEPTION) {
-        stmt.setString(4, variable.getAdditionalInformation());
+        stmt.setString(5, variable.getAdditionalInformation());
       }
       else {
-        stmt.setNull(4, Types.VARCHAR);
-      }
-
-      stmt.executeUpdate();
-
-      return getAutoIncrementKey(stmt);
-    }
-    catch (final SQLException e) {
-      throw new PersistenceException(e);
-    }
-  }
-
-  public void nextPointInTime(final int pointInTime, final int idVariableStatus, final Integer oldVariableStatus) throws PersistenceException {
-    final String copyStmt = oldVariableStatus != null ? "INSERT INTO xref_event_status (pointInTime, idVariableStatus) SELECT ?, idVariableStatus FROM xref_event_status WHERE pointInTime = ? AND idVariableStatus != ?" //$NON-NLS-1$
-            : "INSERT INTO xref_event_status (pointInTime, idVariableStatus) SELECT ?, idVariableStatus FROM xref_event_status WHERE pointInTime = ?"; //$NON-NLS-1$
-
-    try (PreparedStatement stmt = connection.prepareStatement(copyStmt)) {
-      stmt.setInt(1, pointInTime);
-      stmt.setInt(2, lastPointInTime);
-
-      if (oldVariableStatus != null) {
-        stmt.setInt(3, oldVariableStatus);
+        stmt.setNull(5, Types.VARCHAR);
       }
 
       stmt.executeUpdate();
@@ -456,18 +442,6 @@ public class DatabaseHelper {
     catch (final SQLException e) {
       throw new PersistenceException(e);
     }
-
-    final String insertStmt = "INSERT INTO xref_event_status (pointInTime, idVariableStatus) VALUES (?, ?)"; //$NON-NLS-1$
-    try (PreparedStatement stmt = connection.prepareStatement(insertStmt)) {
-      stmt.setInt(1, pointInTime);
-      stmt.setInt(2, idVariableStatus);
-      stmt.executeUpdate();
-    }
-    catch (final SQLException e) {
-      throw new PersistenceException(e);
-    }
-
-    lastPointInTime = pointInTime;
   }
 
   public List<ReactiveVariable> getReVarsWithDependencies(final int pointInTime) throws PersistenceException {
@@ -548,9 +522,12 @@ public class DatabaseHelper {
     final Map<Integer, Vertex> verticesByVariable = new HashMap<>();
     final Map<Integer, Vertex> verticesByStatus = new HashMap<>();
 
-    final String query = "SELECT variable.idVariable AS idVariable, variable.variableId AS variableId, variable.variableName AS variableName, variable.reactiveType AS reactiveType, event.type AS historyType, variable.typeSimple AS typeSimple, variable.typeFull AS typeFull, variable_status.valueString AS valueString, variable_status.idVariableStatus AS idVariableStatus FROM variable JOIN variable_status ON variable_status.idVariable = variable.idVariable JOIN xref_event_status ON xref_event_status.idVariableStatus = variable_status.idVariableStatus JOIN event ON event.pointInTime = xref_event_status.pointInTime WHERE event.pointInTime = ?"; //$NON-NLS-1$
+    final String query = "SELECT variable.idVariable AS idVariable, variable.variableId AS variableId, variable.variableName AS variableName, variable.reactiveType AS reactiveType, event.type AS historyType, variable.typeSimple AS typeSimple, variable.typeFull AS typeFull, variable_status.valueString AS valueString, variable_status.idVariableStatus AS idVariableStatus FROM variable JOIN variable_status ON variable_status.idVariable = variable.idVariable JOIN event ON event.pointInTime = ? WHERE variable.timeFrom <= ? AND variable_status.timeFrom <= ? AND variable_status.timeTo >= ?"; //$NON-NLS-1$
     try (final PreparedStatement stmt = connection.prepareStatement(query)) {
       stmt.setInt(1, pointInTime);
+      stmt.setInt(2, pointInTime);
+      stmt.setInt(3, pointInTime);
+      stmt.setInt(4, pointInTime);
 
       try (final ResultSet rs = stmt.executeQuery()) {
         while (rs.next()) {
@@ -567,9 +544,10 @@ public class DatabaseHelper {
       throw new PersistenceException();
     }
 
-    final String dependencyQuery = "SELECT variable_dependency.idVariableStatus AS idVariableStatus, variable_dependency.dependentVariable AS dependentVariable FROM variable_dependency JOIN xref_event_status ON xref_event_status.idVariableStatus = variable_dependency.idVariableStatus WHERE xref_event_status.pointInTime = ?"; //$NON-NLS-1$
+    final String dependencyQuery = "SELECT variable_dependency.idVariableStatus AS idVariableStatus, variable_dependency.dependentVariable AS dependentVariable FROM variable_dependency JOIN variable_status ON variable_status.idVariableStatus = variable_dependency.idVariableStatus WHERE variable_status.timeFrom <= ? AND variable_status.timeTo >= ?"; //$NON-NLS-1$
     try (final PreparedStatement stmt = connection.prepareStatement(dependencyQuery)) {
       stmt.setInt(1, pointInTime);
+      stmt.setInt(2, pointInTime);
 
       try (final ResultSet rs = stmt.executeQuery()) {
         while (rs.next()) {
@@ -589,29 +567,6 @@ public class DatabaseHelper {
     final DependencyGraph dependencyGraph = new DependencyGraph();
     dependencyGraph.addVertices(verticesByVariable.values());
     return dependencyGraph;
-  }
-
-  public Map<Integer, Vertex> createVertexMap(final int pointInTime) throws PersistenceException {
-    final Map<Integer, Vertex> variables = new HashMap<>();
-
-    final String query = "SELECT variable.idVariable AS idVariable, variable.variableId AS variableId, variable.variableName AS variableName, variable.reactiveType AS reactiveType, event.type AS historyType, variable.typeSimple AS typeSimple, variable.typeFull AS typeFull, variable_status.valueString AS valueString, variable_status.idVariableStatus AS idVariableStatus FROM variable JOIN variable_status ON variable_status.idVariable = variable.idVariable JOIN xref_event_status ON xref_event_status.idVariableStatus = variable_status.idVariableStatus JOIN event ON event.pointInTime = xref_event_status.pointInTime WHERE event.pointInTime = ?"; //$NON-NLS-1$
-    try (final PreparedStatement stmt = connection.prepareStatement(query)) {
-      stmt.setInt(1, pointInTime);
-
-      try (final ResultSet rs = stmt.executeQuery()) {
-        while (rs.next()) {
-          final int id = rs.getInt("idVariable"); //$NON-NLS-1$
-          final ReactiveVariable r = createReVar(rs, pointInTime);
-          final Vertex vertex = new Vertex(r.getId(), r);
-          variables.put(id, vertex);
-        }
-      }
-    }
-    catch (final SQLException e) {
-      throw new PersistenceException();
-    }
-
-    return variables;
   }
 
   public void close() {
