@@ -89,6 +89,42 @@ public class DatabaseHelper {
     }
   }
 
+  private void beginTx() throws PersistenceException {
+    try {
+      connection.setAutoCommit(false);
+    }
+    catch (final SQLException e) {
+      throw new PersistenceException(e);
+    }
+  }
+
+  private void closeTx() throws PersistenceException {
+    try {
+      connection.setAutoCommit(true);
+    }
+    catch (final SQLException e) {
+      throw new PersistenceException(e);
+    }
+  }
+
+  private void commit() throws PersistenceException {
+    try {
+      connection.commit();
+    }
+    catch (final SQLException e) {
+      throw new PersistenceException(e);
+    }
+  }
+
+  private void rollback() throws PersistenceException {
+    try {
+      connection.rollback();
+    }
+    catch (final SQLException e) {
+      throw new PersistenceException(e);
+    }
+  }
+
   public Connection getConnection() {
     return connection;
   }
@@ -114,6 +150,155 @@ public class DatabaseHelper {
    */
   public int getLastPointInTime() {
     return lastPointInTime;
+  }
+
+  public void logNodeCreated(final ReactiveVariable r) throws PersistenceException {
+    try {
+      beginTx();
+
+      final int idVariable = createVariable(r);
+      final int idVariableStatus = createVariableStatus(r, idVariable);
+      final int pointInTime = createEvent(r, idVariableStatus, null);
+
+      nextPointInTime(pointInTime, idVariableStatus, null);
+
+      r.setPointInTime(pointInTime);
+
+      commit();
+    }
+    catch (PersistenceException | RuntimeException e) {
+      rollback();
+      throw e;
+    }
+    finally {
+      closeTx();
+    }
+  }
+
+  public void logNodeAttached(final ReactiveVariable r, final UUID dependentId) throws PersistenceException {
+    try {
+      beginTx();
+
+      final int idVariable = findVariableById(r.getId());
+      final int dependentVariable = findVariableById(dependentId);
+
+      final int oldVariableStatus = findActiveVariableStatus(idVariable);
+
+      final int idVariableStatus = createVariableStatus(r, idVariable, oldVariableStatus, dependentVariable);
+      final int pointInTime = createEvent(r, idVariable, dependentVariable);
+
+      nextPointInTime(pointInTime, idVariableStatus, oldVariableStatus);
+
+      final String additionalInformation = r.getId() + "->" + dependentId; //$NON-NLS-1$
+      r.setPointInTime(pointInTime);
+      r.setAdditionalInformation(additionalInformation);
+      r.setConnectedWith(dependentId);
+      commit();
+    }
+    catch (PersistenceException | RuntimeException e) {
+      rollback();
+      throw e;
+    }
+    finally {
+      closeTx();
+    }
+  }
+
+  public void logNodeEvaluationEnded(final ReactiveVariable r) throws PersistenceException {
+    try {
+      beginTx();
+
+      final int idVariable = findVariableById(r.getId());
+      final int oldVariableStatus = findActiveVariableStatus(idVariable);
+      final int idVariableStatus = createVariableStatus(r, idVariable, oldVariableStatus);
+      final int pointInTime = createEvent(r, idVariable, null);
+
+      nextPointInTime(pointInTime, idVariableStatus, oldVariableStatus);
+
+      r.setPointInTime(pointInTime);
+
+      commit();
+    }
+    catch (PersistenceException | RuntimeException e) {
+      rollback();
+      throw e;
+    }
+    finally {
+      closeTx();
+    }
+  }
+
+  public void logNodeEvaluationEndedWithException(final ReactiveVariable r, final Exception exception) throws PersistenceException {
+    try {
+      beginTx();
+
+      final int idVariable = findVariableById(r.getId());
+      final int oldVariableStatus = findActiveVariableStatus(idVariable);
+
+      final int idVariableStatus = createVariableStatus(r, idVariable, oldVariableStatus);
+      final int pointInTime = createEvent(r, idVariable, null);
+
+      nextPointInTime(pointInTime, idVariableStatus, oldVariableStatus);
+
+      r.setPointInTime(pointInTime);
+
+      commit();
+    }
+    catch (PersistenceException | RuntimeException e) {
+      rollback();
+      throw e;
+    }
+    finally {
+      closeTx();
+    }
+  }
+
+  public void logNodeEvaluationStarted(final ReactiveVariable r) throws PersistenceException {
+    try {
+      beginTx();
+
+      final int idVariable = findVariableById(r.getId());
+      final int oldVariableStatus = findActiveVariableStatus(idVariable);
+      final int idVariableStatus = createVariableStatus(r, idVariable, oldVariableStatus);
+      final int pointInTime = createEvent(r, idVariable, null);
+
+      nextPointInTime(pointInTime, idVariableStatus, oldVariableStatus);
+
+      r.setPointInTime(pointInTime);
+
+      commit();
+    }
+    catch (PersistenceException | RuntimeException e) {
+      rollback();
+      throw e;
+    }
+    finally {
+      closeTx();
+    }
+  }
+
+  public void logNodeValueSet(final ReactiveVariable r) throws PersistenceException {
+    try {
+      beginTx();
+
+      final int idVariable = findVariableById(r.getId());
+      final int oldVariableStatus = findActiveVariableStatus(idVariable);
+      final int idVariableStatus = createVariableStatus(r, idVariable, oldVariableStatus);
+      final int pointInTime = createEvent(r, idVariable, null);
+
+      nextPointInTime(pointInTime, idVariableStatus, oldVariableStatus);
+
+      r.setPointInTime(pointInTime);
+
+      commit();
+    }
+    catch (PersistenceException | RuntimeException e) {
+      rollback();
+      throw e;
+    }
+    finally {
+      closeTx();
+    }
   }
 
   private int getAutoIncrementKey(final Statement stmt) throws PersistenceException {

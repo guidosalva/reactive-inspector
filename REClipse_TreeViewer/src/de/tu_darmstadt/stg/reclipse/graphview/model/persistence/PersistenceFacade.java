@@ -26,13 +26,7 @@ public class PersistenceFacade implements ILoggerInterface {
   @Override
   public void logNodeCreated(final ReactiveVariable r) {
     try {
-      final int idVariable = dbHelper.createVariable(r);
-      final int idVariableStatus = dbHelper.createVariableStatus(r, idVariable);
-      final int pointInTime = dbHelper.createEvent(r, idVariableStatus, null);
-
-      dbHelper.nextPointInTime(pointInTime, idVariableStatus, null);
-
-      r.setPointInTime(pointInTime);
+      dbHelper.logNodeCreated(r);
     }
     catch (final PersistenceException e) {
       Activator.log(e);
@@ -42,20 +36,7 @@ public class PersistenceFacade implements ILoggerInterface {
   @Override
   public void logNodeAttached(final ReactiveVariable r, final UUID dependentId) {
     try {
-      final int idVariable = dbHelper.findVariableById(r.getId());
-      final int dependentVariable = dbHelper.findVariableById(dependentId);
-
-      final int oldVariableStatus = dbHelper.findActiveVariableStatus(idVariable);
-
-      final int idVariableStatus = dbHelper.createVariableStatus(r, idVariable, oldVariableStatus, dependentVariable);
-      final int pointInTime = dbHelper.createEvent(r, idVariable, dependentVariable);
-
-      dbHelper.nextPointInTime(pointInTime, idVariableStatus, oldVariableStatus);
-
-      final String additionalInformation = r.getId() + "->" + dependentId; //$NON-NLS-1$
-      r.setPointInTime(pointInTime);
-      r.setAdditionalInformation(additionalInformation);
-      r.setConnectedWith(dependentId);
+      dbHelper.logNodeAttached(r, dependentId);
     }
     catch (final PersistenceException e) {
       Activator.log(e);
@@ -66,14 +47,7 @@ public class PersistenceFacade implements ILoggerInterface {
   @Override
   public void logNodeEvaluationEnded(final ReactiveVariable r) {
     try {
-      final int idVariable = dbHelper.findVariableById(r.getId());
-      final int oldVariableStatus = dbHelper.findActiveVariableStatus(idVariable);
-      final int idVariableStatus = dbHelper.createVariableStatus(r, idVariable, oldVariableStatus);
-      final int pointInTime = dbHelper.createEvent(r, idVariable, null);
-
-      dbHelper.nextPointInTime(pointInTime, idVariableStatus, oldVariableStatus);
-
-      r.setPointInTime(pointInTime);
+      dbHelper.logNodeEvaluationEnded(r);
     }
     catch (final PersistenceException e) {
       Activator.log(e);
@@ -83,15 +57,7 @@ public class PersistenceFacade implements ILoggerInterface {
   @Override
   public void logNodeEvaluationEndedWithException(final ReactiveVariable r, final Exception exception) {
     try {
-      final int idVariable = dbHelper.findVariableById(r.getId());
-      final int oldVariableStatus = dbHelper.findActiveVariableStatus(idVariable);
-
-      final int idVariableStatus = dbHelper.createVariableStatus(r, idVariable, oldVariableStatus);
-      final int pointInTime = dbHelper.createEvent(r, idVariable, null);
-
-      dbHelper.nextPointInTime(pointInTime, idVariableStatus, oldVariableStatus);
-
-      r.setPointInTime(pointInTime);
+      dbHelper.logNodeEvaluationEndedWithException(r, exception);
     }
     catch (final PersistenceException e) {
       Activator.log(e);
@@ -101,14 +67,7 @@ public class PersistenceFacade implements ILoggerInterface {
   @Override
   public void logNodeEvaluationStarted(final ReactiveVariable r) {
     try {
-      final int idVariable = dbHelper.findVariableById(r.getId());
-      final int oldVariableStatus = dbHelper.findActiveVariableStatus(idVariable);
-      final int idVariableStatus = dbHelper.createVariableStatus(r, idVariable, oldVariableStatus);
-      final int pointInTime = dbHelper.createEvent(r, idVariable, null);
-
-      dbHelper.nextPointInTime(pointInTime, idVariableStatus, oldVariableStatus);
-
-      r.setPointInTime(pointInTime);
+      dbHelper.logNodeEvaluationStarted(r);
     }
     catch (final PersistenceException e) {
       Activator.log(e);
@@ -118,14 +77,7 @@ public class PersistenceFacade implements ILoggerInterface {
   @Override
   public void logNodeValueSet(final ReactiveVariable r) {
     try {
-      final int idVariable = dbHelper.findVariableById(r.getId());
-      final int oldVariableStatus = dbHelper.findActiveVariableStatus(idVariable);
-      final int idVariableStatus = dbHelper.createVariableStatus(r, idVariable, oldVariableStatus);
-      final int pointInTime = dbHelper.createEvent(r, idVariable, null);
-
-      dbHelper.nextPointInTime(pointInTime, idVariableStatus, oldVariableStatus);
-
-      r.setPointInTime(pointInTime);
+      dbHelper.logNodeValueSet(r);
     }
     catch (final PersistenceException e) {
       Activator.log(e);
