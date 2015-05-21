@@ -2,6 +2,7 @@ package de.tu_darmstadt.stg.reclipse.graphview.model.persistence;
 
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -10,6 +11,13 @@ import java.util.UUID;
 public class DependencyGraph {
 
   private final Set<Vertex> vertices = new HashSet<>();
+
+  public DependencyGraph() {
+  }
+
+  public DependencyGraph(final Collection<? extends Vertex> vertices) {
+    this.vertices.addAll(vertices);
+  }
 
   public void addVertex(final Vertex vertex) {
     vertices.add(vertex);

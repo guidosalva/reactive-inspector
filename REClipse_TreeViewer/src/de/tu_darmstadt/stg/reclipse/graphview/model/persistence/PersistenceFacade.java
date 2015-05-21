@@ -39,17 +39,17 @@ public class PersistenceFacade implements ILoggerInterface {
 
   @Override
   public void logNodeEvaluationEndedWithException(final ReactiveVariable r, final Exception exception) {
-
+    helper.evaluationEndedWithException(r);
   }
 
   @Override
   public void logNodeEvaluationStarted(final ReactiveVariable r) {
-
+    helper.evaluationStarted(r);
   }
 
   @Override
   public void logNodeValueSet(final ReactiveVariable r) {
-
+    helper.valueSet(r);
   }
 
   public List<ReactiveVariable> getReVars(final int pointInTime) {
@@ -61,7 +61,7 @@ public class PersistenceFacade implements ILoggerInterface {
   }
 
   public DependencyGraph getDependencyGraph(final int pointInTime) {
-    return null; // TODO create dependency graph
+    return helper.getDependencyGraph(pointInTime);
   }
 
   public int getLastPointInTime() {

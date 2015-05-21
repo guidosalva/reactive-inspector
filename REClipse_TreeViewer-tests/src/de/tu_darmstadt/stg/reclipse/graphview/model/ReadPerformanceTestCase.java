@@ -15,6 +15,7 @@ import de.tu_darmstadt.stg.reclipse.graphview.model.SerializationEventLogger.Nod
 import de.tu_darmstadt.stg.reclipse.graphview.model.SerializationEventLogger.NodeEvaluationStarted;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SerializationEventLogger.NodeEvent;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SerializationEventLogger.NodeValueSet;
+import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.DependencyGraph;
 
 
 public class ReadPerformanceTestCase extends PerformanceTestCase {
