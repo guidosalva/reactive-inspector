@@ -2,25 +2,30 @@ package de.tu_darmstadt.stg.reclipse.graphview.model.persistence;
 
 import de.tu_darmstadt.stg.reclipse.graphview.Activator;
 import de.tu_darmstadt.stg.reclipse.graphview.model.ISessionConfiguration;
+import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.DependencyGraph.Vertex;
 import de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariableType;
 
 import java.io.File;
+import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * Helper class which does all the work related to the database, e.g. storing
@@ -28,21 +33,22 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class DatabaseHelper {
 
+  public static final String REACTIVE_VARIABLES_TABLE_NAME = "revars"; //$NON-NLS-1$
+
+  private static final Gson GSON = new Gson();
+
   private static final String JDBC_CLASS_NAME = "org.sqlite.JDBC"; //$NON-NLS-1$
   private static final String JDBC_USER = ""; //$NON-NLS-1$
   private static final String JDBC_PASSWORD = ""; //$NON-NLS-1$
 
   private static List<String> databaseSetupQueries = Arrays
-          .asList("CREATE TABLE variable (idVariable  INTEGER NOT NULL PRIMARY KEY, variableId varchar(36) NOT NULL, variableName varchar(200), reactiveType integer(10), typeSimple varchar(200), typeFull varchar(200), idVariableStatusActive integer(10))", //$NON-NLS-1$
-                  "CREATE TABLE variable_status (idVariableStatus  INTEGER NOT NULL PRIMARY KEY, idVariable integer(10) NOT NULL, valueString varchar(200))", //$NON-NLS-1$
-                  "CREATE TABLE event (pointInTime  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, type integer(10) NOT NULL, idVariable integer(10) NOT NULL, dependentVariable integer(10), exception varchar(200))", //$NON-NLS-1$
-                  "CREATE TABLE xref_event_status (pointInTime integer(10) NOT NULL, idVariableStatus integer(10) NOT NULL, PRIMARY KEY (pointInTime, idVariableStatus))", //$NON-NLS-1$
-                  "CREATE TABLE variable_dependency (idVariableStatus integer(10) NOT NULL, dependentVariable integer(10) NOT NULL)"); //$NON-NLS-1$
+          .asList("DROP TABLE IF EXISTS " + REACTIVE_VARIABLES_TABLE_NAME, //$NON-NLS-1$
+                  "CREATE TABLE IF NOT EXISTS " //$NON-NLS-1$
+                  + REACTIVE_VARIABLES_TABLE_NAME
+                  + " (\"auto_increment_id\" integer NOT NULL PRIMARY KEY AUTOINCREMENT, \"id\" char(36) NOT NULL, \"reactiveVariableType\" integer NOT NULL, \"pointInTime\" integer DEFAULT NULL, \"dependencyGraphHistoryType\" integer NOT NULL, \"additionalInformation\" varchar(200) DEFAULT NULL, \"active\" integer DEFAULT NULL, \"typeSimple\" varchar(200) DEFAULT NULL, \"typeFull\" varchar(200) DEFAULT NULL, \"name\" varchar(200) DEFAULT NULL, \"additionalKeys\" varchar(500) DEFAULT NULL, \"valueString\" varchar(200) DEFAULT NULL, \"connectedWith\" varchar(500) DEFAULT NULL)"); //$NON-NLS-1$
 
   private final List<DependencyGraphHistoryChangedListener> listeners = new CopyOnWriteArrayList<>();
   private final File dbFile;
-  private final Map<UUID, Integer> variableMap = new HashMap<>();
-  private final Map<Integer, Integer> variableStatusMap = new HashMap<>();
 
   private Connection connection;
 
@@ -108,6 +114,18 @@ public class DatabaseHelper {
     }
   }
 
+  public int truncateTable(final String table) {
+    try (final Statement stmt = connection.createStatement()) {
+      final int result = stmt.executeUpdate("DELETE FROM " + table); //$NON-NLS-1$
+      fireChangedEvent();
+      return result;
+    }
+    catch (final SQLException e) {
+      Activator.log(e);
+    }
+    return -1;
+  }
+
   /**
    * @return the last point in time of the dependency graph history
    */
@@ -115,241 +133,207 @@ public class DatabaseHelper {
     return lastPointInTime;
   }
 
-  private int getAutoIncrementKey(final Statement stmt) throws PersistenceException {
-    try (final ResultSet rs = stmt.getGeneratedKeys()) {
-      rs.next();
-      return rs.getInt(1);
-    }
-    catch (final SQLException e) {
-      throw new PersistenceException(e);
-    }
+  /**
+   * Resets the last point in time for a new debugging session.
+   */
+  public void resetLastPointInTime() {
+    lastPointInTime = 0;
   }
 
-  public int findVariableById(final UUID id) throws PersistenceException {
-    if (!variableMap.containsKey(id)) {
-      throw new PersistenceException("unknown variable with id " + id); //$NON-NLS-1$
+  public void copyLastReVars(final DependencyGraphHistoryType newType) {
+    lastPointInTime++;
+    if (lastPointInTime == 1) {
+      return;
     }
 
-    return variableMap.get(id);
-  }
+    try {
+      final boolean autoCommit = connection.getAutoCommit();
+      connection.setAutoCommit(false);
+      final String tempTableName = REACTIVE_VARIABLES_TABLE_NAME + "_temp"; //$NON-NLS-1$
 
-  public int findActiveVariableStatus(final int idVariable) throws PersistenceException {
-    if (!variableStatusMap.containsKey(idVariable)) {
-      throw new PersistenceException("no active status for variable " + idVariable); //$NON-NLS-1$
-    }
+      final String tempTableQuery = "CREATE TEMP TABLE " + tempTableName + " AS SELECT * FROM " + REACTIVE_VARIABLES_TABLE_NAME + " WHERE pointInTime = ?"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+      try (final PreparedStatement tempTableStmt = connection.prepareStatement(tempTableQuery)) {
+        tempTableStmt.setInt(1, lastPointInTime - 1);
+        tempTableStmt.executeUpdate();
 
-    return variableStatusMap.get(idVariable);
-  }
+        final String updateQuery = "UPDATE " + tempTableName + " SET pointInTime = ?, dependencyGraphHistoryType = ?, additionalInformation = ?, active = ?"; //$NON-NLS-1$ //$NON-NLS-2$
+        try (final PreparedStatement updateStmt = connection.prepareStatement(updateQuery)) {
+          updateStmt.setInt(1, lastPointInTime);
+          updateStmt.setInt(2, newType.ordinal());
+          updateStmt.setString(3, null);
+          updateStmt.setBoolean(4, false);
+          updateStmt.executeUpdate();
 
-  public int createVariable(final ReactiveVariable variable) throws PersistenceException {
-    final String insertStmt = "INSERT INTO variable (variableId, variableName, reactiveType, typeSimple, typeFull) VALUES (?, ?, ?, ?, ?)"; //$NON-NLS-1$
-
-    try (final PreparedStatement stmt = connection.prepareStatement(insertStmt)) {
-      stmt.setString(1, variable.getId().toString());
-      stmt.setString(2, variable.getName());
-      stmt.setInt(3, variable.getReactiveVariableType().ordinal());
-      stmt.setString(4, variable.getTypeSimple());
-      stmt.setString(5, variable.getTypeFull());
-      stmt.executeUpdate();
-
-      final int key = getAutoIncrementKey(stmt);
-      variableMap.put(variable.getId(), key);
-      return key;
-    }
-    catch (final SQLException e) {
-      throw new PersistenceException(e);
-    }
-  }
-
-  public int createVariableStatus(final ReactiveVariable variable, final int idVariable) throws PersistenceException {
-    final String insertStmt = "INSERT INTO variable_status (idVariable, valueString) VALUES (?, ?)"; //$NON-NLS-1$
-
-    try (PreparedStatement stmt = connection.prepareStatement(insertStmt)) {
-      stmt.setInt(1, idVariable);
-      stmt.setString(2, variable.getValueString());
-      stmt.executeUpdate();
-
-      final int key = getAutoIncrementKey(stmt);
-      variableStatusMap.put(idVariable, key);
-      return key;
-    }
-    catch (final SQLException e) {
-      throw new PersistenceException(e);
-    }
-  }
-
-  public int createVariableStatus(final ReactiveVariable variable, final int idVariable, final int oldVariableStatus) throws PersistenceException {
-    final int id = createVariableStatus(variable, idVariable);
-
-    final String updateStmt = "UPDATE variable SET idVariableStatusActive = ? WHERE idVariable = ?"; //$NON-NLS-1$
-
-    try (PreparedStatement stmt = connection.prepareStatement(updateStmt)) {
-      stmt.setInt(1, id);
-      stmt.setInt(2, idVariable);
-      stmt.executeUpdate();
-    }
-    catch (final SQLException e) {
-      throw new PersistenceException(e);
-    }
-
-    final String copyStmt = "INSERT INTO variable_dependency (idVariableStatus, dependentVariable) SELECT ?, dependentVariable FROM variable_dependency WHERE idVariableStatus = ?"; //$NON-NLS-1$
-
-    try (PreparedStatement stmt = connection.prepareStatement(copyStmt)) {
-      stmt.setInt(1, id);
-      stmt.setInt(2, oldVariableStatus);
-      stmt.executeUpdate();
-    }
-    catch (final SQLException e) {
-      throw new PersistenceException(e);
-    }
-
-    return id;
-  }
-
-  public int createVariableStatus(final ReactiveVariable variable, final int idVariable, final int oldVariableStatus, final int dependentVariable) throws PersistenceException {
-    final int id = createVariableStatus(variable, idVariable, oldVariableStatus);
-
-    final String insertStmt = "INSERT INTO variable_dependency (idVariableStatus, dependentVariable) VALUES (?, ?)"; //$NON-NLS-1$
-
-    try (PreparedStatement stmt = connection.prepareStatement(insertStmt)) {
-      stmt.setInt(1, id);
-      stmt.setInt(2, dependentVariable);
-      stmt.executeUpdate();
-    }
-    catch (final SQLException e) {
-      throw new PersistenceException(e);
-    }
-
-    return id;
-  }
-
-  public int createEvent(final ReactiveVariable variable, final int idVariable, final Integer dependentVariable) throws PersistenceException {
-    final String insertStmt = "INSERT INTO event (type, idVariable, dependentVariable, exception) VALUES (?, ? ,?, ?)"; //$NON-NLS-1$
-
-    try (PreparedStatement stmt = connection.prepareStatement(insertStmt)) {
-      stmt.setInt(1, variable.getDependencyGraphHistoryType().ordinal());
-      stmt.setInt(2, idVariable);
-
-      if (dependentVariable != null) {
-        stmt.setInt(3, dependentVariable);
+          final String insertQuery = "INSERT INTO " + REACTIVE_VARIABLES_TABLE_NAME + " SELECT NULL, id, reactiveVariableType, pointInTime, dependencyGraphHistoryType, additionalInformation, active, typeSimple, typeFull, name, additionalKeys, valueString, connectedWith FROM " + tempTableName; //$NON-NLS-1$ //$NON-NLS-2$
+          try (Statement insertStmt = connection.createStatement()) {
+            insertStmt.executeUpdate(insertQuery);
+            connection.commit();
+          }
+        }
       }
-      else {
-        stmt.setNull(3, Types.INTEGER);
+      final String dropTempTableQuery = "DROP TABLE " + tempTableName; //$NON-NLS-1$
+      try (final Statement stmt = connection.createStatement()) {
+        stmt.executeUpdate(dropTempTableQuery);
+        connection.commit();
       }
-
-      if (variable.getDependencyGraphHistoryType() == DependencyGraphHistoryType.NODE_EVALUATION_ENDED_WITH_EXCEPTION) {
-        stmt.setString(4, variable.getAdditionalInformation());
-      }
-      else {
-        stmt.setNull(4, Types.VARCHAR);
-      }
-
-      stmt.executeUpdate();
-
-      return getAutoIncrementKey(stmt);
+      connection.setAutoCommit(autoCommit);
     }
     catch (final SQLException e) {
-      throw new PersistenceException(e);
+      Activator.log(e);
     }
   }
 
-  public void nextPointInTime(final int pointInTime, final int idVariableStatus, final Integer oldVariableStatus) throws PersistenceException {
-    final String copyStmt = oldVariableStatus != null ? "INSERT INTO xref_event_status (pointInTime, idVariableStatus) SELECT ?, idVariableStatus FROM xref_event_status WHERE pointInTime = ? AND idVariableStatus != ?" //$NON-NLS-1$
-            : "INSERT INTO xref_event_status (pointInTime, idVariableStatus) SELECT ?, idVariableStatus FROM xref_event_status WHERE pointInTime = ?"; //$NON-NLS-1$
-
-    try (PreparedStatement stmt = connection.prepareStatement(copyStmt)) {
-      stmt.setInt(1, pointInTime);
-      stmt.setInt(2, lastPointInTime);
-
-      if (oldVariableStatus != null) {
-        stmt.setInt(3, oldVariableStatus);
-      }
-
-      stmt.executeUpdate();
+  /**
+   * Calls {@link #addReVar(Connection, ReactiveVariable)} with a new
+   * connection.
+   *
+   * @param r
+   *          the reactive variable to add
+   * @return the row count
+   */
+  public int addReVar(final ReactiveVariable r) {
+    final String addQuery = "INSERT INTO " + REACTIVE_VARIABLES_TABLE_NAME + " (id, reactiveVariableType, pointInTime, dependencyGraphHistoryType, additionalInformation, active, typeSimple, typeFull, name, additionalKeys, valueString , connectedWith) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; //$NON-NLS-1$ //$NON-NLS-2$
+    try (final PreparedStatement addStmt = connection.prepareStatement(addQuery)) {
+      addStmt.setString(1, r.getId().toString());
+      addStmt.setInt(2, r.getReactiveVariableType().ordinal());
+      addStmt.setInt(3, r.getPointInTime());
+      addStmt.setInt(4, r.getDependencyGraphHistoryType().ordinal());
+      addStmt.setString(5, r.getAdditionalInformation());
+      addStmt.setBoolean(6, r.isActive());
+      addStmt.setString(7, r.getTypeSimple());
+      addStmt.setString(8, r.getTypeFull());
+      addStmt.setString(9, r.getName());
+      addStmt.setString(10, GSON.toJson(r.getAdditionalKeys()));
+      addStmt.setString(11, r.getValueString());
+      addStmt.setString(12, GSON.toJson(r.getConnectedWith()));
+      final int result = addStmt.executeUpdate();
+      fireChangedEvent();
+      return result;
     }
     catch (final SQLException e) {
-      throw new PersistenceException(e);
+      Activator.log(e);
     }
-
-    final String insertStmt = "INSERT INTO xref_event_status (pointInTime, idVariableStatus) VALUES (?, ?)"; //$NON-NLS-1$
-    try (PreparedStatement stmt = connection.prepareStatement(insertStmt)) {
-      stmt.setInt(1, pointInTime);
-      stmt.setInt(2, idVariableStatus);
-      stmt.executeUpdate();
-    }
-    catch (final SQLException e) {
-      throw new PersistenceException(e);
-    }
-
-    lastPointInTime = pointInTime;
+    return -1;
   }
 
-  public List<ReactiveVariable> getReVars(final int pointInTime) throws PersistenceException {
-    final List<ReactiveVariable> variables = new ArrayList<>();
+  public int deleteReVar(final UUID id, final int pointInTime) {
+    final String deleteQuery = "DELETE FROM " + REACTIVE_VARIABLES_TABLE_NAME + " WHERE id = ? AND pointInTime = ?"; //$NON-NLS-1$ //$NON-NLS-2$
+    try (final PreparedStatement deleteStmt = connection.prepareStatement(deleteQuery)) {
+      deleteStmt.setString(1, id.toString());
+      deleteStmt.setInt(2, pointInTime);
+      final int result = deleteStmt.executeUpdate();
+      fireChangedEvent();
+      return result;
+    }
+    catch (final SQLException e) {
+      Activator.log(e);
+    }
+    return -1;
+  }
 
-    final String query = "SELECT variable.variableId AS variableId, variable.variableName AS variableName, variable.reactiveType AS reactiveType, event.type AS historyType, variable.typeSimple AS typeSimple, variable.typeFull AS typeFull, variable_status.valueString AS valueString, variable_status.idVariableStatus AS idVariableStatus FROM variable JOIN variable_status ON variable_status.idVariable = variable.idVariable JOIN xref_event_status ON xref_event_status.idVariableStatus = variable_status.idVariableStatus JOIN event ON event.pointInTime = xref_event_status.pointInTime WHERE event.pointInTime = ?"; //$NON-NLS-1$
+  public ArrayList<ReactiveVariable> getReVars(final int pointInTime) {
+    final String query = "SELECT * FROM " + REACTIVE_VARIABLES_TABLE_NAME + " WHERE pointInTime = ?"; //$NON-NLS-1$ //$NON-NLS-2$
     try (final PreparedStatement stmt = connection.prepareStatement(query)) {
       stmt.setInt(1, pointInTime);
-
       try (final ResultSet rs = stmt.executeQuery()) {
+        final ArrayList<ReactiveVariable> reVars = new ArrayList<>();
+        final Gson gson = new Gson();
         while (rs.next()) {
-          final ReactiveVariable r = createReVar(rs, pointInTime);
-          variables.add(r);
+          final ReactiveVariable r = new ReactiveVariable();
+          r.setId(UUID.fromString(rs.getString("id"))); //$NON-NLS-1$
+          r.setReactiveVariableType(ReactiveVariableType.values()[rs.getInt("reactiveVariableType")]); //$NON-NLS-1$
+          r.setPointInTime(rs.getInt("pointInTime")); //$NON-NLS-1$
+          r.setDependencyGraphHistoryType(DependencyGraphHistoryType.values()[rs.getInt("dependencyGraphHistoryType")]); //$NON-NLS-1$
+          r.setAdditionalInformation(rs.getString("additionalInformation")); //$NON-NLS-1$
+          r.setActive(rs.getBoolean("active")); //$NON-NLS-1$
+          r.setTypeSimple(rs.getString("typeSimple")); //$NON-NLS-1$
+          r.setTypeFull(rs.getString("typeFull")); //$NON-NLS-1$
+          r.setName(rs.getString("name")); //$NON-NLS-1$
+          final String additionalKeysString = rs.getString("additionalKeys"); //$NON-NLS-1$
+          Type type = TypeToken.get(new HashMap<String, Object>().getClass()).getType();
+          final Map<String, Object> additionalKeys = gson.fromJson(additionalKeysString, type);
+          r.setAdditionalKeys(additionalKeys);
+          r.setValueString(rs.getString("valueString")); //$NON-NLS-1$
+          final String connectedWithString = rs.getString("connectedWith"); //$NON-NLS-1$
+          type = TypeToken.get(new ArrayList<String>().getClass()).getType();
+          final ArrayList<String> connectedWith = gson.fromJson(connectedWithString, type);
+          for (final String id : connectedWith) {
+            r.setConnectedWith(UUID.fromString(id));
+          }
+          reVars.add(r);
         }
+        return reVars;
       }
     }
     catch (final SQLException e) {
-      throw new PersistenceException();
+      Activator.log(e);
     }
-
-    for (final ReactiveVariable r : variables) {
-
-    }
-
-    return variables;
+    return null;
   }
 
-  private ReactiveVariable createReVar(final ResultSet rs, final int pointInTime) throws SQLException {
-    final ReactiveVariable r = new ReactiveVariable();
-    r.setId(UUID.fromString(rs.getString("variableId"))); //$NON-NLS-1$
-    r.setName(rs.getString("variableName")); //$NON-NLS-1$
-    r.setReactiveVariableType(ReactiveVariableType.values()[rs.getInt("reactiveType")]); //$NON-NLS-1$
-    r.setPointInTime(pointInTime);
-    r.setDependencyGraphHistoryType(DependencyGraphHistoryType.values()[rs.getInt("historyType")]); //$NON-NLS-1$
-    r.setAdditionalInformation(""); // TODO load additional information field
-    r.setActive(true); // TODO load active field
-    r.setTypeSimple(rs.getString("typeSimple")); //$NON-NLS-1$
-    r.setTypeFull(rs.getString("typeFull")); //$NON-NLS-1$
-    r.setAdditionalKeys(new HashMap<String, Object>()); // TODO load additional
-    // keys field
-    r.setValueString(rs.getString("valueString")); //$NON-NLS-1$
+  public boolean isNodeChildOf(final int pointInTime, final UUID childId, final UUID parentId) {
+    final ArrayList<ReactiveVariable> reVarsList = getReVars(pointInTime);
+    // convert list of reactive variables into map for better handling
+    final HashMap<UUID, ReactiveVariable> reVars = new HashMap<>();
+    for (final ReactiveVariable r : reVarsList) {
+      reVars.put(r.getId(), r);
+    }
+    final ReactiveVariable child = reVars.get(childId);
+    final ReactiveVariable parent = reVars.get(parentId);
 
-    final int idVariableStatus = rs.getInt("idVariableStatus");
-
-    final String query = "SELECT variableId FROM variable JOIN variable_dependency ON variable_dependency.dependentVariable = variable.idVariable WHERE variable_dependency.idVariableStatus = ?"; //$NON-NLS-1$
-    try (final PreparedStatement stmt = connection.prepareStatement(query)) {
-      stmt.setInt(1, idVariableStatus);
-
-      try (ResultSet rs2 = stmt.executeQuery()) {
-        while (rs2.next()) {
-          final String id = rs2.getString(1);
-          r.setConnectedWith(UUID.fromString(id));
-        }
-      }
+    if (child == null || parent == null) {
+      return false;
     }
 
-    return r;
+    // parent is directly connected with child
+    if (parent.isConnectedWith(childId)) {
+      return true;
+    }
+
+    // recursively check children of parents
+    final Set<UUID> potentialParents = parent.getConnectedWith();
+    boolean result = false;
+    for (final UUID potentialParentId : potentialParents) {
+      result = result || isNodeChildOf(pointInTime, childId, potentialParentId);
+    }
+    return result;
   }
 
-  public UUID getIdFromName(final String name) {
-    // TODO variables should be referenced by their IDs
-
-    final String sql = "SELECT variableId FROM variable WHERE variableName = ?"; //$NON-NLS-1$
+  public boolean isNodeConnectionActive(final int pointInTime, final UUID srcId, final UUID destId) {
+    boolean result = false;
+    final String sql = "SELECT dependencyGraphHistoryType, additionalInformation FROM " + REACTIVE_VARIABLES_TABLE_NAME + " WHERE pointInTime = ?"; //$NON-NLS-1$ //$NON-NLS-2$
     try (final PreparedStatement stmt = connection.prepareStatement(sql)) {
-      stmt.setString(1, name);
+      stmt.setInt(1, pointInTime);
       try (final ResultSet rs = stmt.executeQuery()) {
         while (rs.next()) {
-          return UUID.fromString(rs.getString("variableId")); //$NON-NLS-1$
+          final DependencyGraphHistoryType type = DependencyGraphHistoryType.values()[rs.getInt("dependencyGraphHistoryType")]; //$NON-NLS-1$
+          final String additionalInformation = rs.getString("additionalInformation"); //$NON-NLS-1$
+          if (type != DependencyGraphHistoryType.NODE_ATTACHED || additionalInformation == null || additionalInformation.equals("")) { //$NON-NLS-1$
+            continue;
+          }
+          final String[] ids = additionalInformation.split("->"); //$NON-NLS-1$
+          final UUID id1 = UUID.fromString(ids[0]);
+          final UUID id2 = UUID.fromString(ids[1]);
+          if (id1.equals(srcId) && id2.equals(destId)) {
+            result = true;
+            break;
+          }
+        }
+      }
+    }
+    catch (final SQLException e) {
+      Activator.log(e);
+    }
+    return result;
+  }
+
+  public DependencyGraphHistoryType getDependencyGraphHistoryType(final int pointInTime) {
+    final String sql = "SELECT dependencyGraphHistoryType FROM " + REACTIVE_VARIABLES_TABLE_NAME + " WHERE pointInTime = ? LIMIT 1"; //$NON-NLS-1$ //$NON-NLS-2$
+    try (final PreparedStatement stmt = connection.prepareStatement(sql)) {
+      stmt.setInt(1, pointInTime);
+      try (final ResultSet rs = stmt.executeQuery()) {
+        while (rs.next()) {
+          return DependencyGraphHistoryType.values()[rs.getInt("dependencyGraphHistoryType")]; //$NON-NLS-1$
         }
       }
     }
@@ -357,6 +341,44 @@ public class DatabaseHelper {
       Activator.log(e);
     }
     return null;
+  }
+
+  public UUID getIdFromName(final String name) {
+    final String sql = "SELECT id FROM " + REACTIVE_VARIABLES_TABLE_NAME + " WHERE name = ? AND pointInTime = ?"; //$NON-NLS-1$ //$NON-NLS-2$
+    try (final PreparedStatement stmt = connection.prepareStatement(sql)) {
+      stmt.setString(1, name);
+      stmt.setInt(2, getLastPointInTime());
+      try (final ResultSet rs = stmt.executeQuery()) {
+        while (rs.next()) {
+          return UUID.fromString(rs.getString("id")); //$NON-NLS-1$
+        }
+      }
+    }
+    catch (final SQLException e) {
+      Activator.log(e);
+    }
+    return null;
+  }
+
+  public DependencyGraph getDependencyGraph(final int pointInTime) {
+    final List<ReactiveVariable> variables = getReVars(pointInTime);
+    final Map<UUID, Vertex> vertices = new HashMap<>();
+
+    for (final ReactiveVariable variable : variables) {
+      final Vertex vertex = new Vertex(variable.getId(), variable);
+      vertices.put(variable.getId(), vertex);
+    }
+
+    for (final ReactiveVariable variable : variables) {
+      final Vertex vertex = vertices.get(variable.getId());
+
+      for (final UUID id : variable.getConnectedWith()) {
+        final Vertex dependent = vertices.get(id);
+        vertex.addConnectedVertex(dependent);
+      }
+    }
+
+    return new DependencyGraph(vertices.values());
   }
 
   public void close() {
