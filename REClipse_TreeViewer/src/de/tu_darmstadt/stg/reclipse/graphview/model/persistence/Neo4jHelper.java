@@ -135,6 +135,11 @@ public class Neo4jHelper {
       pointInTime++;
 
       final Node variable = findVariableNode(r);
+
+      final Node status = db.createNode(Label.STATUS);
+      status.setProperty("value", r.getValueString());
+
+      updateVariableStatus(r.getId(), variable, status);
       createEvent(variable, r);
 
       tx.success();
