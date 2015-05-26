@@ -49,6 +49,7 @@ public class Neo4jHelper {
   private void init() {
     final File dbFile = configuration.getDatabaseFilesDir().append(id + ".db").toFile(); //$NON-NLS-1$
     this.db = new GraphDatabaseFactory().newEmbeddedDatabase(dbFile.getAbsolutePath());
+    // this.db = new TestGraphDatabaseFactory().newImpermanentDatabase();
 
     this.variables = new HashMap<>();
     this.lastStatus = new HashMap<>();

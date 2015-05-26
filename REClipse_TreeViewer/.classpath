@@ -40,5 +40,7 @@
 	<classpathentry kind="lib" path="lib/neo4j/parboiled-scala_2.10-1.1.7.jar"/>
 	<classpathentry kind="lib" path="lib/neo4j/scala-library-2.10.5.jar"/>
 	<classpathentry kind="lib" path="lib/neo4j/server-api-2.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/neo4j/neo4j-io-2.2.1-tests.jar"/>
+	<classpathentry kind="lib" path="lib/neo4j/neo4j-kernel-2.2.1-tests.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
