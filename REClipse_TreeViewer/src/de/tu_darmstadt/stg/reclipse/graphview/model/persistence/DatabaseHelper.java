@@ -36,8 +36,8 @@ public class DatabaseHelper {
   private static List<String> databaseSetupQueries = Arrays
           .asList("CREATE TABLE variable (idVariable  INTEGER NOT NULL PRIMARY KEY, variableId varchar(36) NOT NULL, variableName varchar(200), reactiveType integer(10), typeSimple varchar(200), typeFull varchar(200), timeFrom integer(10) NOT NULL)", //$NON-NLS-1$
                   "CREATE TABLE variable_status (idVariableStatus  INTEGER NOT NULL PRIMARY KEY, idVariable integer(10) NOT NULL, valueString varchar(200), timeFrom integer(10) NOT NULL, timeTo integer(10) NOT NULL)", //$NON-NLS-1$
-                  "CREATE TABLE event (pointInTime  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, type integer(10) NOT NULL, idVariable integer(10) NOT NULL, dependentVariable integer(10), exception varchar(200))", //$NON-NLS-1$
-                  "CREATE TABLE variable_dependency (idVariableStatus integer(10) NOT NULL, dependentVariable integer(10) NOT NULL)"); //$NON-NLS-1$
+                  "CREATE TABLE event (pointInTime  INTEGER NOT NULL PRIMARY KEY, type integer(10) NOT NULL, idVariable integer(10) NOT NULL, dependentVariable integer(10), exception varchar(200))", //$NON-NLS-1$
+                  "CREATE TABLE variable_dependency (idVariableStatus integer(10) NOT NULL, dependentVariable integer(10) NOT NULL, PRIMARY KEY (idVariableStatus, dependentVariable))"); //$NON-NLS-1$
 
   private final List<DependencyGraphHistoryChangedListener> listeners = new CopyOnWriteArrayList<>();
   private final File dbFile;
@@ -355,6 +355,7 @@ public class DatabaseHelper {
     final String insertStmt = "INSERT INTO variable_status (idVariable, valueString, timeFrom, timeTo) VALUES (?, ?, ?, ?)"; //$NON-NLS-1$
 
     try (PreparedStatement stmt = connection.prepareStatement(insertStmt)) {
+
       stmt.setInt(1, idVariable);
       stmt.setString(2, variable.getValueString());
       stmt.setInt(3, lastPointInTime);
@@ -581,7 +582,8 @@ public class DatabaseHelper {
   }
 
   protected String getJdbcUrl() {
-    return "jdbc:sqlite:" + dbFile.getAbsolutePath(); //$NON-NLS-1$
+    //return "jdbc:sqlite:" + dbFile.getAbsolutePath(); //$NON-NLS-1$
+    return "jdbc:sqlite::memory:";
   }
 
   protected String getJdbcClassName() {
