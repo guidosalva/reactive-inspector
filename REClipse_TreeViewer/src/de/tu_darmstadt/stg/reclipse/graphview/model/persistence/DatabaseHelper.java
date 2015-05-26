@@ -38,7 +38,7 @@ public class DatabaseHelper {
                   "CREATE TABLE variable_status (idVariableStatus  INTEGER NOT NULL PRIMARY KEY, idVariable integer(10) NOT NULL, valueString varchar(200))", //$NON-NLS-1$
                   "CREATE TABLE event (pointInTime  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, type integer(10) NOT NULL, idVariable integer(10) NOT NULL, dependentVariable integer(10), exception varchar(200))", //$NON-NLS-1$
                   "CREATE TABLE xref_event_status (pointInTime integer(10) NOT NULL, idVariableStatus integer(10) NOT NULL, PRIMARY KEY (pointInTime, idVariableStatus))", //$NON-NLS-1$
-                  "CREATE TABLE variable_dependency (idVariableStatus integer(10) NOT NULL, dependentVariable integer(10) NOT NULL)"); //$NON-NLS-1$
+                  "CREATE TABLE variable_dependency (idVariableStatus integer(10) NOT NULL, dependentVariable integer(10) NOT NULL, PRIMARY KEY(idVariableStatus, dependentVariable))"); //$NON-NLS-1$
 
   private final List<DependencyGraphHistoryChangedListener> listeners = new CopyOnWriteArrayList<>();
   private final File dbFile;
