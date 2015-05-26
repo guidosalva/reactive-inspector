@@ -2,6 +2,7 @@ package de.tu_darmstadt.stg.reclipse.graphview.model.persistence;
 
 import de.tu_darmstadt.stg.reclipse.graphview.model.ISessionConfiguration;
 import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.DependencyGraph.Vertex;
+import de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariableType;
 
@@ -36,7 +37,7 @@ public class Neo4jHelper {
   private int pointInTime = 0;
   private Node lastEvent;
   private Map<UUID, Node> variables;
-  private Map<UUID, Relationship> lastStatusRelations;
+  private Map<UUID, Node> lastStatus;
 
   public Neo4jHelper(final String id, final ISessionConfiguration configuration) {
     this.id = id;
@@ -50,7 +51,7 @@ public class Neo4jHelper {
     this.db = new GraphDatabaseFactory().newEmbeddedDatabase(dbFile.getAbsolutePath());
 
     this.variables = new HashMap<>();
-    this.lastStatusRelations = new HashMap<>();
+    this.lastStatus = new HashMap<>();
   }
 
   public void createNode(final ReactiveVariable r) {
@@ -67,13 +68,13 @@ public class Neo4jHelper {
 
       final Node status = db.createNode(Label.STATUS);
       status.setProperty("value", r.getValueString());
+      status.setProperty("from", pointInTime);
+      status.setProperty("to", Integer.MAX_VALUE);
 
-      final Relationship relationship = variable.createRelationshipTo(status, RelType.HAS);
-      relationship.setProperty("from", pointInTime);
-      relationship.setProperty("to", Integer.MAX_VALUE);
+      variable.createRelationshipTo(status, RelType.HAS);
 
       variables.put(r.getId(), variable);
-      lastStatusRelations.put(r.getId(), relationship);
+      lastStatus.put(r.getId(), status);
 
       createEvent(variable, r);
 
@@ -163,16 +164,17 @@ public class Neo4jHelper {
   }
 
   private void updateVariableStatus(final UUID id, final Node variable, final Node status) {
-    if (lastStatusRelations.containsKey(id)) {
-      final Relationship last = lastStatusRelations.get(id);
+    if (lastStatus.containsKey(id)) {
+      final Node last = lastStatus.get(id);
       last.setProperty("to", (pointInTime - 1));
     }
 
-    final Relationship relationship = variable.createRelationshipTo(status, RelType.HAS);
-    relationship.setProperty("from", pointInTime);
-    relationship.setProperty("to", Integer.MAX_VALUE);
+    status.setProperty("from", pointInTime);
+    status.setProperty("to", Integer.MAX_VALUE);
 
-    lastStatusRelations.put(id, relationship);
+    variable.createRelationshipTo(status, RelType.HAS);
+
+    lastStatus.put(id, status);
   }
 
   private void createEvent(final Node variable, final ReactiveVariable r) {
@@ -222,15 +224,17 @@ public class Neo4jHelper {
   private Map<String, Vertex> createVertices(final int time) {
     final Map<String, Vertex> vertices = new HashMap<>();
 
+    final Node event = db.findNode(Label.EVENT, "time", time);
+
     final Map<String, Object> params = new HashMap<>();
     params.put("time", time);
-    final String query = "MATCH (v:VARIABLE)-[r:HAS]->(s:STATUS) WHERE v.from <= {time} AND r.from <= {time} AND r.to >= {time} return v, s";
+    final String query = "MATCH (v:VARIABLE)-[r:HAS]->(s:STATUS) WHERE v.from <= {time} AND s.from <= {time} AND s.to >= {time} return v, s";
     try (final Result result = db.execute(query, params)) {
       while (result.hasNext()) {
         final Map<String, Object> row = result.next();
         final Node variable = (Node) row.get("v");
         final Node status = (Node) row.get("s");
-        final ReactiveVariable r = createReVar(variable, status);
+        final ReactiveVariable r = createReVar(variable, status, event);
         final Vertex vertex = new Vertex(r.getId(), r);
         vertices.put(vertex.getId().toString(), vertex);
       }
@@ -239,7 +243,7 @@ public class Neo4jHelper {
     return vertices;
   }
 
-  private ReactiveVariable createReVar(final Node variable, final Node status) {
+  private ReactiveVariable createReVar(final Node variable, final Node status, final Node event) {
     final ReactiveVariable r = new ReactiveVariable();
     r.setId(UUID.fromString((String) variable.getProperty("id")));
     r.setName((String) variable.getProperty("name"));
@@ -247,6 +251,7 @@ public class Neo4jHelper {
     r.setTypeSimple((String) variable.getProperty("typeSimple"));
     r.setTypeFull((String) variable.getProperty("typeSimple"));
     r.setValueString((String) status.getProperty("value"));
+    r.setDependencyGraphHistoryType(DependencyGraphHistoryType.values()[(Integer) event.getProperty("type")]);
 
     if (status.hasProperty("exception")) {
       r.setAdditionalInformation((String) status.getProperty("exception"));
