@@ -15,6 +15,7 @@ import java.util.Properties;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -153,7 +154,7 @@ public class Activator extends AbstractUIPlugin {
    *          throwable to log
    */
   public static void log(final Throwable t) {
-    log(new Status(IStatus.ERROR, PLUGIN_ID, ERROR, Texts.Log_Error, t));
+    log(new Status(IStatus.ERROR, PLUGIN_ID, ERROR, NLS.bind(Texts.Log_Error, t.getMessage()), t));
   }
 
   /**

@@ -9,6 +9,7 @@ import de.tu_darmstadt.stg.reclipse.graphview.view.graph.Stylesheet;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -74,19 +75,18 @@ public class ContentModel {
   public List<ReactiveVariableVertex> getVertices() {
     final List<ReactiveVariableVertex> vertices = new ArrayList<>();
 
-    // sort by name
-    // Collections.sort(reVars, new ReactiveVariableNameComparator());
-
     for (final Vertex vertex : dependencyGraph.getVertices()) {
       final ReactiveVariable variable = vertex.getVariable();
       final boolean variableChanged = hasVariableChanged(variable);
 
       // create reactive variable vertex
       final boolean isHighlighted = variableChanged && highlightChange;
-      final ReactiveVariableVertex variableVertext = new ReactiveVariableVertex(variable, isHighlighted);
+      final ReactiveVariableVertex variableVertext = new ReactiveVariableVertex(vertex, isHighlighted);
 
       vertices.add(variableVertext);
     }
+
+    Collections.sort(vertices);
 
     return vertices;
   }
@@ -117,10 +117,12 @@ public class ContentModel {
       final String style = Stylesheet.calculateStyleFromColor(color);
 
       // create vertex instance
-      final ReactiveVariableVertex variableVertext = new ReactiveVariableVertex(variable, style);
+      final ReactiveVariableVertex variableVertext = new ReactiveVariableVertex(vertex, style);
 
       vertices.add(variableVertext);
     }
+
+    Collections.sort(vertices);
 
     return vertices;
   }

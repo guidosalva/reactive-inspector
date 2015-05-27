@@ -469,7 +469,7 @@ public class DatabaseHelper {
     r.setName(rs.getString("variableName")); //$NON-NLS-1$
     r.setReactiveVariableType(ReactiveVariableType.values()[rs.getInt("reactiveType")]); //$NON-NLS-1$
     r.setPointInTime(pointInTime);
-    r.setDependencyGraphHistoryType(DependencyGraphHistoryType.values()[rs.getInt("historyType")]); //$NON-NLS-1$
+    //r.setDependencyGraphHistoryType(DependencyGraphHistoryType.values()[rs.getInt("historyType")]); //$NON-NLS-1$
     r.setAdditionalInformation(""); // TODO load additional information field
     r.setActive(true); // TODO load active field
     r.setTypeSimple(rs.getString("typeSimple")); //$NON-NLS-1$
@@ -516,24 +516,27 @@ public class DatabaseHelper {
   }
 
   public DependencyGraph getDependencyGraph(final int pointInTime) throws PersistenceException {
-    final Map<Integer, Vertex> verticesByVariable = new HashMap<>();
-    final Map<Integer, Vertex> verticesByStatus = new HashMap<>();
+    final List<Vertex> vertices = loadVertices(pointInTime);
+    connectVertices(vertices, pointInTime);
+    return new DependencyGraph(vertices);
+  }
 
-    final String query = "SELECT variable.idVariable AS idVariable, variable.variableId AS variableId, variable.variableName AS variableName, variable.reactiveType AS reactiveType, event.type AS historyType, variable.typeSimple AS typeSimple, variable.typeFull AS typeFull, variable_status.valueString AS valueString, variable_status.idVariableStatus AS idVariableStatus FROM variable JOIN variable_status ON variable_status.idVariable = variable.idVariable JOIN event ON event.pointInTime = ? WHERE variable.timeFrom <= ? AND variable_status.timeFrom <= ? AND variable_status.timeTo >= ?"; //$NON-NLS-1$
+  private List<Vertex> loadVertices(final int pointInTime) throws PersistenceException {
+    final List<Vertex> vertices = new ArrayList<>();
+
+    final String query = "SELECT variable.idVariable AS idVariable, variable.variableId AS variableId, variable.variableName AS variableName, variable.reactiveType AS reactiveType, variable.typeSimple AS typeSimple, variable.typeFull AS typeFull, variable_status.valueString AS valueString, variable.timeFrom AS timeFrom FROM variable JOIN variable_status ON variable_status.idVariable = variable.idVariable WHERE variable.timeFrom <= ? AND variable_status.timeFrom <= ? AND variable_status.timeTo >= ?"; //$NON-NLS-1$
     try (final PreparedStatement stmt = connection.prepareStatement(query)) {
       stmt.setInt(1, pointInTime);
       stmt.setInt(2, pointInTime);
       stmt.setInt(3, pointInTime);
-      stmt.setInt(4, pointInTime);
 
       try (final ResultSet rs = stmt.executeQuery()) {
         while (rs.next()) {
           final int idVariable = rs.getInt("idVariable"); //$NON-NLS-1$
-          final int idVariableStatus = rs.getInt("idVariableStatus"); //$NON-NLS-1$
+          final int created = rs.getInt("timeFrom"); //$NON-NLS-1$
           final ReactiveVariable r = createReVar(rs, pointInTime);
-          final Vertex vertex = new Vertex(r.getId(), r);
-          verticesByVariable.put(idVariable, vertex);
-          verticesByStatus.put(idVariableStatus, vertex);
+          final Vertex vertex = new Vertex(idVariable, created, r);
+          vertices.add(vertex);
         }
       }
     }
@@ -541,18 +544,32 @@ public class DatabaseHelper {
       throw new PersistenceException(e);
     }
 
-    final String dependencyQuery = "SELECT variable_dependency.idVariableStatus AS idVariableStatus, variable_dependency.dependentVariable AS dependentVariable FROM variable_dependency JOIN variable_status ON variable_status.idVariableStatus = variable_dependency.idVariableStatus WHERE variable_status.timeFrom <= ? AND variable_status.timeTo >= ?"; //$NON-NLS-1$
+    return vertices;
+  }
+
+  private void connectVertices(final List<Vertex> vertices, final int pointInTime) throws PersistenceException {
+    final Map<Integer, Vertex> vertexMap = new HashMap<>();
+
+    for (final Vertex vertex : vertices) {
+      vertexMap.put(vertex.getId(), vertex);
+    }
+
+    final String dependencyQuery = "SELECT variable_status.idVariable AS idVariable, variable_dependency.dependentVariable AS dependentVariable FROM variable_dependency JOIN variable_status ON variable_status.idVariableStatus = variable_dependency.idVariableStatus WHERE variable_status.timeFrom <= ? AND variable_status.timeTo >= ?"; //$NON-NLS-1$
     try (final PreparedStatement stmt = connection.prepareStatement(dependencyQuery)) {
       stmt.setInt(1, pointInTime);
       stmt.setInt(2, pointInTime);
 
       try (final ResultSet rs = stmt.executeQuery()) {
         while (rs.next()) {
-          final int idStatus = rs.getInt("idVariableStatus"); //$NON-NLS-1$
+          final int idVariable = rs.getInt("idVariable"); //$NON-NLS-1$
           final int dependentId = rs.getInt("dependentVariable"); //$NON-NLS-1$
 
-          final Vertex v = verticesByStatus.get(idStatus);
-          final Vertex dependent = verticesByVariable.get(dependentId);
+          if (!vertexMap.containsKey(idVariable)) {
+            throw new PersistenceException("vertex for variable with internal id " + idVariable + " is missing"); //$NON-NLS-1$ //$NON-NLS-2$
+          }
+
+          final Vertex v = vertexMap.get(idVariable);
+          final Vertex dependent = vertexMap.get(dependentId);
           v.addConnectedVertex(dependent);
         }
       }
@@ -560,8 +577,6 @@ public class DatabaseHelper {
     catch (final SQLException e) {
       throw new PersistenceException(e);
     }
-
-    return new DependencyGraph(verticesByVariable.values());
   }
 
   public void close() {

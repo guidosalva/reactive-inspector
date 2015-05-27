@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 public class DependencyGraph {
 
@@ -26,12 +25,14 @@ public class DependencyGraph {
 
   public static class Vertex {
 
-    private final UUID id;
+    private final int id;
+    private final int created;
     private final ReactiveVariable variable;
     private final Set<Vertex> connected = new HashSet<>();
 
-    public Vertex(final UUID id, final ReactiveVariable variable) {
+    public Vertex(final int id, final int created, final ReactiveVariable variable) {
       this.id = id;
+      this.created = created;
       this.variable = variable;
     }
 
@@ -43,8 +44,12 @@ public class DependencyGraph {
       return Collections.unmodifiableSet(connected);
     }
 
-    public UUID getId() {
+    public int getId() {
       return id;
+    }
+
+    public int getCreated() {
+      return created;
     }
 
     public ReactiveVariable getVariable() {
@@ -55,7 +60,7 @@ public class DependencyGraph {
     public int hashCode() {
       final int prime = 31;
       int result = 1;
-      result = prime * result + ((id == null) ? 0 : id.hashCode());
+      result = prime * result + id;
       return result;
     }
 
@@ -71,12 +76,7 @@ public class DependencyGraph {
         return false;
       }
       final Vertex other = (Vertex) obj;
-      if (id == null) {
-        if (other.id != null) {
-          return false;
-        }
-      }
-      else if (!id.equals(other.id)) {
+      if (id != other.id) {
         return false;
       }
       return true;

@@ -1,43 +1,51 @@
 package de.tu_darmstadt.stg.reclipse.graphview.view;
 
+import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.DependencyGraph.Vertex;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.Stylesheet;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
 import com.mxgraph.view.mxGraph;
 
 /**
- * 
+ *
  * @author Sebastian Ruhleder <sebastian.ruhleder@gmail.com>
- * 
+ *
  */
-public class ReactiveVariableVertex {
+public class ReactiveVariableVertex implements Comparable<ReactiveVariableVertex> {
 
-  protected ReactiveVariable var;
+  private final Vertex vertex;
+  private final ReactiveVariable var;
 
   private boolean isHighlighted;
 
   private String customStyle;
 
-  public ReactiveVariableVertex(final ReactiveVariable v) {
-    this.var = v;
+  public ReactiveVariableVertex(final Vertex v) {
+    this.vertex = v;
+    this.var = v.getVariable();
     this.isHighlighted = false;
     this.customStyle = null;
   }
 
-  public ReactiveVariableVertex(final ReactiveVariable v, final String cs) {
+  public ReactiveVariableVertex(final Vertex v, final String cs) {
     this(v);
 
     this.customStyle = cs;
   }
 
-  public ReactiveVariableVertex(final ReactiveVariable v, final boolean h) {
+  public ReactiveVariableVertex(final Vertex v, final boolean h) {
     this(v);
 
     this.isHighlighted = h;
   }
 
+  @Override
+  public int compareTo(final ReactiveVariableVertex other) {
+    return Integer.compare(vertex.getCreated(), other.vertex.getCreated());
+  }
+
   /**
-   * 
+   *
    * @return The style to be used when displaying this vertex in the graph.
    */
   public String getStyle() {
@@ -68,7 +76,7 @@ public class ReactiveVariableVertex {
 
   /**
    * Inserts the vertex into the graph.
-   * 
+   *
    * @param graph
    *          A graph.
    * @return The cell representing the vertex in the graph.
@@ -88,7 +96,7 @@ public class ReactiveVariableVertex {
   }
 
   /**
-   * 
+   *
    * @return A reactive variable.
    */
   public ReactiveVariable getVar() {
