@@ -1,17 +1,19 @@
 package de.tu_darmstadt.stg.reclipse.graphview.provider;
 
-import de.tu_darmstadt.stg.reclipse.graphview.model.ReactiveVariableNameComparator;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
+import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.DependencyGraph;
+import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.DependencyGraph.Vertex;
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableVertex;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.Heatmap;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.Stylesheet;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -25,17 +27,13 @@ public class ContentModel {
   private final SessionContext ctx;
 
   private int pointInTime = 0;
-
   private boolean highlightChange;
 
-  private final Map<String, String> library;
-
-  private final Map<String, Boolean> state;
+  private Map<UUID, String> library = new HashMap<>();
+  private DependencyGraph dependencyGraph = DependencyGraph.emptyGraph();
 
   public ContentModel(final SessionContext ctx) {
     this.ctx = ctx;
-    this.library = new HashMap<>();
-    this.state = new HashMap<>();
     this.highlightChange = false;
   }
 
@@ -52,6 +50,21 @@ public class ContentModel {
   public void setPointInTime(final int newPointInTime, final boolean propagateChange) {
     this.pointInTime = newPointInTime;
     this.highlightChange = propagateChange;
+
+    updateLibary();
+
+    this.dependencyGraph = ctx.getPersistence().getDependencyGraph(newPointInTime);
+  }
+
+  private void updateLibary() {
+    library = new HashMap<>();
+
+    if (dependencyGraph != null) {
+      for (final Vertex vertex : dependencyGraph.getVertices()) {
+        final ReactiveVariable variable = vertex.getVariable();
+        library.put(variable.getId(), variable.getValueString());
+      }
+    }
   }
 
   /**
@@ -61,75 +74,52 @@ public class ContentModel {
   public List<ReactiveVariableVertex> getVertices() {
     final List<ReactiveVariableVertex> vertices = new ArrayList<>();
 
-    // make sure that point in time is in a valid range
-    if (pointInTime < 1 || pointInTime > ctx.getPersistence().getLastPointInTime()) {
-      return vertices;
-    }
-
-    // get reactive variables
-    final List<ReactiveVariable> reVars = ctx.getPersistence().getReVars(pointInTime);
-
     // sort by name
-    Collections.sort(reVars, new ReactiveVariableNameComparator());
+    // Collections.sort(reVars, new ReactiveVariableNameComparator());
 
-    // set flag if library is empty
-    final boolean emptyLibrary = library.isEmpty();
-
-    for (final ReactiveVariable reVar : reVars) {
-      // return empty map if not all reactive variables are created yet
-      if (reVar == null) {
-        return new ArrayList<>();
-      }
-
-      // extract name and value
-      final String name = reVar.getName();
-      final String value = reVar.getValueString();
-
-      if (library.containsKey(name)) {
-        state.put(name, !library.get(name).equals(value));
-      }
-      else {
-        state.put(name, !emptyLibrary);
-      }
-
-      // update value in library
-      library.put(name, value == null ? "null" : value); //$NON-NLS-1$
+    for (final Vertex vertex : dependencyGraph.getVertices()) {
+      final ReactiveVariable variable = vertex.getVariable();
+      final boolean variableChanged = hasVariableChanged(variable);
 
       // create reactive variable vertex
-      final boolean isHighlighted = state.get(name) && highlightChange;
-      final ReactiveVariableVertex vertex = new ReactiveVariableVertex(reVar, isHighlighted);
+      final boolean isHighlighted = variableChanged && highlightChange;
+      final ReactiveVariableVertex variableVertext = new ReactiveVariableVertex(variable, isHighlighted);
 
-      vertices.add(vertex);
+      vertices.add(variableVertext);
     }
 
     return vertices;
   }
 
+  private boolean hasVariableChanged(final ReactiveVariable variable) {
+    if (library.containsKey(variable.getId())) {
+      final String oldValue = library.get(variable.getId());
+      return !Objects.equals(oldValue, variable.getValueString());
+    }
+    else {
+      return !library.isEmpty();
+    }
+  }
+
   public List<ReactiveVariableVertex> getHeatmapVertices() {
     final List<ReactiveVariableVertex> vertices = new ArrayList<>();
-
-    // make sure that point in time is in a valid range
-    if (pointInTime < 1 || pointInTime > ctx.getPersistence().getLastPointInTime()) {
-      return vertices;
-    }
-
-    // get reactive variables
-    final List<ReactiveVariable> reVars = ctx.getPersistence().getReVars(pointInTime);
 
     // generate heatmap based on point in time
     final Map<String, String> heatmap = Heatmap.generateHeatmap(pointInTime, ctx);
 
-    for (final ReactiveVariable reVar : reVars) {
+    for (final Vertex vertex : dependencyGraph.getVertices()) {
+      final ReactiveVariable variable = vertex.getVariable();
+
       // get color for reactive variable
-      final String color = heatmap.get(reVar.getName());
+      final String color = heatmap.get(variable.getName());
 
       // generate style from color
       final String style = Stylesheet.calculateStyleFromColor(color);
 
       // create vertex instance
-      final ReactiveVariableVertex vertex = new ReactiveVariableVertex(reVar, style);
+      final ReactiveVariableVertex variableVertext = new ReactiveVariableVertex(variable, style);
 
-      vertices.add(vertex);
+      vertices.add(variableVertext);
     }
 
     return vertices;
@@ -142,21 +132,14 @@ public class ContentModel {
   public Map<UUID, Set<UUID>> getEdges() {
     final Map<UUID, Set<UUID>> edges = new HashMap<>();
 
-    // make sure that point in time is in a valid range
-    if (pointInTime < 1 || pointInTime > ctx.getPersistence().getLastPointInTime()) {
-      return edges;
-    }
+    for (final Vertex vertex : dependencyGraph.getVertices()) {
+      final Set<UUID> connectedWith = new HashSet<>();
 
-    // get reactive variables
-    final List<ReactiveVariable> reVars = ctx.getPersistence().getReVars(pointInTime);
-
-    for (final ReactiveVariable reVar : reVars) {
-      // return empty map if not all reactive variables are created yet
-      if (reVar == null) {
-        return new HashMap<>();
+      for (final Vertex connectedVertex : vertex.getConnectedVertices()) {
+        connectedWith.add(connectedVertex.getVariable().getId());
       }
 
-      edges.put(reVar.getId(), reVar.getConnectedWith());
+      edges.put(vertex.getVariable().getId(), connectedWith);
     }
 
     return edges;

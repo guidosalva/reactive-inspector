@@ -7,7 +7,6 @@ import de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariableType;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -40,17 +39,16 @@ public class DatabaseHelper {
                   "CREATE TABLE variable_dependency (idVariableStatus integer(10) NOT NULL, dependentVariable integer(10) NOT NULL, PRIMARY KEY (idVariableStatus, dependentVariable))"); //$NON-NLS-1$
 
   private final List<DependencyGraphHistoryChangedListener> listeners = new CopyOnWriteArrayList<>();
-  private final File dbFile;
+  private final String sessionId;
   private final Map<UUID, Integer> variableMap = new HashMap<>();
   private final Map<Integer, Integer> variableStatusMap = new HashMap<>();
 
   private Connection connection;
 
-  // cache this field locally, because it is queried quite often
   private int lastPointInTime = 0;
 
-  public DatabaseHelper(final String id, final ISessionConfiguration configuration) {
-    this.dbFile = configuration.getDatabaseFilesDir().append(id + ".db").toFile(); //$NON-NLS-1$
+  public DatabaseHelper(final String sessionId, final ISessionConfiguration configuration) {
+    this.sessionId = sessionId;
 
     establishConnection();
 
@@ -72,8 +70,6 @@ public class DatabaseHelper {
    */
   private void establishConnection() {
     try {
-      dbFile.getParentFile().mkdirs();
-
       // establish DB connection
       Class.forName(JDBC_CLASS_NAME);
       final String jdbcUrl = getJdbcUrl();
@@ -159,7 +155,7 @@ public class DatabaseHelper {
 
       final int idVariable = createVariable(r);
       createVariableStatus(r, idVariable);
-      createEvent(r, idVariable, null);
+      createEvent(r, idVariable, null, null);
 
       r.setPointInTime(lastPointInTime);
 
@@ -186,7 +182,7 @@ public class DatabaseHelper {
       final int oldVariableStatus = findActiveVariableStatus(idVariable);
 
       createVariableStatus(r, idVariable, oldVariableStatus, dependentVariable);
-      createEvent(r, idVariable, dependentVariable);
+      createEvent(r, idVariable, dependentVariable, null);
 
       final String additionalInformation = r.getId() + "->" + dependentId; //$NON-NLS-1$
       r.setPointInTime(lastPointInTime);
@@ -212,7 +208,7 @@ public class DatabaseHelper {
       final int idVariable = findVariableById(r.getId());
       final int oldVariableStatus = findActiveVariableStatus(idVariable);
       createVariableStatus(r, idVariable, oldVariableStatus);
-      createEvent(r, idVariable, null);
+      createEvent(r, idVariable, null, null);
 
       r.setPointInTime(lastPointInTime);
 
@@ -237,7 +233,7 @@ public class DatabaseHelper {
       final int oldVariableStatus = findActiveVariableStatus(idVariable);
 
       createVariableStatus(r, idVariable, oldVariableStatus);
-      createEvent(r, idVariable, null);
+      createEvent(r, idVariable, null, exception);
 
       r.setPointInTime(lastPointInTime);
 
@@ -261,7 +257,7 @@ public class DatabaseHelper {
       final int idVariable = findVariableById(r.getId());
       final int oldVariableStatus = findActiveVariableStatus(idVariable);
       createVariableStatus(r, idVariable, oldVariableStatus);
-      createEvent(r, idVariable, null);
+      createEvent(r, idVariable, null, null);
 
       r.setPointInTime(lastPointInTime);
 
@@ -285,7 +281,7 @@ public class DatabaseHelper {
       final int idVariable = findVariableById(r.getId());
       final int oldVariableStatus = findActiveVariableStatus(idVariable);
       createVariableStatus(r, idVariable, oldVariableStatus);
-      createEvent(r, idVariable, null);
+      createEvent(r, idVariable, null, null);
 
       r.setPointInTime(lastPointInTime);
 
@@ -416,7 +412,7 @@ public class DatabaseHelper {
     return id;
   }
 
-  public void createEvent(final ReactiveVariable variable, final int idVariable, final Integer dependentVariable) throws PersistenceException {
+  public void createEvent(final ReactiveVariable variable, final int idVariable, final Integer dependentVariable, final Exception exception) throws PersistenceException {
     final String insertStmt = "INSERT INTO event (pointInTime, type, idVariable, dependentVariable, exception) VALUES (?, ? ,?, ?, ?)"; //$NON-NLS-1$
 
     try (PreparedStatement stmt = connection.prepareStatement(insertStmt)) {
@@ -432,7 +428,7 @@ public class DatabaseHelper {
       }
 
       if (variable.getDependencyGraphHistoryType() == DependencyGraphHistoryType.NODE_EVALUATION_ENDED_WITH_EXCEPTION) {
-        stmt.setString(5, variable.getAdditionalInformation());
+        stmt.setString(5, exception.toString());
       }
       else {
         stmt.setNull(5, Types.VARCHAR);
@@ -461,7 +457,7 @@ public class DatabaseHelper {
       }
     }
     catch (final SQLException e) {
-      throw new PersistenceException();
+      throw new PersistenceException(e);
     }
 
     return variables;
@@ -542,7 +538,7 @@ public class DatabaseHelper {
       }
     }
     catch (final SQLException e) {
-      throw new PersistenceException();
+      throw new PersistenceException(e);
     }
 
     final String dependencyQuery = "SELECT variable_dependency.idVariableStatus AS idVariableStatus, variable_dependency.dependentVariable AS dependentVariable FROM variable_dependency JOIN variable_status ON variable_status.idVariableStatus = variable_dependency.idVariableStatus WHERE variable_status.timeFrom <= ? AND variable_status.timeTo >= ?"; //$NON-NLS-1$
@@ -565,9 +561,7 @@ public class DatabaseHelper {
       throw new PersistenceException(e);
     }
 
-    final DependencyGraph dependencyGraph = new DependencyGraph();
-    dependencyGraph.addVertices(verticesByVariable.values());
-    return dependencyGraph;
+    return new DependencyGraph(verticesByVariable.values());
   }
 
   public void close() {
@@ -582,8 +576,8 @@ public class DatabaseHelper {
   }
 
   protected String getJdbcUrl() {
-    //return "jdbc:sqlite:" + dbFile.getAbsolutePath(); //$NON-NLS-1$
-    return "jdbc:sqlite::memory:";
+    // shared in-memory database
+    return "jdbc:sqlite:file:" + sessionId + "?mode=memory&cache=shared"; //$NON-NLS-1$ //$NON-NLS-2$
   }
 
   protected String getJdbcClassName() {

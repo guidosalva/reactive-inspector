@@ -10,14 +10,14 @@ import java.util.UUID;
 
 public class DependencyGraph {
 
-  private final Set<Vertex> vertices = new HashSet<>();
+  private final Set<Vertex> vertices;
 
-  public void addVertex(final Vertex vertex) {
-    vertices.add(vertex);
+  public DependencyGraph(final Collection<? extends Vertex> vertices) {
+    this.vertices = new HashSet<>(vertices);
   }
 
-  public void addVertices(final Collection<? extends Vertex> vertices) {
-    this.vertices.addAll(vertices);
+  public static DependencyGraph emptyGraph() {
+    return new DependencyGraph(Collections.<Vertex> emptySet());
   }
 
   public Set<Vertex> getVertices() {

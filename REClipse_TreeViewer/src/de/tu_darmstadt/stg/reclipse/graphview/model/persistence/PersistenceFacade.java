@@ -100,7 +100,7 @@ public class PersistenceFacade implements ILoggerInterface {
     }
     catch (final PersistenceException e) {
       Activator.log(e);
-      return null;
+      return DependencyGraph.emptyGraph();
     }
   }
 
