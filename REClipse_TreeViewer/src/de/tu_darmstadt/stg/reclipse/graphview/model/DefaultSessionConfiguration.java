@@ -13,6 +13,6 @@ public class DefaultSessionConfiguration implements ISessionConfiguration {
 
   @Override
   public boolean isLogging() {
-    return true; // TODO add plug-in property for logging
+    return false; // TODO add plug-in property for logging
   }
 }

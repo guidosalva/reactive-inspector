@@ -219,6 +219,11 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
         // just give the point in time to the graph at which the user wants to
         // see the dependency graph
         graphContainer.getGraph().setPointInTime(getCurrentSliderValue(), highlightChange);
+
+        if (graphParent != null && !graphParent.isDisposed()) {
+          graphParent.layout();
+        }
+
         if (slider != null && !slider.isDisposed()) {
           slider.redraw();
         }

@@ -91,6 +91,7 @@ public class CustomGraph extends mxGraph {
     // initialize graph component and add it to frame
     graphComponent = new mxGraphComponent(this);
     graphComponent.setEnabled(false);
+    graphComponent.setDoubleBuffered(true);
 
     graphFrame.add(graphComponent);
 
@@ -106,15 +107,19 @@ public class CustomGraph extends mxGraph {
   public void layoutGraph() {
     getModel().beginUpdate();
     try {
-      // execute layout
-      graphLayout.execute(getDefaultParent());
-
-      // center cells
-      moveCells(getChildCells(getDefaultParent(), true, true), 50, 50);
+      doLayoutGraph();
     }
     finally {
       getModel().endUpdate();
     }
+  }
+
+  private void doLayoutGraph() {
+    // execute layout
+    graphLayout.execute(getDefaultParent());
+
+    // center cells
+    moveCells(getChildCells(getDefaultParent(), true, true), 50, 50);
   }
 
   public void setGraphLayout(final mxGraphLayout l) {
@@ -143,6 +148,16 @@ public class CustomGraph extends mxGraph {
    * appropriately.
    */
   public void updateGraph() {
+    getModel().beginUpdate();
+    try {
+      doUpdateGraph();
+    }
+    finally {
+      getModel().endUpdate();
+    }
+  }
+
+  private void doUpdateGraph() {
     // remove cells, if any
     removeCells(getChildVertices(getDefaultParent()));
 
@@ -184,7 +199,7 @@ public class CustomGraph extends mxGraph {
       }
     }
 
-    layoutGraph();
+    doLayoutGraph();
   }
 
   private void addMouseListener() {
