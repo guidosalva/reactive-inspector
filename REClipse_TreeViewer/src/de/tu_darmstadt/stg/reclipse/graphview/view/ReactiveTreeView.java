@@ -18,9 +18,6 @@ import de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType;
 
 import java.util.Optional;
 
-import org.eclipse.debug.core.DebugEvent;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.TraverseEvent;
@@ -35,13 +32,18 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Scale;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.ViewPart;
 
 /**
  * Base view class containing all the elements which are shown in the
  * "Reactive Tree" view / tab.
  */
-public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener, IDependencyGraphListener, ISessionSelectionListener {
+public class ReactiveTreeView extends ViewPart implements IDependencyGraphListener, ISessionSelectionListener, IPartListener2 {
 
   /**
    * The ID of the view as specified by the extension.
@@ -52,7 +54,6 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
 
   protected Composite graphParent;
   protected Scale slider;
-  private boolean showGraph = false;
   protected boolean manualMode = false;
 
   protected boolean moveGraphActive = false;
@@ -61,8 +62,10 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
 
   private Text queryTextField;
 
-  public ReactiveTreeView() {
-    DebugPlugin.getDefault().addDebugEventListener(this);
+  @Override
+  public void init(final IViewSite site) throws PartInitException {
+    super.init(site);
+    site.getPage().addPartListener(this);
   }
 
   @Override
@@ -73,9 +76,6 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
     graphParent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     graphParent.setLayout(new GridLayout());
 
-    // be careful: you have to set environment variable LIBOVERLAY_SCROLLBAR=0
-    // under Ubuntu / OpenJDK, so that the slider works - see
-    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=368929
     slider = new Scale(parent, SWT.HORIZONTAL);
     slider.setMinimum(0);
     slider.setIncrement(1);
@@ -86,6 +86,7 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
       @Override
       public void handleEvent(final Event event) {
         if (event.detail == SWT.NONE) {
+          manualMode = true;
           rebuildGraph(false);
         }
       }
@@ -120,7 +121,6 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
     createActions();
 
     final SessionManager sessionManager = SessionManager.getInstance();
-
     final Optional<SessionContext> ctx = sessionManager.getSelectedSession();
 
     if (ctx.isPresent()) {
@@ -141,10 +141,13 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
   }
 
   @Override
-  public void onSessionSelected(final SessionContext ctx) {
-    showGraph = true;
+  public void setFocus() {
+    queryTextField.setFocus();
+  }
 
-    ctx.getDbHelper().addDepGraphHistoryChangedListener(ReactiveTreeView.this);
+  @Override
+  public void onSessionSelected(final SessionContext ctx) {
+    ctx.getDbHelper().addDependencyGraphListener(ReactiveTreeView.this);
 
     Display.getDefault().syncExec(new Runnable() {
 
@@ -158,12 +161,12 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
     // update slider values, because the reactive tree view tab could be
     // opened
     // after the dependency graph history changed events have been fired
-    updateSliderValues();
+    rebuildGraphLastPoint();
   }
 
   @Override
   public void onSessionDeselected(final SessionContext ctx) {
-    ctx.getDbHelper().removeDepGraphHistoryChangedListener(this);
+    ctx.getDbHelper().removeDependencyGraphListener(this);
 
     if (graphContainer.containsGraph()) {
       Display.getDefault().syncExec(new Runnable() {
@@ -178,38 +181,21 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
   }
 
   @Override
-  public void setFocus() {
-    rebuildGraph();
-  }
+  public void onDependencyGraphChanged(final DependencyGraphHistoryType type, final int pointInTime) {
+    // only update if the graph is shown
+    if (isVisible()) {
+      updateSliderMaximum(pointInTime);
 
-  @Override
-  public void handleDebugEvents(final DebugEvent[] events) {
-    // react only when debugging is suspended
-    boolean suspended = false;
-    boolean terminated = false;
-    for (final DebugEvent e : events) {
-      switch (e.getKind()) {
-        case DebugEvent.SUSPEND:
-          suspended = true;
-          break;
-        case DebugEvent.TERMINATE:
-          terminated = true;
-          break;
-        default:
-          // do nothing
-          break;
-      }
-    }
-
-    if (terminated || suspended) {
+      // update the graph to reflect newest changes
       rebuildGraph();
     }
   }
 
   public void rebuildGraph(final boolean highlightChange) {
-    if (!showGraph) {
+    if (!isVisible()) {
       return;
     }
+
     Display.getDefault().asyncExec(new Runnable() {
 
       @Override
@@ -217,16 +203,12 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
         if (!graphContainer.containsGraph()) {
           return;
         }
-        // just give the point in time to the graph at which the user wants to
-        // see the dependency graph
-        graphContainer.getGraph().setPointInTime(getCurrentSliderValue(), highlightChange);
+
+        final int pointInTime = getCurrentSliderValue();
+        graphContainer.getGraph().setPointInTime(pointInTime, highlightChange);
 
         if (graphParent != null && !graphParent.isDisposed()) {
           graphParent.layout();
-        }
-
-        if (slider != null && !slider.isDisposed()) {
-          slider.redraw();
         }
       }
     });
@@ -236,25 +218,34 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
     rebuildGraph(true);
   }
 
-  private void updateSliderValues() {
+  private void rebuildGraphLastPoint() {
+    final Optional<SessionContext> ctx = SessionManager.getInstance().getSelectedSession();
+
+    if (!ctx.isPresent()) {
+      return;
+    }
+
+    final int lastPoint = ctx.get().getPersistence().getLastPointInTime();
+    updateSliderMaximum(lastPoint);
+    rebuildGraph();
+  }
+
+  private void updateSliderMaximum(final int maximum) {
     // syncExec so that maximum is correctly set if jumpToLastSliderValue is
     // called directly afterwards
     Display.getDefault().syncExec(new Runnable() {
 
       @Override
       public void run() {
-        final Optional<SessionContext> ctx = SessionManager.getInstance().getSelectedSession();
 
-        if (slider == null || slider.isDisposed() || !ctx.isPresent()) {
+        if (slider == null || slider.isDisposed()) {
           return;
         }
 
-        slider.setMaximum(ctx.get().getDbHelper().getLastPointInTime());
+        slider.setMaximum(maximum);
+
         if (!manualMode) {
-          slider.setSelection(slider.getMaximum());
-          // notify the listeners, because this is not done automatically when
-          // the selection is changed programmatically via setSelecion
-          slider.notifyListeners(SWT.Selection, new Event());
+          slider.setSelection(maximum);
         }
       }
     });
@@ -267,23 +258,8 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
     return slider.getSelection();
   }
 
-  public void setShowGraph(final boolean show) {
-    showGraph = show;
-    if (showGraph) {
-      updateSliderValues();
-    }
-    rebuildGraph();
-  }
-
-  @Override
-  public void onDependencyGraphChanged(DependencyGraphHistoryType type, int pointInTime) {
-    // only update the slider if the graph is shown
-    if (showGraph) {
-      updateSliderValues();
-    }
-
-    // update the graph to reflect newest changes
-    rebuildGraph();
+  private boolean isVisible() {
+    return getSite().getPage().isPartVisible(this);
   }
 
   public String getQueryText() {
@@ -315,9 +291,53 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
     sessionManager.removeSessionSelectionListener(this);
 
     if (ctx.isPresent()) {
-      ctx.get().getDbHelper().removeDepGraphHistoryChangedListener(this);
+      ctx.get().getDbHelper().removeDependencyGraphListener(this);
     }
 
     super.dispose();
+  }
+
+  @Override
+  public void partVisible(final IWorkbenchPartReference ref) {
+    final IWorkbenchPart part = ref.getPart(false);
+
+    if (part != null && part == this) {
+      rebuildGraphLastPoint();
+    }
+  }
+
+  @Override
+  public void partActivated(final IWorkbenchPartReference ref) {
+    // nothing to do
+  }
+
+  @Override
+  public void partBroughtToTop(final IWorkbenchPartReference ref) {
+    // nothing to do
+  }
+
+  @Override
+  public void partClosed(final IWorkbenchPartReference ref) {
+    // nothing to do
+  }
+
+  @Override
+  public void partDeactivated(final IWorkbenchPartReference ref) {
+    // nothing to do
+  }
+
+  @Override
+  public void partHidden(final IWorkbenchPartReference ref) {
+    // nothing to do
+  }
+
+  @Override
+  public void partInputChanged(final IWorkbenchPartReference ref) {
+    // nothing to do
+  }
+
+  @Override
+  public void partOpened(final IWorkbenchPartReference ref) {
+    // nothing to do
   }
 }

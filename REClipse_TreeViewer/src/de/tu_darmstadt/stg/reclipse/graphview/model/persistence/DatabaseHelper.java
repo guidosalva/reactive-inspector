@@ -124,13 +124,13 @@ public class DatabaseHelper {
     return connection;
   }
 
-  public void addDepGraphHistoryChangedListener(final IDependencyGraphListener listener) {
+  public void addDependencyGraphListener(final IDependencyGraphListener listener) {
     if (!listeners.contains(listener)) {
       listeners.add(listener);
     }
   }
 
-  public void removeDepGraphHistoryChangedListener(final IDependencyGraphListener listener) {
+  public void removeDependencyGraphListener(final IDependencyGraphListener listener) {
     listeners.remove(listener);
   }
 

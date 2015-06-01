@@ -32,11 +32,6 @@ public class ShowReactiveTree implements IObjectActionDelegate {
     else {
       page.bringToTop(part);
     }
-
-    if (part != null) {
-      final ReactiveTreeView rtv = (ReactiveTreeView) part;
-      rtv.setShowGraph(true);
-    }
   }
 
   @Override
