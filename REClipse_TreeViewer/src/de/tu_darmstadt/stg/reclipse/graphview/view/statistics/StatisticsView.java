@@ -3,7 +3,8 @@ package de.tu_darmstadt.stg.reclipse.graphview.view.statistics;
 import de.tu_darmstadt.stg.reclipse.graphview.model.ISessionSelectionListener;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionManager;
-import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.DependencyGraphHistoryChangedListener;
+import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.IDependencyGraphListener;
+import de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType;
 
 import java.awt.Frame;
 import java.util.Optional;
@@ -18,7 +19,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.ViewPart;
 import org.jfree.chart.ChartPanel;
 
-public class StatisticsView extends ViewPart implements DependencyGraphHistoryChangedListener, ISessionSelectionListener {
+public class StatisticsView extends ViewPart implements IDependencyGraphListener, ISessionSelectionListener {
 
   // ID of the view
   public static final String ID = "de.tu-darmstadt.stg.reclipse.graphview.StatisticsView"; //$NON-NLS-1$
@@ -74,7 +75,7 @@ public class StatisticsView extends ViewPart implements DependencyGraphHistoryCh
   }
 
   @Override
-  public void dependencyGraphHistoryChanged() {
+  public void onDependencyGraphChanged(DependencyGraphHistoryType type, int pointInTime) {
     if (pieCharts != null) {
       pieCharts.refresh();
     }

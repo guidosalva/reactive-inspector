@@ -38,7 +38,7 @@ public class DatabaseHelper {
                   "CREATE TABLE event (pointInTime  INTEGER NOT NULL PRIMARY KEY, type integer(10) NOT NULL, idVariable integer(10) NOT NULL, dependentVariable integer(10), exception varchar(200))", //$NON-NLS-1$
                   "CREATE TABLE variable_dependency (idVariableStatus integer(10) NOT NULL, dependentVariable integer(10) NOT NULL, PRIMARY KEY (idVariableStatus, dependentVariable))"); //$NON-NLS-1$
 
-  private final List<DependencyGraphHistoryChangedListener> listeners = new CopyOnWriteArrayList<>();
+  private final List<IDependencyGraphListener> listeners = new CopyOnWriteArrayList<>();
   private final String sessionId;
   private final Map<UUID, Integer> variableMap = new HashMap<>();
   private final Map<Integer, Integer> variableStatusMap = new HashMap<>();
@@ -124,19 +124,19 @@ public class DatabaseHelper {
     return connection;
   }
 
-  public void addDepGraphHistoryChangedListener(final DependencyGraphHistoryChangedListener listener) {
+  public void addDepGraphHistoryChangedListener(final IDependencyGraphListener listener) {
     if (!listeners.contains(listener)) {
       listeners.add(listener);
     }
   }
 
-  public void removeDepGraphHistoryChangedListener(final DependencyGraphHistoryChangedListener listener) {
+  public void removeDepGraphHistoryChangedListener(final IDependencyGraphListener listener) {
     listeners.remove(listener);
   }
 
-  protected void fireChangedEvent() {
-    for (final DependencyGraphHistoryChangedListener l : listeners) {
-      l.dependencyGraphHistoryChanged();
+  protected void fireChangedEvent(final DependencyGraphHistoryType type, final int pointInTime) {
+    for (final IDependencyGraphListener l : listeners) {
+      l.onDependencyGraphChanged(type, pointInTime);
     }
   }
 
@@ -168,6 +168,8 @@ public class DatabaseHelper {
     finally {
       closeTx();
     }
+
+    fireChangedEvent(DependencyGraphHistoryType.NODE_CREATED, lastPointInTime);
   }
 
   public void logNodeAttached(final ReactiveVariable r, final UUID dependentId) throws PersistenceException {
@@ -197,6 +199,8 @@ public class DatabaseHelper {
     finally {
       closeTx();
     }
+
+    fireChangedEvent(DependencyGraphHistoryType.NODE_ATTACHED, lastPointInTime);
   }
 
   public void logNodeEvaluationEnded(final ReactiveVariable r) throws PersistenceException {
@@ -221,6 +225,8 @@ public class DatabaseHelper {
     finally {
       closeTx();
     }
+
+    fireChangedEvent(DependencyGraphHistoryType.NODE_EVALUATION_ENDED, lastPointInTime);
   }
 
   public void logNodeEvaluationEndedWithException(final ReactiveVariable r, final Exception exception) throws PersistenceException {
@@ -246,6 +252,8 @@ public class DatabaseHelper {
     finally {
       closeTx();
     }
+
+    fireChangedEvent(DependencyGraphHistoryType.NODE_EVALUATION_ENDED_WITH_EXCEPTION, lastPointInTime);
   }
 
   public void logNodeEvaluationStarted(final ReactiveVariable r) throws PersistenceException {
@@ -270,6 +278,8 @@ public class DatabaseHelper {
     finally {
       closeTx();
     }
+
+    fireChangedEvent(DependencyGraphHistoryType.NODE_EVALUATION_STARTED, lastPointInTime);
   }
 
   public void logNodeValueSet(final ReactiveVariable r) throws PersistenceException {
@@ -294,6 +304,8 @@ public class DatabaseHelper {
     finally {
       closeTx();
     }
+
+    fireChangedEvent(DependencyGraphHistoryType.NODE_VALUE_SET, lastPointInTime);
   }
 
   private void nextPointInTime() {

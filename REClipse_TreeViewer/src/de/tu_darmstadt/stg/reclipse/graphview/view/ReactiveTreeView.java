@@ -11,9 +11,10 @@ import de.tu_darmstadt.stg.reclipse.graphview.controller.QueryController;
 import de.tu_darmstadt.stg.reclipse.graphview.model.ISessionSelectionListener;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionManager;
-import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.DependencyGraphHistoryChangedListener;
+import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.IDependencyGraphListener;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.CustomGraph;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.GraphContainer;
+import de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType;
 
 import java.util.Optional;
 
@@ -40,7 +41,7 @@ import org.eclipse.ui.part.ViewPart;
  * Base view class containing all the elements which are shown in the
  * "Reactive Tree" view / tab.
  */
-public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener, DependencyGraphHistoryChangedListener, ISessionSelectionListener {
+public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener, IDependencyGraphListener, ISessionSelectionListener {
 
   /**
    * The ID of the view as specified by the extension.
@@ -275,7 +276,7 @@ public class ReactiveTreeView extends ViewPart implements IDebugEventSetListener
   }
 
   @Override
-  public void dependencyGraphHistoryChanged() {
+  public void onDependencyGraphChanged(DependencyGraphHistoryType type, int pointInTime) {
     // only update the slider if the graph is shown
     if (showGraph) {
       updateSliderValues();
