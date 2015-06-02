@@ -39,7 +39,7 @@ public class ReadPerformanceTestCase extends PerformanceTestCase {
     
     SessionContext ctx = prepareSession();
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < ITERATIONS; i++) {
       startMeasuring();
       emulateReads(i + 1, ctx);
       stopMeasuring();

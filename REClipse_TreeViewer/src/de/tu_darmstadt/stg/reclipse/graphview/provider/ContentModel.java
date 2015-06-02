@@ -92,13 +92,12 @@ public class ContentModel {
   }
 
   private boolean hasVariableChanged(final ReactiveVariable variable) {
-    if (library.containsKey(variable.getId())) {
-      final String oldValue = library.get(variable.getId());
-      return !Objects.equals(oldValue, variable.getValueString());
-    }
-    else {
+    if (!library.containsKey(variable.getId())) {
       return !library.isEmpty();
     }
+
+    final String oldValue = library.get(variable.getId());
+    return !Objects.equals(oldValue, variable.getValueString());
   }
 
   public List<ReactiveVariableVertex> getHeatmapVertices() {

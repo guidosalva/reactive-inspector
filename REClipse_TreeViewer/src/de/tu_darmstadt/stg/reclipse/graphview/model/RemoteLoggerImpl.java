@@ -78,12 +78,12 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
     this.ctx = ctx;
     this.persistence = ctx.getPersistence();
     this.esperAdapter = ctx.getEsperAdapter();
-    this.logger = createLogger(ctx);
+    this.logger = createLogger();
 
     store = BreakpointInformationStore.getInstance();
   }
 
-  private IEventLogger createLogger(final SessionContext ctx) {
+  private IEventLogger createLogger() {
     if (!ctx.getConfiguration().isEventLogging()) {
       return DUMMY_LOGGER;
     }

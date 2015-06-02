@@ -482,7 +482,7 @@ public class DatabaseHelper {
     r.setReactiveVariableType(ReactiveVariableType.values()[rs.getInt("reactiveType")]); //$NON-NLS-1$
     r.setPointInTime(pointInTime);
     //r.setDependencyGraphHistoryType(DependencyGraphHistoryType.values()[rs.getInt("historyType")]); //$NON-NLS-1$
-    r.setAdditionalInformation(""); // TODO load additional information field
+    r.setAdditionalInformation(""); // TODO load additional information field //$NON-NLS-1$
     r.setActive(true); // TODO load active field
     r.setTypeSimple(rs.getString("typeSimple")); //$NON-NLS-1$
     r.setTypeFull(rs.getString("typeFull")); //$NON-NLS-1$
