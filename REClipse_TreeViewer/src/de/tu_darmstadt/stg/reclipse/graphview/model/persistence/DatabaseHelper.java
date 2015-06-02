@@ -147,7 +147,7 @@ public class DatabaseHelper {
     return lastPointInTime;
   }
 
-  public void logNodeCreated(final ReactiveVariable r) throws PersistenceException {
+  public synchronized void logNodeCreated(final ReactiveVariable r) throws PersistenceException {
     try {
       beginTx();
 
@@ -172,7 +172,7 @@ public class DatabaseHelper {
     fireChangedEvent(DependencyGraphHistoryType.NODE_CREATED, lastPointInTime);
   }
 
-  public void logNodeAttached(final ReactiveVariable r, final UUID dependentId) throws PersistenceException {
+  public synchronized void logNodeAttached(final ReactiveVariable r, final UUID dependentId) throws PersistenceException {
     try {
       beginTx();
 
@@ -203,7 +203,7 @@ public class DatabaseHelper {
     fireChangedEvent(DependencyGraphHistoryType.NODE_ATTACHED, lastPointInTime);
   }
 
-  public void logNodeEvaluationEnded(final ReactiveVariable r) throws PersistenceException {
+  public synchronized void logNodeEvaluationEnded(final ReactiveVariable r) throws PersistenceException {
     try {
       beginTx();
 
@@ -229,7 +229,7 @@ public class DatabaseHelper {
     fireChangedEvent(DependencyGraphHistoryType.NODE_EVALUATION_ENDED, lastPointInTime);
   }
 
-  public void logNodeEvaluationEndedWithException(final ReactiveVariable r, final Exception exception) throws PersistenceException {
+  public synchronized void logNodeEvaluationEndedWithException(final ReactiveVariable r, final Exception exception) throws PersistenceException {
     try {
       beginTx();
 
@@ -256,7 +256,7 @@ public class DatabaseHelper {
     fireChangedEvent(DependencyGraphHistoryType.NODE_EVALUATION_ENDED_WITH_EXCEPTION, lastPointInTime);
   }
 
-  public void logNodeEvaluationStarted(final ReactiveVariable r) throws PersistenceException {
+  public synchronized void logNodeEvaluationStarted(final ReactiveVariable r) throws PersistenceException {
     try {
       beginTx();
 
@@ -282,7 +282,7 @@ public class DatabaseHelper {
     fireChangedEvent(DependencyGraphHistoryType.NODE_EVALUATION_STARTED, lastPointInTime);
   }
 
-  public void logNodeValueSet(final ReactiveVariable r) throws PersistenceException {
+  public synchronized void logNodeValueSet(final ReactiveVariable r) throws PersistenceException {
     try {
       beginTx();
 
@@ -330,7 +330,7 @@ public class DatabaseHelper {
     return variableMap.get(id);
   }
 
-  public int findActiveVariableStatus(final int idVariable) throws PersistenceException {
+  private int findActiveVariableStatus(final int idVariable) throws PersistenceException {
     if (!variableStatusMap.containsKey(idVariable)) {
       throw new PersistenceException("no active status for variable " + idVariable); //$NON-NLS-1$
     }
@@ -338,7 +338,7 @@ public class DatabaseHelper {
     return variableStatusMap.get(idVariable);
   }
 
-  public int createVariable(final ReactiveVariable variable) throws PersistenceException {
+  private int createVariable(final ReactiveVariable variable) throws PersistenceException {
     final String insertStmt = "INSERT INTO variable (variableId, variableName, reactiveType, typeSimple, typeFull, timeFrom) VALUES (?, ?, ?, ?, ?, ?)"; //$NON-NLS-1$
 
     try (final PreparedStatement stmt = connection.prepareStatement(insertStmt)) {
@@ -359,7 +359,7 @@ public class DatabaseHelper {
     }
   }
 
-  public int createVariableStatus(final ReactiveVariable variable, final int idVariable) throws PersistenceException {
+  private int createVariableStatus(final ReactiveVariable variable, final int idVariable) throws PersistenceException {
     final String insertStmt = "INSERT INTO variable_status (idVariable, valueString, timeFrom, timeTo) VALUES (?, ?, ?, ?)"; //$NON-NLS-1$
 
     try (PreparedStatement stmt = connection.prepareStatement(insertStmt)) {
@@ -379,7 +379,7 @@ public class DatabaseHelper {
     }
   }
 
-  public int createVariableStatus(final ReactiveVariable variable, final int idVariable, final int oldVariableStatus) throws PersistenceException {
+  private int createVariableStatus(final ReactiveVariable variable, final int idVariable, final int oldVariableStatus) throws PersistenceException {
     final String updateStmt = "UPDATE variable_status SET timeTo = ? WHERE idVariableStatus = ?"; //$NON-NLS-1$
 
     try (PreparedStatement stmt = connection.prepareStatement(updateStmt)) {
@@ -407,7 +407,7 @@ public class DatabaseHelper {
     return id;
   }
 
-  public int createVariableStatus(final ReactiveVariable variable, final int idVariable, final int oldVariableStatus, final int dependentVariable) throws PersistenceException {
+  private int createVariableStatus(final ReactiveVariable variable, final int idVariable, final int oldVariableStatus, final int dependentVariable) throws PersistenceException {
     final int id = createVariableStatus(variable, idVariable, oldVariableStatus);
 
     final String insertStmt = "INSERT INTO variable_dependency (idVariableStatus, dependentVariable) VALUES (?, ?)"; //$NON-NLS-1$
@@ -424,7 +424,7 @@ public class DatabaseHelper {
     return id;
   }
 
-  public void createEvent(final ReactiveVariable variable, final int idVariable, final Integer dependentVariable, final Exception exception) throws PersistenceException {
+  private void createEvent(final ReactiveVariable variable, final int idVariable, final Integer dependentVariable, final Exception exception) throws PersistenceException {
     final String insertStmt = "INSERT INTO event (pointInTime, type, idVariable, dependentVariable, exception) VALUES (?, ? ,?, ?, ?)"; //$NON-NLS-1$
 
     try (PreparedStatement stmt = connection.prepareStatement(insertStmt)) {
