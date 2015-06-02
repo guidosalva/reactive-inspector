@@ -456,9 +456,12 @@ public class DatabaseHelper {
   public List<ReactiveVariable> getReVarsWithDependencies(final int pointInTime) throws PersistenceException {
     final List<ReactiveVariable> variables = new ArrayList<>();
 
-    final String query = "SELECT variable.variableId AS variableId, variable.variableName AS variableName, variable.reactiveType AS reactiveType, event.type AS historyType, variable.typeSimple AS typeSimple, variable.typeFull AS typeFull, variable_status.valueString AS valueString, variable_status.idVariableStatus AS idVariableStatus FROM variable JOIN variable_status ON variable_status.idVariable = variable.idVariable JOIN xref_event_status ON xref_event_status.idVariableStatus = variable_status.idVariableStatus JOIN event ON event.pointInTime = xref_event_status.pointInTime WHERE event.pointInTime = ?"; //$NON-NLS-1$
+    final String query = "SELECT variable.variableId AS variableId, variable.variableName AS variableName, variable.reactiveType AS reactiveType, event.type AS historyType, variable.typeSimple AS typeSimple, variable.typeFull AS typeFull, variable_status.valueString AS valueString, variable_status.idVariableStatus AS idVariableStatus FROM variable, event JOIN variable_status ON variable_status.idVariable = variable.idVariable WHERE event.pointInTime = ? AND variable.timeFrom <= ? AND variable_status.timeFrom <= ? AND variable_status.timeTo >= ?"; //$NON-NLS-1$
     try (final PreparedStatement stmt = connection.prepareStatement(query)) {
       stmt.setInt(1, pointInTime);
+      stmt.setInt(2, pointInTime);
+      stmt.setInt(3, pointInTime);
+      stmt.setInt(4, pointInTime);
 
       try (final ResultSet rs = stmt.executeQuery()) {
         while (rs.next()) {
