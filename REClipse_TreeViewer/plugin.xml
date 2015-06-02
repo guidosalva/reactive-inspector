@@ -75,4 +75,18 @@
             class="de.tu_darmstadt.stg.reclipse.graphview.Startup">
       </startup>
    </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="de.tu_darmstadt.stg.reclipse.graphview.preferences.ReclipsePreferencePage"
+            id="de.tu_darmstadt.stg.reclipse.graphview.preferences.ReclipsePreferencePage"
+            name="REclipse Preferences">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="de.tu_darmstadt.stg.reclipse.graphview.preferences.PreferenceInitializer">
+      </initializer>
+   </extension>
 </plugin>

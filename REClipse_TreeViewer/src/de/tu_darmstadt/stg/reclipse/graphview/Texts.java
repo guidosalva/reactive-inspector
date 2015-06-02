@@ -48,6 +48,10 @@ public class Texts extends NLS {
   public static String MenuItem_Breakpoint_Disable;
   public static String MenuItem_Locate;
 
+  public static String Pref_Description;
+  public static String Pref_UpdateInterval;
+  public static String Pref_EventLogging;
+
   private static final String BUNDLE_NAME = Texts.class.getPackage().getName() + ".texts"; //$NON-NLS-1$
 
   static {

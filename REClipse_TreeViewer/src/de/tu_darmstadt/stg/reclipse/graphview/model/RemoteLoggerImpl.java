@@ -84,7 +84,7 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
   }
 
   private IEventLogger createLogger(final SessionContext ctx) {
-    if (!ctx.getConfiguration().isLogging()) {
+    if (!ctx.getConfiguration().isEventLogging()) {
       return DUMMY_LOGGER;
     }
 

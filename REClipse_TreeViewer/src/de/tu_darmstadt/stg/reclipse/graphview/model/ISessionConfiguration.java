@@ -6,5 +6,5 @@ public interface ISessionConfiguration {
 
   public IPath getDatabaseFilesDir();
 
-  public boolean isLogging();
+  public boolean isEventLogging();
 }

@@ -32,7 +32,7 @@ public class ReadPerformanceTestCase extends PerformanceTestCase {
       }
 
       @Override
-      public boolean isLogging() {
+      public boolean isEventLogging() {
         return false;
       }
     });

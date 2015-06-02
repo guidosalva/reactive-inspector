@@ -1,5 +1,6 @@
 package de.tu_darmstadt.stg.reclipse.graphview.view;
 
+import de.tu_darmstadt.stg.reclipse.graphview.Activator;
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
 import de.tu_darmstadt.stg.reclipse.graphview.action.Relayout;
 import de.tu_darmstadt.stg.reclipse.graphview.action.SaveGraphAsImage;
@@ -12,6 +13,7 @@ import de.tu_darmstadt.stg.reclipse.graphview.model.ISessionSelectionListener;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionManager;
 import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.IDependencyGraphListener;
+import de.tu_darmstadt.stg.reclipse.graphview.preferences.PreferenceConstants;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.CustomGraph;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.GraphContainer;
 import de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType;
@@ -53,8 +55,6 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
    */
   public static final String ID = "de.tu-darmstadt.stg.reclipse.graphview.ReactiveTreeView"; //$NON-NLS-1$
 
-  public static final int UPDATE_INTERVAL = 500;
-
   protected final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
   protected final GraphContainer graphContainer = new GraphContainer();
 
@@ -65,6 +65,12 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
   protected long lastUpdate = 0;
   protected ScheduledFuture<?> delayedUpdateTask;
   protected boolean manualMode = false;
+
+  private final int updateInterval;
+
+  public ReactiveTreeView() {
+    updateInterval = Activator.getDefault().getPreferenceStore().getInt(PreferenceConstants.UPDATE_INTERVAL);
+  }
 
   @Override
   public void init(final IViewSite site) throws PartInitException {
@@ -257,7 +263,7 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
   }
 
   private void deleayUpdate() {
-    final long delay = UPDATE_INTERVAL - (System.currentTimeMillis() - lastUpdate);
+    final long delay = updateInterval - (System.currentTimeMillis() - lastUpdate);
 
     delayedUpdateTask = executorService.schedule(new Runnable() {
 
@@ -270,7 +276,7 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
   }
 
   private boolean isInUpdateInterval() {
-    return System.currentTimeMillis() - lastUpdate < UPDATE_INTERVAL;
+    return System.currentTimeMillis() - lastUpdate < updateInterval;
   }
 
   public void jumpToPointInTime(final int pointInTime) {

@@ -1,6 +1,7 @@
 package de.tu_darmstadt.stg.reclipse.graphview.model;
 
 import de.tu_darmstadt.stg.reclipse.graphview.Activator;
+import de.tu_darmstadt.stg.reclipse.graphview.preferences.PreferenceConstants;
 
 import org.eclipse.core.runtime.IPath;
 
@@ -12,7 +13,7 @@ public class DefaultSessionConfiguration implements ISessionConfiguration {
   }
 
   @Override
-  public boolean isLogging() {
-    return false; // TODO add plug-in property for logging
+  public boolean isEventLogging() {
+    return Activator.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EVENT_LOGGING);
   }
 }
