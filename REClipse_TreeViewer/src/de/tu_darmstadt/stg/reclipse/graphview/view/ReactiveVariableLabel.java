@@ -31,11 +31,20 @@ public class ReactiveVariableLabel {
       label += "Value: CHANGE\n"; //$NON-NLS-1$
     }
     else {
-      label += "Value: " + var.getValueString() + "\n"; //$NON-NLS-1$ //$NON-NLS-2$
+      label += "Value: " + getValueString() + "\n"; //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     label += "Type: " + var.getTypeSimple(); //$NON-NLS-1$
 
     return label;
+  }
+
+  private String getValueString() {
+    if (var.getValueString().length() > 20) {
+      return var.getValueString().substring(0, 19) + '\u2026';
+    }
+    else {
+      return var.getValueString();
+    }
   }
 }
