@@ -44,7 +44,7 @@ public class ReactiveVariable implements Serializable, Comparable<ReactiveVariab
    * A free text field where additional information can be stored. If the
    * dependency graph history type is a
    * {@link DependencyGraphHistoryType#NODE_ATTACHED}, then this field has to be
-   * filled with a String in the form "ID1->ID2".
+   * filled with a String in the form "ID1-&gt;ID2".
    */
   private String additionalInformation;
 
