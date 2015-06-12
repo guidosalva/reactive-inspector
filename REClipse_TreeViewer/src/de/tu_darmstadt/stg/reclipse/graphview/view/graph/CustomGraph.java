@@ -14,6 +14,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -98,13 +99,9 @@ public class CustomGraph extends mxGraph {
     graphComponent = new mxGraphComponent(this);
     graphComponent.setEnabled(false);
     graphComponent.setDoubleBuffered(true);
-
-    final JComponent graphControl = graphComponent.getGraphControl();
-    final ScrollMouseAdapter mouseAdapter = new ScrollMouseAdapter();
-    graphControl.addMouseListener(mouseAdapter);
-    graphControl.addMouseMotionListener(mouseAdapter);
-
+    // prevent auto scroll if cursor is dragged out of bounds
     graphComponent.setAutoScroll(false);
+    graphComponent.setWheelScrollingEnabled(false);
 
     graphFrame.add(graphComponent);
 
@@ -217,6 +214,13 @@ public class CustomGraph extends mxGraph {
 
   private void addMouseListener() {
     graphComponent.getGraphControl().addMouseListener(new PopupMouseAdapter());
+
+    final ScrollMouseAdapter mouseAdapter = new ScrollMouseAdapter();
+    final JComponent graphControl = graphComponent.getGraphControl();
+    graphControl.addMouseListener(mouseAdapter);
+    graphControl.addMouseMotionListener(mouseAdapter);
+
+    graphComponent.addMouseWheelListener(new ZoomMouseAdapter());
   }
 
   /**
@@ -345,6 +349,24 @@ public class CustomGraph extends mxGraph {
 
       lastX = e.getXOnScreen();
       lastY = e.getYOnScreen();
+    }
+  }
+
+  protected class ZoomMouseAdapter extends MouseAdapter {
+
+    @Override
+    public void mouseWheelMoved(final MouseWheelEvent e) {
+      if (e.isShiftDown()) {
+        // do nothing on vertical scroll
+        return;
+      }
+
+      if (e.getWheelRotation() < 0) {
+        graphComponent.zoomIn();
+      }
+      else if (e.getWheelRotation() > 0) {
+        graphComponent.zoomOut();
+      }
     }
   }
 }
