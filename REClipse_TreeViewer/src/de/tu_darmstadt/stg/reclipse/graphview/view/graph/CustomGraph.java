@@ -8,7 +8,10 @@ import de.tu_darmstadt.stg.reclipse.graphview.view.graph.actions.CollapseAction;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.actions.HighlightAction;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.actions.LocateAction;
 
+import java.awt.Cursor;
 import java.awt.Frame;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
@@ -18,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -46,15 +50,17 @@ public class CustomGraph extends mxGraph {
 
   private final Composite composite;
 
+  protected final Frame graphFrame;
+
   private mxGraphLayout graphLayout;
 
-  final CollapseAction collapser;
+  protected final CollapseAction collapser;
 
-  final HighlightAction highlighter;
+  protected final HighlightAction highlighter;
 
-  final BreakpointAction breakpointer;
+  protected final BreakpointAction breakpointer;
 
-  final LocateAction locater;
+  protected final LocateAction locater;
 
   private boolean activeHeatmap = false;
 
@@ -86,12 +92,19 @@ public class CustomGraph extends mxGraph {
     composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
     // create frame inside composite
-    final Frame graphFrame = SWT_AWT.new_Frame(composite);
+    graphFrame = SWT_AWT.new_Frame(composite);
 
     // initialize graph component and add it to frame
     graphComponent = new mxGraphComponent(this);
     graphComponent.setEnabled(false);
     graphComponent.setDoubleBuffered(true);
+
+    final JComponent graphControl = graphComponent.getGraphControl();
+    final ScrollMouseAdapter mouseAdapter = new ScrollMouseAdapter();
+    graphControl.addMouseListener(mouseAdapter);
+    graphControl.addMouseMotionListener(mouseAdapter);
+
+    graphComponent.setAutoScroll(false);
 
     graphFrame.add(graphComponent);
 
@@ -203,39 +216,7 @@ public class CustomGraph extends mxGraph {
   }
 
   private void addMouseListener() {
-    graphComponent.getGraphControl().addMouseListener(new MouseAdapter() {
-
-      @Override
-      public void mouseClicked(final MouseEvent e) {
-      }
-
-      @Override
-      public void mouseReleased(final MouseEvent e) {
-        if (!SwingUtilities.isRightMouseButton(e)) {
-          return;
-        }
-
-        // find clicked cell
-        final mxCell cell = (mxCell) graphComponent.getCellAt(e.getX(), e.getY());
-
-        // if no cell has been clicked, return
-        if (cell == null) {
-          return;
-        }
-
-        final JPopupMenu popupMenu = new JPopupMenu();
-
-        // add menu items
-        popupMenu.add(collapser.createMenuItem(cell));
-        popupMenu.add(highlighter.createMenuItem(cell));
-        popupMenu.addSeparator();
-        popupMenu.add(breakpointer.createMenuItem(cell));
-        popupMenu.add(locater.createMenuItem(cell));
-
-        // show popup menu on clicked point
-        popupMenu.show(graphComponent, e.getX(), e.getY());
-      }
-    });
+    graphComponent.getGraphControl().addMouseListener(new PopupMouseAdapter());
   }
 
   /**
@@ -296,5 +277,74 @@ public class CustomGraph extends mxGraph {
 
   public void dispose() {
     composite.dispose();
+  }
+
+  protected class PopupMouseAdapter extends MouseAdapter {
+
+    @Override
+    public void mouseClicked(final MouseEvent e) {
+      if (!SwingUtilities.isRightMouseButton(e)) {
+        return;
+      }
+
+      // find clicked cell
+      final mxCell cell = (mxCell) graphComponent.getCellAt(e.getX(), e.getY());
+
+      // if no cell has been clicked, return
+      if (cell == null) {
+        return;
+      }
+
+      final JPopupMenu popupMenu = new JPopupMenu();
+
+      // add menu items
+      popupMenu.add(collapser.createMenuItem(cell));
+      popupMenu.add(highlighter.createMenuItem(cell));
+      popupMenu.addSeparator();
+      popupMenu.add(breakpointer.createMenuItem(cell));
+      popupMenu.add(locater.createMenuItem(cell));
+
+      // take scrolling offset into account
+      final Point pos = graphComponent.getViewport().getViewPosition();
+      final int x = e.getX() - (int) pos.getX();
+      final int y = e.getY() - (int) pos.getY();
+
+      // show popup menu on clicked point
+      popupMenu.show(graphComponent, x, y);
+    }
+  }
+
+  protected class ScrollMouseAdapter extends MouseAdapter {
+
+    private int lastX;
+    private int lastY;
+
+    @Override
+    public void mousePressed(final MouseEvent e) {
+      lastX = e.getXOnScreen();
+      lastY = e.getYOnScreen();
+      graphFrame.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    }
+
+    @Override
+    public void mouseReleased(final MouseEvent e) {
+      graphFrame.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+    }
+
+    @Override
+    public void mouseDragged(final MouseEvent e) {
+      // calculate dragging
+      final int dx = e.getXOnScreen() - lastX;
+      final int dy = e.getYOnScreen() - lastY;
+
+      // scroll to new position
+      final Point pos = graphComponent.getViewport().getViewPosition();
+      pos.translate(-dx, -dy);
+      final Rectangle rec = new Rectangle(pos, graphComponent.getViewport().getSize());
+      graphComponent.getGraphControl().scrollRectToVisible(rec);
+
+      lastX = e.getXOnScreen();
+      lastY = e.getYOnScreen();
+    }
   }
 }
