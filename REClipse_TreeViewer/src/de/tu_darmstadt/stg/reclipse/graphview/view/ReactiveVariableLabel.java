@@ -40,6 +40,10 @@ public class ReactiveVariableLabel {
   }
 
   private String getValueString() {
+    if (var.getValueString() == null) {
+      return "null"; //$NON-NLS-1$
+    }
+
     if (var.getValueString().length() > 20) {
       return var.getValueString().substring(0, 19) + '\u2026';
     }
