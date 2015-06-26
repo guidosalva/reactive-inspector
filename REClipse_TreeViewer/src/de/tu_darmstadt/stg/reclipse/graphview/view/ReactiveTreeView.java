@@ -31,12 +31,12 @@ import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Scale;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPart;
@@ -55,12 +55,21 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
    */
   public static final String ID = "de.tu-darmstadt.stg.reclipse.graphview.ReactiveTreeView"; //$NON-NLS-1$
 
+  private static final String[] QUERY_TEMPLATES = new String[] {
+    "nodeCreated(<name>)", //$NON-NLS-1$
+    "nodeEvaluated(<name>)", //$NON-NLS-1$
+    "nodeValueSet(<name>)", //$NON-NLS-1$
+    "dependencyCreated(<name>, <name>)", //$NON-NLS-1$
+    "evaluationYielded(<name>, <value>)", //$NON-NLS-1$
+    "evaluationException(<name>)" //$NON-NLS-1$
+  };
+
   protected final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
   protected final GraphContainer graphContainer = new GraphContainer();
 
   protected Composite graphParent;
   protected Scale slider;
-  protected Text queryTextField;
+  protected Combo queryTextField;
 
   protected long lastUpdate = 0;
   protected ScheduledFuture<?> delayedUpdateTask;
@@ -107,8 +116,9 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
     queryComposite.setLayout(new GridLayout(4, false));
     queryComposite.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
 
-    queryTextField = new Text(queryComposite, SWT.BORDER);
+    queryTextField = new Combo(queryComposite, SWT.DROP_DOWN);
     queryTextField.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
+    queryTextField.setItems(QUERY_TEMPLATES);
 
     final Button submitButton = new Button(queryComposite, SWT.PUSH);
     submitButton.addSelectionListener(queryController.new SubmitQueryButtonHandler());
