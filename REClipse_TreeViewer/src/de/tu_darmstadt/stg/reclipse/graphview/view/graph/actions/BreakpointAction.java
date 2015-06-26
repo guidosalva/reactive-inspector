@@ -3,7 +3,8 @@ package de.tu_darmstadt.stg.reclipse.graphview.view.graph.actions;
 import de.tu_darmstadt.stg.reclipse.graphview.Activator;
 import de.tu_darmstadt.stg.reclipse.graphview.Images;
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
-import de.tu_darmstadt.stg.reclipse.graphview.model.BreakpointInformationStore;
+import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
+import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableLabel;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.CustomGraph;
 import de.tu_darmstadt.stg.reclipse.logger.BreakpointInformation;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
@@ -48,14 +49,12 @@ public class BreakpointAction {
   // Tracked watchpoints
   private final Map<mxCell, IJavaWatchpoint> watchpoints;
 
-  // Reference to the breakpoint information store
-  private final BreakpointInformationStore store;
+  private final SessionContext ctx;
 
-  public BreakpointAction(final CustomGraph g) {
+  public BreakpointAction(final CustomGraph g, final SessionContext ctx) {
     super();
     this.graph = g;
-
-    store = BreakpointInformationStore.getInstance();
+    this.ctx = ctx;
 
     breakpointStatus = new HashMap<>();
     watchpoints = new HashMap<>();
@@ -115,10 +114,11 @@ public class BreakpointAction {
     }
     else {
       // get reactive variable from cell
-      final ReactiveVariable reVar = (ReactiveVariable) cell.getValue();
+      final ReactiveVariableLabel reVarLabel = (ReactiveVariableLabel) cell.getValue();
+      final ReactiveVariable reVar = reVarLabel.getVar();
 
       // get breakpoint information from store
-      final BreakpointInformation information = store.get(reVar);
+      final BreakpointInformation information = ctx.getBreakpointInformation(reVar);
 
       // create type and file instances
       final IType type = createTypeFromClassName(information.getClassName());

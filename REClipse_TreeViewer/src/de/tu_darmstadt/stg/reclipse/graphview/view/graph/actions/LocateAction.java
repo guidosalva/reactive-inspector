@@ -3,7 +3,8 @@ package de.tu_darmstadt.stg.reclipse.graphview.view.graph.actions;
 import de.tu_darmstadt.stg.reclipse.graphview.Activator;
 import de.tu_darmstadt.stg.reclipse.graphview.Images;
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
-import de.tu_darmstadt.stg.reclipse.graphview.model.BreakpointInformationStore;
+import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
+import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableLabel;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.CustomGraph;
 import de.tu_darmstadt.stg.reclipse.logger.BreakpointInformation;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
@@ -15,11 +16,15 @@ import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.IDE;
 
 import com.mxgraph.model.mxCell;
 
@@ -36,14 +41,12 @@ public class LocateAction {
   @SuppressWarnings("unused")
   private final CustomGraph graph;
 
-  // Reference to the breakpoint information store
-  private final BreakpointInformationStore store;
+  private final SessionContext ctx;
 
-  public LocateAction(final CustomGraph g) {
+  public LocateAction(final CustomGraph g, final SessionContext ctx) {
     super();
     this.graph = g;
-
-    store = BreakpointInformationStore.getInstance();
+    this.ctx = ctx;
   }
 
   /**
@@ -70,7 +73,7 @@ public class LocateAction {
         try {
           openSourceCode(cell);
         }
-        catch (final PartInitException e) {
+        catch (final CoreException e) {
           Activator.log(e);
         }
       }
@@ -79,19 +82,57 @@ public class LocateAction {
     return item;
   }
 
-  void openSourceCode(final mxCell cell) throws PartInitException {
+  void openSourceCode(final mxCell cell) throws CoreException {
     // get reactive variable from cell
-    final ReactiveVariable reVar = (ReactiveVariable) cell.getValue();
+    final ReactiveVariableLabel reVarLabel = (ReactiveVariableLabel) cell.getValue();
+    final ReactiveVariable reVar = reVarLabel.getVar();
 
     // get breakpoint information from store
-    final BreakpointInformation information = store.get(reVar);
+    final BreakpointInformation information = ctx.getVariableLocation(reVar.getId());
+    if (information == null) {
+      return;
+    }
 
-    // create type and file instances
+    // create file instances
     final IFile file = createFile(information.getSourcePath());
+    if (file == null) {
+      return;
+    }
 
-    // open editor with appropriate file
-    final IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-    org.eclipse.ui.ide.IDE.openEditor(page, file, true);
+    // breakpoints are 1 line ahead
+    final int locationLine = information.getLineNumber() - 1;
+    final IMarker marker = createMarker(file, locationLine);
+
+    Display.getDefault().asyncExec(new Runnable() {
+
+      @Override
+      public void run() {
+        // open editor with appropriate file
+        try {
+          final IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+          IDE.openEditor(page, marker, true);
+        }
+        catch (final PartInitException e) {
+          Activator.log(e);
+        }
+      }
+    });
+  }
+
+  /**
+   * Creates a text marker in the file on the given line number.
+   *
+   * @param file
+   *          the file
+   * @param lineNumber
+   *          the line number
+   * @return the text marker
+   * @throws CoreException
+   */
+  private IMarker createMarker(final IFile file, final int lineNumber) throws CoreException {
+    final IMarker marker = file.createMarker(IMarker.TEXT);
+    marker.setAttribute(IMarker.LINE_NUMBER, lineNumber);
+    return marker;
   }
 
   /**

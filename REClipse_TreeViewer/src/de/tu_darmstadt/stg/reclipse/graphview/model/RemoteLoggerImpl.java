@@ -70,8 +70,6 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
   private final IEventLogger logger;
   private final HashSet<IJavaLineBreakpoint> breakpoints = new HashSet<>();
 
-  private final BreakpointInformationStore store;
-
   protected RemoteLoggerImpl(final SessionContext ctx) throws RemoteException {
     super();
 
@@ -79,8 +77,6 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
     this.persistence = ctx.getPersistence();
     this.esperAdapter = ctx.getEsperAdapter();
     this.logger = createLogger();
-
-    store = BreakpointInformationStore.getInstance();
   }
 
   private IEventLogger createLogger() {
@@ -121,60 +117,61 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
 
   @Override
   public void logNodeCreated(final ReactiveVariable r, final BreakpointInformation breakpointInformation) throws RemoteException {
-    store.put(r, breakpointInformation);
-
     logger.logNodeCreated(r);
     persistence.logNodeCreated(r);
+
+    ctx.putVariableLocation(r.getId(), breakpointInformation);
+    ctx.putBreakpointInformation(r, breakpointInformation);
 
     sendEventToEsper(r, breakpointInformation);
   }
 
   @Override
   public void logNodeAttached(final ReactiveVariable r, final UUID dependentId, final BreakpointInformation breakpointInformation) throws RemoteException {
-    store.put(r, breakpointInformation);
-
     logger.logNodeAttached(r, dependentId);
     persistence.logNodeAttached(r, dependentId);
+
+    ctx.putBreakpointInformation(r, breakpointInformation);
 
     sendEventToEsper(r, breakpointInformation);
   }
 
   @Override
   public void logNodeEvaluationEnded(final ReactiveVariable r, final BreakpointInformation breakpointInformation) throws RemoteException {
-    store.put(r, breakpointInformation);
-
     logger.logNodeEvaluationEnded(r);
     persistence.logNodeEvaluationEnded(r);
+
+    ctx.putBreakpointInformation(r, breakpointInformation);
 
     sendEventToEsper(r, breakpointInformation);
   }
 
   @Override
   public void logNodeEvaluationEndedWithException(final ReactiveVariable r, final Exception e, final BreakpointInformation breakpointInformation) throws RemoteException {
-    store.put(r, breakpointInformation);
-
     logger.logNodeEvaluationEndedWithException(r, e);
     persistence.logNodeEvaluationEndedWithException(r, e);
+
+    ctx.putBreakpointInformation(r, breakpointInformation);
 
     sendEventToEsper(r, breakpointInformation);
   }
 
   @Override
   public void logNodeEvaluationStarted(final ReactiveVariable r, final BreakpointInformation breakpointInformation) throws RemoteException {
-    store.put(r, breakpointInformation);
-
     logger.logNodeEvaluationStarted(r);
     persistence.logNodeEvaluationStarted(r);
+
+    ctx.putBreakpointInformation(r, breakpointInformation);
 
     sendEventToEsper(r, breakpointInformation);
   }
 
   @Override
   public void logNodeValueSet(final ReactiveVariable r, final BreakpointInformation breakpointInformation) throws RemoteException {
-    store.put(r, breakpointInformation);
-
     logger.logNodeValueSet(r);
     persistence.logNodeValueSet(r);
+
+    ctx.putBreakpointInformation(r, breakpointInformation);
 
     sendEventToEsper(r, breakpointInformation);
   }

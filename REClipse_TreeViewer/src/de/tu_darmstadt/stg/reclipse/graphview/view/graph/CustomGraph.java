@@ -77,8 +77,8 @@ public class CustomGraph extends mxGraph {
     // initialize graph collapser and highlighter
     collapser = new CollapseAction(this);
     highlighter = new HighlightAction(this);
-    breakpointer = new BreakpointAction(this);
-    locater = new LocateAction(this);
+    breakpointer = new BreakpointAction(this, ctx);
+    locater = new LocateAction(this, ctx);
 
     // create new content model
     contentModel = new ContentModel(ctx);
@@ -362,10 +362,10 @@ public class CustomGraph extends mxGraph {
       }
 
       if (e.getWheelRotation() < 0) {
-        graphComponent.zoomIn();
+        zoomIn();
       }
       else if (e.getWheelRotation() > 0) {
-        graphComponent.zoomOut();
+        zoomOut();
       }
     }
   }

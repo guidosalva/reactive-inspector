@@ -51,4 +51,8 @@ public class ReactiveVariableLabel {
       return var.getValueString();
     }
   }
+
+  public ReactiveVariable getVar() {
+    return var;
+  }
 }
