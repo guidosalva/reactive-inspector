@@ -41,7 +41,10 @@ public class QueryController {
         return;
       }
 
-      final String sqlQuery = parseReclipseQuery(rtv.getQueryText());
+      final String queryText = rtv.getQueryText();
+      ctx.get().getEsperAdapter().updateLiveQueryText(queryText);
+
+      final String sqlQuery = parseReclipseQuery(queryText);
       matches = ctx.get().getEsperAdapter().executeQuery(sqlQuery);
       if (matches != null && matches.size() > 0) {
         rtv.jumpToPointInTime(matches.get(0));

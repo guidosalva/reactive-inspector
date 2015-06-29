@@ -68,12 +68,18 @@ public class EsperAdapter {
   }
 
   private void updateEPLStatement() {
+
+  }
+
+  public void updateLiveQueryText(final String newQueryText) {
     final String oldQueryText = queryText;
-    updateQueryText();
+    queryText = newQueryText;
+
     // if query text has not been changed or not existing, do nothing
     if (queryText == null || queryText.equals(oldQueryText)) {
       return;
     }
+
     // if query text has been deleted, delete statement
     if (queryText.equals("")) { //$NON-NLS-1$
       if (liveStmt != null) {
@@ -90,10 +96,6 @@ public class EsperAdapter {
     }
     liveStmt = provider.getEPAdministrator().createEPL(query);
     liveStmt.setSubscriber(this);
-  }
-
-  private void updateQueryText() {
-    // TODO update query text via method parameter
   }
 
   private String parseReclipseQuery() {
