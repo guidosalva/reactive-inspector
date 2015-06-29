@@ -35,6 +35,11 @@ public class ReadPerformanceTestCase extends PerformanceTestCase {
       public boolean isEventLogging() {
         return false;
       }
+
+      @Override
+      public boolean isSuspendOnSessionStart() {
+        return false;
+      }
     });
     
     SessionContext ctx = prepareSession();

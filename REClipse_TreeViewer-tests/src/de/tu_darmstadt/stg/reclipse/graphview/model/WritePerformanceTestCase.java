@@ -31,6 +31,11 @@ public class WritePerformanceTestCase extends PerformanceTestCase {
       public boolean isEventLogging() {
         return false;
       }
+
+      @Override
+      public boolean isSuspendOnSessionStart() {
+        return false;
+      }
     });
 
     for (int i = 0; i < ITERATIONS; i++) {

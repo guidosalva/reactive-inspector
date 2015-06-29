@@ -4,6 +4,7 @@ import de.tu_darmstadt.stg.reclipse.graphview.Activator;
 import de.tu_darmstadt.stg.reclipse.graphview.Images;
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
+import de.tu_darmstadt.stg.reclipse.graphview.util.BreakpointUtils;
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableLabel;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.CustomGraph;
 import de.tu_darmstadt.stg.reclipse.logger.BreakpointInformation;
@@ -17,16 +18,8 @@ import java.util.Map;
 import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.debug.core.IJavaWatchpoint;
-import org.eclipse.jdt.debug.core.JDIDebugModel;
 
 import com.mxgraph.model.mxCell;
 
@@ -120,18 +113,8 @@ public class BreakpointAction {
       // get breakpoint information from store
       final BreakpointInformation information = ctx.getBreakpointInformation(reVar);
 
-      // create type and file instances
-      final IType type = createTypeFromClassName(information.getClassName());
-      final IFile file = createFile(information.getSourcePath());
-
-      // try to create watchpoint
-      IJavaWatchpoint watchpoint = null;
-      try {
-        watchpoint = JDIDebugModel.createWatchpoint(file, type.getFullyQualifiedName(), reVar.getName(), -1, -1, -1, 0, true, null);
-      }
-      catch (final CoreException e) {
-        Activator.log(e);
-      }
+      // create watchpoint
+      final IJavaWatchpoint watchpoint = BreakpointUtils.createWatchpoint(information, reVar.getName());
 
       // save watchpoint
       if (watchpoint != null) {
@@ -140,61 +123,6 @@ public class BreakpointAction {
     }
 
     breakpointStatus.put(cell, !isEnabled);
-  }
-
-  /**
-   * Based on the current projects and a class name, generates an appropriate
-   * type.
-   *
-   * @param className
-   *          A class name.
-   * @return A type.
-   */
-  private static IType createTypeFromClassName(final String className) {
-    // Get projects in current workspace
-    final IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-
-    IType resource = null;
-    for (final IProject project : projects) {
-      final IJavaProject javaProject = JavaCore.create(project);
-
-      IType type = null;
-      try {
-        type = javaProject.findType(className);
-      }
-      catch (final JavaModelException e) {
-        Activator.log(e);
-      }
-
-      if (type != null) {
-        resource = type;
-        break;
-      }
-    }
-    return resource;
-  }
-
-  /**
-   * Based on a file name, generates an appropriate file instance.
-   *
-   * @param fileName
-   *          A file name.
-   * @return An IFile instance.
-   */
-  private static IFile createFile(final String fileName) {
-    // Get projects in current workspace
-    final IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-
-    IFile resource = null;
-    for (final IProject project : projects) {
-      final IFile file = project.getFile(fileName);
-
-      if (file != null) {
-        resource = file;
-        break;
-      }
-    }
-    return resource;
   }
 
   /**

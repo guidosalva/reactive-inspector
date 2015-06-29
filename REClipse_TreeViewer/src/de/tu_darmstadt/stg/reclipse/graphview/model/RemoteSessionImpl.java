@@ -1,5 +1,6 @@
 package de.tu_darmstadt.stg.reclipse.graphview.model;
 
+import de.tu_darmstadt.stg.reclipse.logger.BreakpointInformation;
 import de.tu_darmstadt.stg.reclipse.logger.RemoteLoggerInterface;
 import de.tu_darmstadt.stg.reclipse.logger.RemoteSessionInterface;
 
@@ -21,9 +22,9 @@ public class RemoteSessionImpl extends UnicastRemoteObject implements RemoteSess
   }
 
   @Override
-  public RemoteLoggerInterface startSession() throws RemoteException {
+  public RemoteLoggerInterface startSession(final BreakpointInformation breakpointInformation) throws RemoteException {
     final SessionContext ctx = sessionManager.createSession();
-    return new RemoteLoggerImpl(ctx);
+    return new RemoteLoggerImpl(ctx, breakpointInformation);
   }
 
 }

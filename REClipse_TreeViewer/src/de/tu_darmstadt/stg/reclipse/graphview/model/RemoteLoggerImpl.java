@@ -3,6 +3,7 @@ package de.tu_darmstadt.stg.reclipse.graphview.model;
 import de.tu_darmstadt.stg.reclipse.graphview.Activator;
 import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.EsperAdapter;
 import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.PersistenceFacade;
+import de.tu_darmstadt.stg.reclipse.graphview.util.BreakpointUtils;
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveTreeView;
 import de.tu_darmstadt.stg.reclipse.logger.BreakpointInformation;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
@@ -14,12 +15,8 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.HashSet;
 import java.util.UUID;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.debug.core.IJavaLineBreakpoint;
-import org.eclipse.jdt.debug.core.JDIDebugModel;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -70,13 +67,17 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
   private final IEventLogger logger;
   private final HashSet<IJavaLineBreakpoint> breakpoints = new HashSet<>();
 
-  protected RemoteLoggerImpl(final SessionContext ctx) throws RemoteException {
+  protected RemoteLoggerImpl(final SessionContext ctx, final BreakpointInformation breakpointInformation) throws RemoteException {
     super();
 
     this.ctx = ctx;
     this.persistence = ctx.getPersistence();
     this.esperAdapter = ctx.getEsperAdapter();
     this.logger = createLogger();
+
+    if (ctx.getConfiguration().isSuspendOnSessionStart()) {
+      createBreakpoint(breakpointInformation);
+    }
   }
 
   private IEventLogger createLogger() {
@@ -94,24 +95,10 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
   }
 
   private void createBreakpoint(final BreakpointInformation breakpointInformation) {
-    try {
-      final IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-      IFile resource = null;
-      for (final IProject project : projects) {
-        final IFile file = project.getFile(breakpointInformation.getSourcePath());
-        if (file != null && file.exists()) {
-          resource = file;
-          break;
-        }
-      }
-      if (resource != null) {
-        final IJavaLineBreakpoint breakpoint = JDIDebugModel.createLineBreakpoint(resource, breakpointInformation.getClassName(), breakpointInformation.getLineNumber(), -1, -1, 0,
-                true, null);
-        breakpoints.add(breakpoint);
-      }
-    }
-    catch (final CoreException e) {
-      Activator.log(e);
+    final IJavaLineBreakpoint breakpoint = BreakpointUtils.createBreakoint(breakpointInformation);
+
+    if (breakpoint != null) {
+      breakpoints.add(breakpoint);
     }
   }
 

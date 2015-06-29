@@ -99,9 +99,11 @@ class REScalaLogger extends Logging {
   private lazy val remoteLogger: RemoteLoggerInterface = {
     checkSecurityManager()
     
+    val breakpointInformation = getBreakpointInformation()
+    
     val registry = LocateRegistry.getRegistry()
     val session = registry.lookup(RMIConstants.REMOTE_REFERENCE_NAME).asInstanceOf[RemoteSessionInterface]
-    val logger = session.startSession()
+    val logger = session.startSession(breakpointInformation)
     
     sys.addShutdownHook {
      logger.endSession()

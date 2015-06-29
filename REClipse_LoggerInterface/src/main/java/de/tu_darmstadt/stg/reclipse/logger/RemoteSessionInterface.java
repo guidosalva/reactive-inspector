@@ -11,6 +11,6 @@ import java.rmi.RemoteException;
  */
 public interface RemoteSessionInterface extends Remote {
 
-  public RemoteLoggerInterface startSession() throws RemoteException;
+  public RemoteLoggerInterface startSession(BreakpointInformation breakpointInformation) throws RemoteException;
 
 }

@@ -7,4 +7,6 @@ public interface ISessionConfiguration {
   public IPath getDatabaseFilesDir();
 
   public boolean isEventLogging();
+
+  public boolean isSuspendOnSessionStart();
 }

@@ -2,6 +2,7 @@ package de.tu_darmstadt.stg.reclipse.graphview.view;
 
 import de.tu_darmstadt.stg.reclipse.graphview.Activator;
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
+import de.tu_darmstadt.stg.reclipse.graphview.action.SuspendOnSessionStart;
 import de.tu_darmstadt.stg.reclipse.graphview.action.Relayout;
 import de.tu_darmstadt.stg.reclipse.graphview.action.SaveGraphAsImage;
 import de.tu_darmstadt.stg.reclipse.graphview.action.SessionSelect;
@@ -153,6 +154,7 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
   private void createActions() {
     // creating the toolbar entries
     getViewSite().getActionBars().getToolBarManager().add(new SessionSelect());
+    getViewSite().getActionBars().getToolBarManager().add(new SuspendOnSessionStart());
     getViewSite().getActionBars().getToolBarManager().add(new Relayout(graphContainer));
     getViewSite().getActionBars().getToolBarManager().add(new SaveGraphAsImage(getSite(), graphContainer));
     getViewSite().getActionBars().getToolBarManager().add(new ZoomIn(graphContainer));
