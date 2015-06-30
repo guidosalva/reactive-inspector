@@ -21,7 +21,7 @@ public class BreakpointUtils {
   }
 
   public static IJavaLineBreakpoint createBreakoint(final BreakpointInformation information) {
-    final IFile file = createFile(information.getSourcePath());
+    final IFile file = findFile(information.getSourcePath());
 
     if (file == null) {
       return null;
@@ -38,7 +38,7 @@ public class BreakpointUtils {
 
   public static IJavaWatchpoint createWatchpoint(final BreakpointInformation information, final String variableName) {
     final IType type = createTypeFromClassName(information.getClassName());
-    final IFile file = createFile(information.getSourcePath());
+    final IFile file = findFile(information.getSourcePath());
 
     if (type == null || file == null) {
       return null;
@@ -86,20 +86,20 @@ public class BreakpointUtils {
   }
 
   /**
-   * Based on a file name, generates an appropriate file instance.
+   * Based on a file name, finds the appropriate file instance.
    *
    * @param fileName
    *          A file name.
    * @return An IFile instance.
    */
-  private static IFile createFile(final String fileName) {
+  public static IFile findFile(final String fileName) {
     // Get projects in current workspace
     final IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 
     for (final IProject project : projects) {
       final IFile file = project.getFile(fileName);
 
-      if (file != null) {
+      if (file != null && file.exists()) {
         return file;
       }
     }

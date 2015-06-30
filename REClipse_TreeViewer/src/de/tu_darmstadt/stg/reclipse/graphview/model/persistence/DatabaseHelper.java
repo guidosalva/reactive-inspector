@@ -410,7 +410,7 @@ public class DatabaseHelper {
   private int createVariableStatus(final ReactiveVariable variable, final int idVariable, final int oldVariableStatus, final int dependentVariable) throws PersistenceException {
     final int id = createVariableStatus(variable, idVariable, oldVariableStatus);
 
-    final String insertStmt = "INSERT INTO variable_dependency (idVariableStatus, dependentVariable) VALUES (?, ?)"; //$NON-NLS-1$
+    final String insertStmt = "REPLACE INTO variable_dependency (idVariableStatus, dependentVariable) VALUES (?, ?)"; //$NON-NLS-1$
 
     try (PreparedStatement stmt = connection.prepareStatement(insertStmt)) {
       stmt.setInt(1, id);

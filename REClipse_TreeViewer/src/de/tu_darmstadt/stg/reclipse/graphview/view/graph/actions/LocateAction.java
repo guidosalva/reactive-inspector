@@ -4,6 +4,7 @@ import de.tu_darmstadt.stg.reclipse.graphview.Activator;
 import de.tu_darmstadt.stg.reclipse.graphview.Images;
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
+import de.tu_darmstadt.stg.reclipse.graphview.util.BreakpointUtils;
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableLabel;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.CustomGraph;
 import de.tu_darmstadt.stg.reclipse.logger.BreakpointInformation;
@@ -17,8 +18,6 @@ import javax.swing.JMenuItem;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPage;
@@ -94,7 +93,7 @@ public class LocateAction {
     }
 
     // create file instances
-    final IFile file = createFile(information.getSourcePath());
+    final IFile file = BreakpointUtils.findFile(information.getSourcePath());
     if (file == null) {
       return;
     }
@@ -133,29 +132,6 @@ public class LocateAction {
     final IMarker marker = file.createMarker(IMarker.TEXT);
     marker.setAttribute(IMarker.LINE_NUMBER, lineNumber);
     return marker;
-  }
-
-  /**
-   * Based on a file name, generates an appropriate file instance.
-   *
-   * @param fileName
-   *          A file name.
-   * @return An IFile instance.
-   */
-  private static IFile createFile(final String fileName) {
-    // Get projects in current workspace
-    final IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-
-    IFile resource = null;
-    for (final IProject project : projects) {
-      final IFile file = project.getFile(fileName);
-
-      if (file != null) {
-        resource = file;
-        break;
-      }
-    }
-    return resource;
   }
 
   /**
