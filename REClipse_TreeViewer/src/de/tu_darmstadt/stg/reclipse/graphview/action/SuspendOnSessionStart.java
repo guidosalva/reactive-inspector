@@ -14,6 +14,7 @@ public class SuspendOnSessionStart extends Action {
 
     setToolTipText(Texts.SuspendOnSessionStart_Tooltip);
     setImageDescriptor(Activator.getImageDescriptor(Images.SUSPEND));
+    setChecked(Properties.getBoolean(Properties.SUSPEND_ON_SESSION_START));
   }
 
   @Override

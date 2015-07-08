@@ -1,7 +1,7 @@
 package de.tu_darmstadt.stg.reclipse.graphview.action;
 
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
-import de.tu_darmstadt.stg.reclipse.graphview.view.graph.GraphContainer;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.TreeViewGraph;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.ui.ISharedImages;
@@ -14,10 +14,10 @@ import org.eclipse.ui.PlatformUI;
  */
 public class Relayout extends Action {
 
-  private final GraphContainer graphContainer;
+  private final TreeViewGraph graph;
 
-  public Relayout(final GraphContainer graphContainer) {
-    this.graphContainer = graphContainer;
+  public Relayout(final TreeViewGraph graph) {
+    this.graph = graph;
 
     setText(Texts.Relayout_Text);
     setToolTipText(Texts.Relayout_Tooltip);
@@ -26,8 +26,6 @@ public class Relayout extends Action {
 
   @Override
   public void run() {
-    if (graphContainer.containsGraph()) {
-      graphContainer.getGraph().layoutGraph();
-    }
+    graph.layoutGraph();
   }
 }

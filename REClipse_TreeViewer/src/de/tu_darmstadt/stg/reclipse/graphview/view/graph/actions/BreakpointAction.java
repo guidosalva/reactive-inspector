@@ -6,7 +6,6 @@ import de.tu_darmstadt.stg.reclipse.graphview.Texts;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
 import de.tu_darmstadt.stg.reclipse.graphview.util.BreakpointUtils;
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableLabel;
-import de.tu_darmstadt.stg.reclipse.graphview.view.graph.CustomGraph;
 import de.tu_darmstadt.stg.reclipse.logger.BreakpointInformation;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
@@ -30,12 +29,6 @@ import com.mxgraph.model.mxCell;
  */
 public class BreakpointAction {
 
-  /**
-   * Currently, the graph instance is not needed.
-   */
-  @SuppressWarnings("unused")
-  private final CustomGraph graph;
-
   // Statuses of breakpoints
   private final Map<mxCell, Boolean> breakpointStatus;
 
@@ -44,9 +37,8 @@ public class BreakpointAction {
 
   private final SessionContext ctx;
 
-  public BreakpointAction(final CustomGraph g, final SessionContext ctx) {
+  public BreakpointAction(final SessionContext ctx) {
     super();
-    this.graph = g;
     this.ctx = ctx;
 
     breakpointStatus = new HashMap<>();

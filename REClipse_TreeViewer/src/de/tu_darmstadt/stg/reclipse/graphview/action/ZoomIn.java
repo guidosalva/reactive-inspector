@@ -3,7 +3,7 @@ package de.tu_darmstadt.stg.reclipse.graphview.action;
 import de.tu_darmstadt.stg.reclipse.graphview.Activator;
 import de.tu_darmstadt.stg.reclipse.graphview.Images;
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
-import de.tu_darmstadt.stg.reclipse.graphview.view.graph.GraphContainer;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.GraphComponent;
 
 import org.eclipse.jface.action.Action;
 
@@ -12,10 +12,10 @@ import org.eclipse.jface.action.Action;
  */
 public class ZoomIn extends Action {
 
-  private final GraphContainer graphContainer;
+  private final GraphComponent graphComponent;
 
-  public ZoomIn(final GraphContainer graphContainer) {
-    this.graphContainer = graphContainer;
+  public ZoomIn(final GraphComponent graphComponent) {
+    this.graphComponent = graphComponent;
 
     setText(Texts.ZoomIn_Text);
     setToolTipText(Texts.ZoomIn_Tooltip);
@@ -24,8 +24,6 @@ public class ZoomIn extends Action {
 
   @Override
   public void run() {
-    if (graphContainer.containsGraph()) {
-      graphContainer.getGraph().zoomIn();
-    }
+    graphComponent.zoomIn();
   }
 }

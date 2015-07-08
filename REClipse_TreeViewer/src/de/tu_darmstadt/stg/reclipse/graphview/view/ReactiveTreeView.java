@@ -2,11 +2,11 @@ package de.tu_darmstadt.stg.reclipse.graphview.view;
 
 import de.tu_darmstadt.stg.reclipse.graphview.Activator;
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
-import de.tu_darmstadt.stg.reclipse.graphview.action.SuspendOnSessionStart;
 import de.tu_darmstadt.stg.reclipse.graphview.action.Relayout;
 import de.tu_darmstadt.stg.reclipse.graphview.action.SaveGraphAsImage;
 import de.tu_darmstadt.stg.reclipse.graphview.action.SessionSelect;
 import de.tu_darmstadt.stg.reclipse.graphview.action.ShowHeatmap;
+import de.tu_darmstadt.stg.reclipse.graphview.action.SuspendOnSessionStart;
 import de.tu_darmstadt.stg.reclipse.graphview.action.ZoomIn;
 import de.tu_darmstadt.stg.reclipse.graphview.action.ZoomOut;
 import de.tu_darmstadt.stg.reclipse.graphview.controller.QueryController;
@@ -15,10 +15,11 @@ import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionManager;
 import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.IDependencyGraphListener;
 import de.tu_darmstadt.stg.reclipse.graphview.preferences.PreferenceConstants;
-import de.tu_darmstadt.stg.reclipse.graphview.view.graph.CustomGraph;
-import de.tu_darmstadt.stg.reclipse.graphview.view.graph.GraphContainer;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.GraphComponent;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.TreeViewGraph;
 import de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType;
 
+import java.awt.Frame;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -27,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.layout.GridData;
@@ -57,20 +59,21 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
   public static final String ID = "de.tu-darmstadt.stg.reclipse.graphview.ReactiveTreeView"; //$NON-NLS-1$
 
   private static final String[] QUERY_TEMPLATES = new String[] {
-    "nodeCreated(<name>)", //$NON-NLS-1$
-    "nodeEvaluated(<name>)", //$NON-NLS-1$
-    "nodeValueSet(<name>)", //$NON-NLS-1$
-    "dependencyCreated(<name>, <name>)", //$NON-NLS-1$
-    "evaluationYielded(<name>, <value>)", //$NON-NLS-1$
-    "evaluationException(<name>)" //$NON-NLS-1$
+      "nodeCreated(<name>)", //$NON-NLS-1$
+      "nodeEvaluated(<name>)", //$NON-NLS-1$
+      "nodeValueSet(<name>)", //$NON-NLS-1$
+      "dependencyCreated(<name>, <name>)", //$NON-NLS-1$
+      "evaluationYielded(<name>, <value>)", //$NON-NLS-1$
+      "evaluationException(<name>)" //$NON-NLS-1$
   };
 
   protected final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
-  protected final GraphContainer graphContainer = new GraphContainer();
 
   protected Composite graphParent;
   protected Scale slider;
   protected Combo queryTextField;
+  protected TreeViewGraph graph;
+  protected GraphComponent graphComponent;
 
   protected long lastUpdate = 0;
   protected ScheduledFuture<?> delayedUpdateTask;
@@ -95,6 +98,17 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
     graphParent = new Composite(parent, SWT.NONE);
     graphParent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     graphParent.setLayout(new GridLayout());
+
+    final Composite composite = new Composite(graphParent, SWT.EMBEDDED | SWT.BACKGROUND);
+    composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+    graph = new TreeViewGraph();
+
+    // initialize graph component and add it to frame
+    graphComponent = new GraphComponent(graph);
+    graphComponent.setEnabled(false);
+    final Frame graphFrame = SWT_AWT.new_Frame(composite);
+    graphFrame.add(graphComponent);
 
     slider = new Scale(parent, SWT.HORIZONTAL);
     slider.setMinimum(0);
@@ -155,11 +169,11 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
     // creating the toolbar entries
     getViewSite().getActionBars().getToolBarManager().add(new SessionSelect());
     getViewSite().getActionBars().getToolBarManager().add(new SuspendOnSessionStart());
-    getViewSite().getActionBars().getToolBarManager().add(new Relayout(graphContainer));
-    getViewSite().getActionBars().getToolBarManager().add(new SaveGraphAsImage(getSite(), graphContainer));
-    getViewSite().getActionBars().getToolBarManager().add(new ZoomIn(graphContainer));
-    getViewSite().getActionBars().getToolBarManager().add(new ZoomOut(graphContainer));
-    getViewSite().getActionBars().getToolBarManager().add(new ShowHeatmap(graphContainer));
+    getViewSite().getActionBars().getToolBarManager().add(new Relayout(graph));
+    getViewSite().getActionBars().getToolBarManager().add(new SaveGraphAsImage(getSite(), graph));
+    getViewSite().getActionBars().getToolBarManager().add(new ZoomIn(graphComponent));
+    getViewSite().getActionBars().getToolBarManager().add(new ZoomOut(graphComponent));
+    getViewSite().getActionBars().getToolBarManager().add(new ShowHeatmap(graph));
   }
 
   @Override
@@ -171,16 +185,8 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
   public void onSessionSelected(final SessionContext ctx) {
     manualMode = false;
 
+    graph.setSessionContext(ctx);
     ctx.getDbHelper().addDependencyGraphListener(ReactiveTreeView.this);
-
-    Display.getDefault().syncExec(new Runnable() {
-
-      @Override
-      public void run() {
-        final CustomGraph graph = new CustomGraph(graphParent, ctx);
-        graphContainer.setGraph(graph);
-      }
-    });
 
     updateSliderMaximum();
   }
@@ -188,17 +194,7 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
   @Override
   public void onSessionDeselected(final SessionContext ctx) {
     ctx.getDbHelper().removeDependencyGraphListener(this);
-
-    if (graphContainer.containsGraph()) {
-      Display.getDefault().syncExec(new Runnable() {
-
-        @Override
-        public void run() {
-          graphContainer.getGraph().dispose();
-          graphContainer.setGraph(null);
-        }
-      });
-    }
+    graph.removeSessionContext();
   }
 
   @Override
@@ -214,22 +210,8 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
       return;
     }
 
-    Display.getDefault().asyncExec(new Runnable() {
-
-      @Override
-      public void run() {
-        if (!graphContainer.containsGraph()) {
-          return;
-        }
-
-        final int pointInTime = getCurrentSliderValue();
-        graphContainer.getGraph().setPointInTime(pointInTime, highlightChange);
-
-        if (graphParent != null && !graphParent.isDisposed()) {
-          graphParent.layout();
-        }
-      }
-    });
+    final int pointInTime = getCurrentSliderValue();
+    graph.setPointInTime(pointInTime, highlightChange);
   }
 
   public void updateSliderMaximum() {

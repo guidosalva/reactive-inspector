@@ -20,12 +20,6 @@ public class DefaultSessionConfiguration implements ISessionConfiguration {
 
   @Override
   public boolean isSuspendOnSessionStart() {
-    final String propertyValue = Activator.getDefault().getProperty(Properties.SUSPEND_ON_SESSION_START);
-
-    if (propertyValue == null) {
-      return false;
-    }
-
-    return Boolean.parseBoolean(propertyValue);
+    return Properties.getBoolean(Properties.SUSPEND_ON_SESSION_START);
   }
 }

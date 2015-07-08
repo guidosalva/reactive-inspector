@@ -7,4 +7,14 @@ public class Properties {
   private Properties() {
   }
 
+  public static boolean getBoolean(final String propertyName) {
+    final String propertyValue = Activator.getDefault().getProperty(propertyName);
+
+    if (propertyValue == null) {
+      return false;
+    }
+
+    return Boolean.parseBoolean(propertyValue);
+  }
+
 }

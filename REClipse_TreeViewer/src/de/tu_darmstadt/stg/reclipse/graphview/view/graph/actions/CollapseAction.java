@@ -2,7 +2,7 @@ package de.tu_darmstadt.stg.reclipse.graphview.view.graph.actions;
 
 import de.tu_darmstadt.stg.reclipse.graphview.Images;
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
-import de.tu_darmstadt.stg.reclipse.graphview.view.graph.CustomGraph;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.TreeViewGraph;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,17 +16,17 @@ import javax.swing.JMenuItem;
 import com.mxgraph.model.mxCell;
 
 /**
- * 
+ *
  * @author Sebastian Ruhleder <sebastian.ruhleder@gmail.com>
- * 
+ *
  */
 public class CollapseAction {
 
-  private final CustomGraph graph;
+  private final TreeViewGraph graph;
 
   private final Map<mxCell, Set<Object>> collapsed;
 
-  public CollapseAction(final CustomGraph g) {
+  public CollapseAction(final TreeViewGraph g) {
     super();
     this.graph = g;
 
@@ -35,7 +35,7 @@ public class CollapseAction {
 
   /**
    * Creates a menu item for the cell.
-   * 
+   *
    * @param cell
    *          A cell in the graph.
    * @return JMenuItem instance
@@ -63,7 +63,7 @@ public class CollapseAction {
 
   /**
    * Checks if a cell is currently collapsed.
-   * 
+   *
    * @param cell
    *          A cell in the graph.
    * @return True, if the cell is collapsed. False, otherwise.
@@ -74,7 +74,7 @@ public class CollapseAction {
 
   /**
    * Gets the amount of children of the cell in the graph.
-   * 
+   *
    * @param cell
    *          A cell in the graph.
    * @return Amount of the cell's children.
@@ -85,7 +85,7 @@ public class CollapseAction {
 
   /**
    * Builds a label based on whether a cell is collapsed.
-   * 
+   *
    * @param cell
    *          A cell in the graph.
    * @return A label String.
@@ -120,7 +120,7 @@ public class CollapseAction {
 
   /**
    * Collapses a cell in the graph.
-   * 
+   *
    * @param cell
    *          A cell in the graph.
    */

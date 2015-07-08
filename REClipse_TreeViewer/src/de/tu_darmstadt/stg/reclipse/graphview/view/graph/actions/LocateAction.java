@@ -6,7 +6,6 @@ import de.tu_darmstadt.stg.reclipse.graphview.Texts;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
 import de.tu_darmstadt.stg.reclipse.graphview.util.BreakpointUtils;
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableLabel;
-import de.tu_darmstadt.stg.reclipse.graphview.view.graph.CustomGraph;
 import de.tu_darmstadt.stg.reclipse.logger.BreakpointInformation;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
@@ -34,17 +33,10 @@ import com.mxgraph.model.mxCell;
  */
 public class LocateAction {
 
-  /**
-   * Currently, the graph instance is not needed.
-   */
-  @SuppressWarnings("unused")
-  private final CustomGraph graph;
-
   private final SessionContext ctx;
 
-  public LocateAction(final CustomGraph g, final SessionContext ctx) {
+  public LocateAction(final SessionContext ctx) {
     super();
-    this.graph = g;
     this.ctx = ctx;
   }
 

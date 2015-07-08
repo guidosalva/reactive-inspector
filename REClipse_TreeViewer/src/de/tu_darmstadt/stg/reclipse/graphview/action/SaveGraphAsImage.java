@@ -3,7 +3,7 @@ package de.tu_darmstadt.stg.reclipse.graphview.action;
 import de.tu_darmstadt.stg.reclipse.graphview.Activator;
 import de.tu_darmstadt.stg.reclipse.graphview.Images;
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
-import de.tu_darmstadt.stg.reclipse.graphview.view.graph.GraphContainer;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.TreeViewGraph;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -26,11 +26,11 @@ import com.mxgraph.util.mxCellRenderer;
 public class SaveGraphAsImage extends Action {
 
   private final IWorkbenchPartSite site;
-  private final GraphContainer graphContainer;
+  private final TreeViewGraph graph;
 
-  public SaveGraphAsImage(final IWorkbenchPartSite ps, final GraphContainer graphContainer) {
+  public SaveGraphAsImage(final IWorkbenchPartSite ps, final TreeViewGraph graph) {
     this.site = ps;
-    this.graphContainer = graphContainer;
+    this.graph = graph;
 
     setText(Texts.SaveImage_Text);
     setToolTipText(Texts.SaveImage_Tooltip);
@@ -44,17 +44,15 @@ public class SaveGraphAsImage extends Action {
       "*.png" //$NON-NLS-1$
     });
     final String path = dialog.open();
-    if (graphContainer.containsGraph()) {
-      final BufferedImage image = mxCellRenderer.createBufferedImage(graphContainer.getGraph(), null, 1, Color.WHITE, true, null);
-      try {
-        ImageIO.write(image, "PNG", new File(path)); //$NON-NLS-1$
-      }
-      catch (final IOException e) {
-        // display error message
-        MessageDialog.openInformation(site.getShell(), "", Texts.SaveImage_Error); //$NON-NLS-1$
-      }
-
-      MessageDialog.openInformation(site.getShell(), "", Texts.SaveImage_Result); //$NON-NLS-1$
+    final BufferedImage image = mxCellRenderer.createBufferedImage(graph, null, 1, Color.WHITE, true, null);
+    try {
+      ImageIO.write(image, "PNG", new File(path)); //$NON-NLS-1$
     }
+    catch (final IOException e) {
+      // display error message
+      MessageDialog.openInformation(site.getShell(), "", Texts.SaveImage_Error); //$NON-NLS-1$
+    }
+
+    MessageDialog.openInformation(site.getShell(), "", Texts.SaveImage_Result); //$NON-NLS-1$
   }
 }
