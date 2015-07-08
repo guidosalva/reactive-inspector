@@ -24,6 +24,7 @@ import com.mxgraph.view.mxGraph;
 
 public class TreeViewGraph extends mxGraph {
 
+  private Optional<SessionContext> ctx = Optional.empty();
   private Optional<ContentModel> contentModel = Optional.empty();
   private boolean activeHeatmap = false;
 
@@ -42,11 +43,13 @@ public class TreeViewGraph extends mxGraph {
   }
 
   public void setSessionContext(final SessionContext ctx) {
+    this.ctx = Optional.of(ctx);
     this.contentModel = Optional.of(new ContentModel(ctx));
     this.setModel(new mxGraphModel());
   }
 
   public void removeSessionContext() {
+    this.ctx = Optional.empty();
     this.contentModel = Optional.empty();
     this.setModel(new mxGraphModel());
   }
@@ -191,5 +194,9 @@ public class TreeViewGraph extends mxGraph {
     final ReactiveVariableLabel reVarLabel = (ReactiveVariableLabel) cell.getValue();
     final ReactiveVariableTooltip tooltip = new ReactiveVariableTooltip(reVarLabel.getVar());
     return tooltip.toString();
+  }
+
+  public Optional<SessionContext> getSessionContext() {
+    return ctx;
   }
 }

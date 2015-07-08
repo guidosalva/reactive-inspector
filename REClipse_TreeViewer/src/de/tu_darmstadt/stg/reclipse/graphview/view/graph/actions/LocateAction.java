@@ -6,11 +6,13 @@ import de.tu_darmstadt.stg.reclipse.graphview.Texts;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
 import de.tu_darmstadt.stg.reclipse.graphview.util.BreakpointUtils;
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableLabel;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.TreeViewGraph;
 import de.tu_darmstadt.stg.reclipse.logger.BreakpointInformation;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Optional;
 
 import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
@@ -33,11 +35,11 @@ import com.mxgraph.model.mxCell;
  */
 public class LocateAction {
 
-  private final SessionContext ctx;
+  private final TreeViewGraph graph;
 
-  public LocateAction(final SessionContext ctx) {
+  public LocateAction(final TreeViewGraph graph) {
     super();
-    this.ctx = ctx;
+    this.graph = graph;
   }
 
   /**
@@ -62,7 +64,11 @@ public class LocateAction {
       @Override
       public void actionPerformed(final ActionEvent event) {
         try {
-          openSourceCode(cell);
+          final Optional<SessionContext> ctx = graph.getSessionContext();
+
+          if (ctx.isPresent()) {
+            openSourceCode(cell, ctx.get());
+          }
         }
         catch (final CoreException e) {
           Activator.log(e);
@@ -73,7 +79,7 @@ public class LocateAction {
     return item;
   }
 
-  void openSourceCode(final mxCell cell) throws CoreException {
+  void openSourceCode(final mxCell cell, final SessionContext ctx) throws CoreException {
     // get reactive variable from cell
     final ReactiveVariableLabel reVarLabel = (ReactiveVariableLabel) cell.getValue();
     final ReactiveVariable reVar = reVarLabel.getVar();

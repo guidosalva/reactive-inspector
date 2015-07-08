@@ -42,8 +42,8 @@ public class GraphComponent extends mxGraphComponent {
 
     collapser = new CollapseAction(graph);
     highlighter = new HighlightAction(graph);
-    // breakpointer = new BreakpointAction(ctx);
-    // locater = new LocateAction(ctx)
+    // breakpointer = new BreakpointAction(graph);
+    locater = new LocateAction(graph);
 
     addMouseListener();
   }
@@ -79,9 +79,9 @@ public class GraphComponent extends mxGraphComponent {
       // add menu items
       popupMenu.add(collapser.createMenuItem(cell));
       popupMenu.add(highlighter.createMenuItem(cell));
-      // popupMenu.addSeparator();
+      popupMenu.addSeparator();
       // popupMenu.add(breakpointer.createMenuItem(cell));
-      // popupMenu.add(locater.createMenuItem(cell));
+      popupMenu.add(locater.createMenuItem(cell));
 
       // take scrolling offset into account
       final Point pos = getViewport().getViewPosition();
