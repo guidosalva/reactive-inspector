@@ -59,12 +59,12 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
   public static final String ID = "de.tu-darmstadt.stg.reclipse.graphview.ReactiveTreeView"; //$NON-NLS-1$
 
   private static final String[] QUERY_TEMPLATES = new String[] {
-      "nodeCreated(<name>)", //$NON-NLS-1$
-      "nodeEvaluated(<name>)", //$NON-NLS-1$
-      "nodeValueSet(<name>)", //$NON-NLS-1$
-      "dependencyCreated(<name>, <name>)", //$NON-NLS-1$
-      "evaluationYielded(<name>, <value>)", //$NON-NLS-1$
-      "evaluationException(<name>)" //$NON-NLS-1$
+    "nodeCreated(<name>)", //$NON-NLS-1$
+    "nodeEvaluated(<name>)", //$NON-NLS-1$
+    "nodeValueSet(<name>)", //$NON-NLS-1$
+    "dependencyCreated(<name>, <name>)", //$NON-NLS-1$
+    "evaluationYielded(<name>, <value>)", //$NON-NLS-1$
+    "evaluationException(<name>)" //$NON-NLS-1$
   };
 
   protected final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
@@ -77,6 +77,8 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
 
   protected long lastUpdate = 0;
   protected ScheduledFuture<?> delayedUpdateTask;
+  protected int lastPointInTime = -1;
+
   protected boolean manualMode = false;
 
   private final int updateInterval;
@@ -121,7 +123,7 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
       public void handleEvent(final Event event) {
         if (event.detail == SWT.NONE) {
           manualMode = true;
-          rebuildGraph(false);
+          rebuildGraph(slider.getSelection(), false);
         }
       }
     });
@@ -184,37 +186,42 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
   @Override
   public void onSessionSelected(final SessionContext ctx) {
     manualMode = false;
+    lastPointInTime = ctx.getPersistence().getLastPointInTime();
 
     graph.setSessionContext(ctx);
     ctx.getDbHelper().addDependencyGraphListener(ReactiveTreeView.this);
 
-    updateSliderMaximum();
+    rebuildGraph(lastPointInTime, false);
   }
 
   @Override
   public void onSessionDeselected(final SessionContext ctx) {
     ctx.getDbHelper().removeDependencyGraphListener(this);
     graph.removeSessionContext();
+
+    delayedUpdateTask.cancel(false);
+    lastUpdate = 0;
   }
 
   @Override
   public void onDependencyGraphChanged(final DependencyGraphHistoryType type, final int pointInTime) {
+    lastPointInTime = pointInTime;
+
     // only update if the graph is visible
     if (isVisible()) {
-      updateSliderMaximum();
+      updateGraph();
     }
   }
 
-  protected void rebuildGraph(final boolean highlightChange) {
+  protected void rebuildGraph(final int pointInTime, final boolean highlightChange) {
     if (!isVisible()) {
       return;
     }
 
-    final int pointInTime = getCurrentSliderValue();
     graph.setPointInTime(pointInTime, highlightChange);
   }
 
-  public void updateSliderMaximum() {
+  public void updateGraph() {
     if (delayedUpdateTask != null && !delayedUpdateTask.isDone()) {
       // update is already delayed
       return;
@@ -223,20 +230,12 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
       deleayUpdate();
     }
     else {
-      doUpdateSliderMaximum();
+      doUpdateGraph();
     }
   }
 
-  protected void doUpdateSliderMaximum() {
+  protected void doUpdateGraph() {
     lastUpdate = System.currentTimeMillis();
-
-    final Optional<SessionContext> ctx = SessionManager.getInstance().getSelectedSession();
-
-    if (!ctx.isPresent()) {
-      return;
-    }
-
-    final int lastPoint = ctx.get().getPersistence().getLastPointInTime();
 
     Display.getDefault().syncExec(new Runnable() {
 
@@ -246,11 +245,11 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
           return;
         }
 
-        slider.setMaximum(lastPoint);
+        slider.setMaximum(lastPointInTime);
 
         if (!manualMode) {
-          slider.setSelection(lastPoint);
-          rebuildGraph(true);
+          slider.setSelection(lastPointInTime);
+          rebuildGraph(lastPointInTime, true);
         }
       }
     });
@@ -263,7 +262,7 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
 
       @Override
       public void run() {
-        doUpdateSliderMaximum();
+        doUpdateGraph();
 
       }
     }, delay, TimeUnit.MILLISECONDS);
@@ -286,7 +285,7 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
 
         slider.setSelection(pointInTime);
 
-        rebuildGraph(false);
+        rebuildGraph(pointInTime, false);
       }
     });
   }
@@ -336,7 +335,7 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
     final IWorkbenchPart part = ref.getPart(false);
 
     if (part != null && part == this) {
-      updateSliderMaximum();
+      updateGraph();
     }
   }
 
