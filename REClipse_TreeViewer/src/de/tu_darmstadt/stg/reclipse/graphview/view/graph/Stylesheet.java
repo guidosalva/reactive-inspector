@@ -6,9 +6,9 @@ import com.mxgraph.util.mxConstants;
 import com.mxgraph.view.mxStylesheet;
 
 /**
- * 
+ *
  * @author Sebastian Ruhleder <sebastian.ruhleder@gmail.com>
- * 
+ *
  */
 public class Stylesheet extends mxStylesheet {
 
@@ -77,9 +77,9 @@ public class Stylesheet extends mxStylesheet {
   private void addCustomStyles() {
     // set style for VAR vertices
     final Hashtable<String, Object> varStyle = new Hashtable<>(baseStyle);
-    varStyle.put(mxConstants.STYLE_FILLCOLOR, "#DBFF70"); //$NON-NLS-1$
-    varStyle.put(mxConstants.STYLE_GRADIENTCOLOR, "#CCFF33"); //$NON-NLS-1$
-    varStyle.put(mxConstants.STYLE_STROKECOLOR, "#B8E62E"); //$NON-NLS-1$
+    varStyle.put(mxConstants.STYLE_FILLCOLOR, "#00DAF5"); //$NON-NLS-1$
+    varStyle.put(mxConstants.STYLE_GRADIENTCOLOR, "#00C3DB"); //$NON-NLS-1$
+    varStyle.put(mxConstants.STYLE_STROKECOLOR, "#00A1B5"); //$NON-NLS-1$
     putCellStyle(Styles.VAR.name(), varStyle);
 
     // set style for SIGNAL vertices
@@ -91,16 +91,16 @@ public class Stylesheet extends mxStylesheet {
 
     // set style for EVENT vertices
     final Hashtable<String, Object> eventStyle = new Hashtable<>(baseStyle);
-    eventStyle.put(mxConstants.STYLE_FILLCOLOR, "#FF4D94"); //$NON-NLS-1$
-    eventStyle.put(mxConstants.STYLE_GRADIENTCOLOR, "#FF0066"); //$NON-NLS-1$
-    eventStyle.put(mxConstants.STYLE_STROKECOLOR, "#E6005C"); //$NON-NLS-1$
+    eventStyle.put(mxConstants.STYLE_FILLCOLOR, "#FCFF9A"); //$NON-NLS-1$
+    eventStyle.put(mxConstants.STYLE_GRADIENTCOLOR, "#E3E58B"); //$NON-NLS-1$
+    eventStyle.put(mxConstants.STYLE_STROKECOLOR, "#BDBF73"); //$NON-NLS-1$
     putCellStyle(Styles.EVENT.name(), eventStyle);
 
     // set style for EVENT_HANDLER vertices
     final Hashtable<String, Object> eventHandlerStyle = new Hashtable<>(baseStyle);
-    eventHandlerStyle.put(mxConstants.STYLE_FILLCOLOR, "#FFB8DB"); //$NON-NLS-1$
-    eventHandlerStyle.put(mxConstants.STYLE_GRADIENTCOLOR, "#FF99CC"); //$NON-NLS-1$
-    eventHandlerStyle.put(mxConstants.STYLE_STROKECOLOR, "#E68AB8"); //$NON-NLS-1$
+    eventHandlerStyle.put(mxConstants.STYLE_FILLCOLOR, "#FFC4A4"); //$NON-NLS-1$
+    eventHandlerStyle.put(mxConstants.STYLE_GRADIENTCOLOR, "#E5B194"); //$NON-NLS-1$
+    eventHandlerStyle.put(mxConstants.STYLE_STROKECOLOR, "#BF937B"); //$NON-NLS-1$
     putCellStyle(Styles.EVENTHANDLER.name(), eventHandlerStyle);
   }
 
@@ -110,15 +110,16 @@ public class Stylesheet extends mxStylesheet {
     highlightedSignalStyle.put(mxConstants.STYLE_FILLCOLOR, "#FF704D"); //$NON-NLS-1$
     highlightedSignalStyle.put(mxConstants.STYLE_GRADIENTCOLOR, "#FF3300"); //$NON-NLS-1$
     highlightedSignalStyle.put(mxConstants.STYLE_STROKECOLOR, "#E62E00"); //$NON-NLS-1$
+
     putCellStyle(Styles.SIGNAL_HIGHLIGHT.name(), highlightedSignalStyle);
-    // VAR vertices should never be highlighted; added to make sure graph does
-    // not break
     putCellStyle(Styles.VAR_HIGHLIGHT.name(), highlightedSignalStyle);
+    putCellStyle(Styles.EVENT_HIGHLIGHT.name(), highlightedSignalStyle);
+    putCellStyle(Styles.EVENTHANDLER_HIGHLIGHT.name(), highlightedSignalStyle);
   }
 
   /**
    * Darkens a color string by a given factor.
-   * 
+   *
    * @param colorStr
    *          A color string.
    * @param factor
@@ -143,7 +144,7 @@ public class Stylesheet extends mxStylesheet {
 
   /**
    * Calculates an appropriate font color for a given background color.
-   * 
+   *
    * @param colorStr
    *          Background color.
    * @return A font color string.
@@ -156,7 +157,7 @@ public class Stylesheet extends mxStylesheet {
     /*
      * Uses perceptive luminance to decide whether to use black or white
      * font.
-     * 
+     *
      * Source for formula: http://stackoverflow.com/a/1855903/1080221
      */
 
@@ -173,7 +174,7 @@ public class Stylesheet extends mxStylesheet {
 
   /**
    * Generates a style string from a HEX color string.
-   * 
+   *
    * @param color
    *          HEX color string.
    * @return A style string for JXGraph components.
