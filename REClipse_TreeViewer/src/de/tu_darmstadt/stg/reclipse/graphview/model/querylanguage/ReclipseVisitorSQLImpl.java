@@ -41,7 +41,11 @@ public class ReclipseVisitorSQLImpl extends ReclipseBaseVisitor<String> {
     final String nodeName = ctx.NODE_NAME().getText();
     String value = ctx.VALUE().getText();
     value = value.substring(1, value.length() - 1);
-    return "SELECT event.pointInTime FROM event JOIN variable ON event.idVariable = variable.idVariable JOIN xref_event_status ON event.pointInTime = xref_event_status.pointInTime JOIN variable_status ON xref_event_status.idVariableStatus = variable_status.idVariableStatus WHERE event.type = " + DependencyGraphHistoryType.NODE_EVALUATION_ENDED.ordinal() + " AND variable.variableName = '" + nodeName + "' AND variable_status.valueString = '" + value + "'"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+
+    final DependencyGraphHistoryType type = DependencyGraphHistoryType.NODE_EVALUATION_ENDED;
+
+    return "SELECT pointInTime FROM event JOIN variable ON event.idVariable = variable.idVariable JOIN variable_status ON (event.idVariable = variable_status.idVariable AND event.pointInTime = variable_status.timeFrom) WHERE event.type = " //$NON-NLS-1$
+            + type.ordinal() + " AND variable.variableName = '" + nodeName + "' AND variable_status.valueString = '" + value + "'"; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
   }
 
   @Override

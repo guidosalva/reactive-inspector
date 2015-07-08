@@ -61,12 +61,12 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
   public static final String ID = "de.tu-darmstadt.stg.reclipse.graphview.ReactiveTreeView"; //$NON-NLS-1$
 
   private static final String[] QUERY_TEMPLATES = new String[] {
-      "nodeCreated(<name>)", //$NON-NLS-1$
-      "nodeEvaluated(<name>)", //$NON-NLS-1$
-      "nodeValueSet(<name>)", //$NON-NLS-1$
-      "dependencyCreated(<name>, <name>)", //$NON-NLS-1$
-      "evaluationYielded(<name>, <value>)", //$NON-NLS-1$
-      "evaluationException(<name>)" //$NON-NLS-1$
+    "nodeCreated(<name>)", //$NON-NLS-1$
+    "nodeEvaluated(<name>)", //$NON-NLS-1$
+    "nodeValueSet(<name>)", //$NON-NLS-1$
+    "dependencyCreated(<name>, <name>)", //$NON-NLS-1$
+    "evaluationYielded(<name>, <value>)", //$NON-NLS-1$
+    "evaluationException(<name>)" //$NON-NLS-1$
   };
 
   protected final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
@@ -319,7 +319,7 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
   }
 
   public void jumpToPointInTime(final int pointInTime) {
-    manualMode = true;
+    enableManualMode();
 
     Display.getDefault().syncExec(new Runnable() {
 
