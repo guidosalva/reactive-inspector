@@ -34,6 +34,7 @@ public class GraphComponent extends mxGraphComponent {
 
     this.graph = graph;
 
+    setToolTips(true);
     setDoubleBuffered(true);
     // prevent auto scroll if cursor is dragged out of bounds
     setAutoScroll(false);

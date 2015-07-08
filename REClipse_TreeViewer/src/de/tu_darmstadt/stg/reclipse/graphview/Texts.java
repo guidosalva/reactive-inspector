@@ -55,6 +55,10 @@ public class Texts extends NLS {
   public static String Pref_UpdateInterval;
   public static String Pref_EventLogging;
 
+  public static String Graph_Tooltip_Name;
+  public static String Graph_Tooltip_Type;
+  public static String Graph_Tooltip_Value;
+
   private static final String BUNDLE_NAME = Texts.class.getPackage().getName() + ".texts"; //$NON-NLS-1$
 
   static {

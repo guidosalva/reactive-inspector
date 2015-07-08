@@ -2,6 +2,8 @@ package de.tu_darmstadt.stg.reclipse.graphview.view.graph;
 
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
 import de.tu_darmstadt.stg.reclipse.graphview.provider.ContentModel;
+import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableLabel;
+import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableTooltip;
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableVertex;
 
 import java.util.HashMap;
@@ -180,5 +182,14 @@ public class TreeViewGraph extends mxGraph {
 
   public boolean isHeatmapEnabled() {
     return activeHeatmap;
+  }
+
+  @Override
+  public String getToolTipForCell(final Object arg) {
+    final mxCell cell = (mxCell) arg;
+
+    final ReactiveVariableLabel reVarLabel = (ReactiveVariableLabel) cell.getValue();
+    final ReactiveVariableTooltip tooltip = new ReactiveVariableTooltip(reVarLabel.getVar());
+    return tooltip.toString();
   }
 }
