@@ -20,6 +20,8 @@ import rescala.DepHolder
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariableType
 import rescala.Var
 import de.tu_darmstadt.stg.reclipse.logger.RemoteSessionInterface
+import rescala.events.Event
+import rescala.events.EventHandler
 
 /**
  * Provides some static helper methods for the {@link REScalaLogger} class.
@@ -34,6 +36,10 @@ object REScalaLogger {
     var reactiveVariableType = ReactiveVariableType.SIGNAL
     if (classOf[Var[_]].isAssignableFrom(r.getClass)) {
       reactiveVariableType = ReactiveVariableType.VAR
+    } else if(classOf[Event[_]].isAssignableFrom(r.getClass)) {
+      reactiveVariableType = ReactiveVariableType.EVENT
+    } else if(classOf[EventHandler[_]].isAssignableFrom(r.getClass)) {
+      reactiveVariableType = ReactiveVariableType.EVENT_HANDLER
     }
 
     var innerTypeSimple: String = null
