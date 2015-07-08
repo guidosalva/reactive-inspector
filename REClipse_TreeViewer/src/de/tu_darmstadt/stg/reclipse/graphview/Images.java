@@ -10,7 +10,8 @@ public enum Images {
   HEATMAP("/icons/heatmap.png"), //$NON-NLS-1$
   HEATMAP_GREY("/icons/heatmap_grey.png"), //$NON-NLS-1$
   MONITOR("/icons/monitor.gif"), //$NON-NLS-1$
-  SUSPEND("/icons/suspend.gif"); //$NON-NLS-1$
+  SUSPEND("/icons/suspend.gif"), //$NON-NLS-1$
+  REFRESH("/icons/refresh.gif"); //$NON-NLS-1$
 
   private final String path;
 

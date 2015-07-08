@@ -29,6 +29,8 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.layout.GridData;
@@ -59,18 +61,21 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
   public static final String ID = "de.tu-darmstadt.stg.reclipse.graphview.ReactiveTreeView"; //$NON-NLS-1$
 
   private static final String[] QUERY_TEMPLATES = new String[] {
-    "nodeCreated(<name>)", //$NON-NLS-1$
-    "nodeEvaluated(<name>)", //$NON-NLS-1$
-    "nodeValueSet(<name>)", //$NON-NLS-1$
-    "dependencyCreated(<name>, <name>)", //$NON-NLS-1$
-    "evaluationYielded(<name>, <value>)", //$NON-NLS-1$
-    "evaluationException(<name>)" //$NON-NLS-1$
+      "nodeCreated(<name>)", //$NON-NLS-1$
+      "nodeEvaluated(<name>)", //$NON-NLS-1$
+      "nodeValueSet(<name>)", //$NON-NLS-1$
+      "dependencyCreated(<name>, <name>)", //$NON-NLS-1$
+      "evaluationYielded(<name>, <value>)", //$NON-NLS-1$
+      "evaluationException(<name>)" //$NON-NLS-1$
   };
 
   protected final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
 
   protected Composite graphParent;
   protected Scale slider;
+  protected Button autoNavButton;
+  protected Button nextPointButton;
+  protected Button prevPointButton;
   protected Combo queryTextField;
   protected TreeViewGraph graph;
   protected GraphComponent graphComponent;
@@ -112,19 +117,59 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
     final Frame graphFrame = SWT_AWT.new_Frame(composite);
     graphFrame.add(graphComponent);
 
-    slider = new Scale(parent, SWT.HORIZONTAL);
+    final Composite navComposite = new Composite(parent, SWT.NONE);
+    navComposite.setLayout(new GridLayout(4, false));
+    navComposite.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
+
+    slider = new Scale(navComposite, SWT.HORIZONTAL);
     slider.setMinimum(0);
     slider.setIncrement(1);
     slider.setPageIncrement(1);
-    slider.setLayoutData(new GridData(SWT.FILL, SWT.END, true, false));
+    slider.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     slider.addListener(SWT.Selection, new Listener() {
 
       @Override
       public void handleEvent(final Event event) {
         if (event.detail == SWT.NONE) {
-          manualMode = true;
+          enableManualMode();
           rebuildGraph(slider.getSelection(), false);
         }
+      }
+    });
+
+    autoNavButton = new Button(navComposite, SWT.TOGGLE);
+    autoNavButton.setText("Auto"); //$NON-NLS-1$
+    autoNavButton.setSelection(true);
+    autoNavButton.addSelectionListener(new SelectionAdapter() {
+
+      @Override
+      public void widgetSelected(final SelectionEvent e) {
+        if (autoNavButton.getSelection()) {
+          disableManualMode();
+        }
+        else {
+          enableManualMode();
+        }
+      }
+    });
+
+    prevPointButton = new Button(navComposite, SWT.ARROW | SWT.LEFT);
+    prevPointButton.setEnabled(false);
+    prevPointButton.addSelectionListener(new SelectionAdapter() {
+
+      @Override
+      public void widgetSelected(final SelectionEvent e) {
+        prevPointInTime();
+      }
+    });
+
+    nextPointButton = new Button(navComposite, SWT.ARROW | SWT.RIGHT);
+    nextPointButton.setEnabled(false);
+    nextPointButton.addSelectionListener(new SelectionAdapter() {
+
+      @Override
+      public void widgetSelected(final SelectionEvent e) {
+        nextPointInTime();
       }
     });
 
@@ -149,11 +194,12 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
         }
       }
     });
-    final Button prevButton = new Button(queryComposite, SWT.ARROW | SWT.LEFT);
-    prevButton.addSelectionListener(queryController.new PrevQueryResultButtonHandler());
 
-    final Button nextButton = new Button(queryComposite, SWT.ARROW | SWT.RIGHT);
-    nextButton.addSelectionListener(queryController.new NextQueryResultButtonHandler());
+    final Button prevResultButton = new Button(queryComposite, SWT.ARROW | SWT.LEFT);
+    prevResultButton.addSelectionListener(queryController.new PrevQueryResultButtonHandler());
+
+    final Button nextResultButton = new Button(queryComposite, SWT.ARROW | SWT.RIGHT);
+    nextResultButton.addSelectionListener(queryController.new NextQueryResultButtonHandler());
 
     createActions();
 
@@ -299,6 +345,42 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
 
   private boolean isVisible() {
     return getSite().getPage().isPartVisible(this);
+  }
+
+  protected void enableManualMode() {
+    manualMode = true;
+
+    autoNavButton.setSelection(false);
+    prevPointButton.setEnabled(true);
+    nextPointButton.setEnabled(true);
+  }
+
+  protected void disableManualMode() {
+    manualMode = false;
+
+    autoNavButton.setSelection(true);
+    prevPointButton.setEnabled(false);
+    nextPointButton.setEnabled(false);
+
+    updateGraph();
+  }
+
+  protected void nextPointInTime() {
+    final int pointInTime = slider.getSelection() + 1;
+
+    if (pointInTime <= slider.getMaximum()) {
+      slider.setSelection(pointInTime);
+      rebuildGraph(pointInTime, true);
+    }
+  }
+
+  protected void prevPointInTime() {
+    final int pointInTime = slider.getSelection() - 1;
+
+    if (pointInTime >= 0) {
+      slider.setSelection(pointInTime);
+      rebuildGraph(pointInTime, true);
+    }
   }
 
   public String getQueryText() {
