@@ -1,6 +1,7 @@
 package de.tu_darmstadt.stg.reclipse.graphview.view;
 
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
+import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariableType;
 
 public class ReactiveVariableLabel {
 
@@ -25,16 +26,24 @@ public class ReactiveVariableLabel {
 
   @Override
   public String toString() {
-    String label = "<h4>" + var.getName() + "</h4>"; //$NON-NLS-1$ //$NON-NLS-2$
+    String label = ""; //$NON-NLS-1$
 
-    if (isHighlighted) {
-      label += "Value: CHANGE\n"; //$NON-NLS-1$
+    if (var.getName() != null && !var.getName().equals("?")) { //$NON-NLS-1$
+      label += "<h4>" + var.getName() + "</h4>"; //$NON-NLS-1$ //$NON-NLS-2$
     }
     else {
-      label += "Value: " + getValueString() + "\n"; //$NON-NLS-1$ //$NON-NLS-2$
+      label += "<h4><i>[" + var.getTypeSimple() + "]</i></h4>"; //$NON-NLS-1$ //$NON-NLS-2$
     }
 
-    label += "Type: " + var.getTypeSimple(); //$NON-NLS-1$
+    final ReactiveVariableType varType = var.getReactiveVariableType();
+    if (varType == ReactiveVariableType.VAR || varType == ReactiveVariableType.SIGNAL) {
+      if (isHighlighted) {
+        label += "<h3>CHANGE</h3>"; //$NON-NLS-1$
+      }
+      else {
+        label += "<h3>" + getValueString() + "</h3>"; //$NON-NLS-1$ //$NON-NLS-2$
+      }
+    }
 
     return label;
   }
@@ -44,8 +53,8 @@ public class ReactiveVariableLabel {
       return "null"; //$NON-NLS-1$
     }
 
-    if (var.getValueString().length() > 20) {
-      return var.getValueString().substring(0, 19) + '\u2026';
+    if (var.getValueString().length() > 18) {
+      return var.getValueString().substring(0, 17) + '\u2026';
     }
     else {
       return var.getValueString();
