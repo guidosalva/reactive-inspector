@@ -3,21 +3,22 @@
 ### Prerequisites
 
 * Scala IDE for Eclipse
-* Plug-in Development Environment (PDE)
-* Zest
+* Plug-in Development Environment (PDE) (should be already included in Scala IDE)
+* Eclipse Test Framework (only for test project)
 
 ### Installation
 
 1. Set up the Scala IDE for Eclipse.
-2. Install both the PDE and Zest modules in Eclipse.
-3. Import this plugin into the workspace.
-4. Add the local "org.eclipse.jdt.core_XX.jar" and "org.eclipse.ui.ide_XX.jar" library from the "plugins/" directory of Eclipse to the build path.
-5. Import the REScala project into the workspace and add REScala to the buildpath.
-6. Done!
+2. Import the REClipse_TreeViewer project into workspace.
+3. Import the REClipse_TreeViewer-tests project if you want to execute or create tests.
+3. Done!
 
 ### How to use the Tree Viewer Plugin with existing projects
 
-Once the project is set up, it can be used to start an Eclipse application in which the plugin is active. In this Eclipse application, perform the following steps to use the tree viewer.
+Once the project is set up, the plugin can be used by starting an Eclipse application. In this Eclipse application, perform the following steps to use the tree viewer.
 
-* Make sure the projects "REClipse_LoggerInterface" and "REClipse_REScala" are imported and work without conflicts.
-* Add `rescala.ReactiveEngine.log = new REScalaLogger` to every project in order to allow the tree viewer plugin to communicate with the debugger.
+* Make sure the projects include "REClipse_REScala" as a dependency.
+* Add `rescala.ReactiveEngine.log = new REScalaLogger` to the main method of an application in order to allow the plugin to communicate with the debugger.
+
+SBT dependency for REClipse_REScala:
+`"de.tu_darmstadt.stg.reclipse" % "rescala-logger_2.11" % "0.0.0"`
