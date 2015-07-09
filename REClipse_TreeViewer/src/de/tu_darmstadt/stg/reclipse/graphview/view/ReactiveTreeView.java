@@ -61,12 +61,12 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
   public static final String ID = "de.tu-darmstadt.stg.reclipse.graphview.ReactiveTreeView"; //$NON-NLS-1$
 
   private static final String[] QUERY_TEMPLATES = new String[] {
-    "nodeCreated(<name>)", //$NON-NLS-1$
-    "nodeEvaluated(<name>)", //$NON-NLS-1$
-    "nodeValueSet(<name>)", //$NON-NLS-1$
-    "dependencyCreated(<name>, <name>)", //$NON-NLS-1$
-    "evaluationYielded(<name>, <value>)", //$NON-NLS-1$
-    "evaluationException(<name>)" //$NON-NLS-1$
+      "nodeCreated(<name>)", //$NON-NLS-1$
+      "nodeEvaluated(<name>)", //$NON-NLS-1$
+      "nodeValueSet(<name>)", //$NON-NLS-1$
+      "dependencyCreated(<name>, <name>)", //$NON-NLS-1$
+      "evaluationYielded(<name>, <value>)", //$NON-NLS-1$
+      "evaluationException(<name>)" //$NON-NLS-1$
   };
 
   protected final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
@@ -231,13 +231,18 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
 
   @Override
   public void onSessionSelected(final SessionContext ctx) {
-    manualMode = false;
     lastPointInTime = ctx.getPersistence().getLastPointInTime();
 
     graph.setSessionContext(ctx);
     ctx.getDbHelper().addDependencyGraphListener(ReactiveTreeView.this);
 
-    rebuildGraph(lastPointInTime, false);
+    Display.getDefault().syncExec(new Runnable() {
+
+      @Override
+      public void run() {
+        disableManualMode();
+      }
+    });
   }
 
   @Override
@@ -245,7 +250,10 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
     ctx.getDbHelper().removeDependencyGraphListener(this);
     graph.removeSessionContext();
 
-    delayedUpdateTask.cancel(false);
+    if (delayedUpdateTask != null) {
+      delayedUpdateTask.cancel(false);
+    }
+
     lastUpdate = 0;
   }
 
