@@ -5,6 +5,8 @@ import de.tu_darmstadt.stg.reclipse.graphview.provider.ContentModel;
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableLabel;
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableTooltip;
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableVertex;
+import de.tu_darmstadt.stg.reclipse.logger.BreakpointInformation;
+import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -192,7 +194,10 @@ public class TreeViewGraph extends mxGraph {
     final mxCell cell = (mxCell) arg;
 
     final ReactiveVariableLabel reVarLabel = (ReactiveVariableLabel) cell.getValue();
-    final ReactiveVariableTooltip tooltip = new ReactiveVariableTooltip(reVarLabel.getVar());
+    final ReactiveVariable reVar = reVarLabel.getVar();
+    final BreakpointInformation breakpointInformation = ctx.isPresent() ? ctx.get().getVariableLocation(reVar.getId()) : null;
+
+    final ReactiveVariableTooltip tooltip = new ReactiveVariableTooltip(reVarLabel.getVar(), breakpointInformation);
     return tooltip.toString();
   }
 
