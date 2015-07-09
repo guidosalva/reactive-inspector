@@ -4,11 +4,13 @@
 
 * Scala IDE for Eclipse
 * Plug-in Development Environment (PDE) (should be already included in Scala IDE)
+* Eclipse Test Framework (only for test project)
 
 ### Installation
 
 1. Set up the Scala IDE for Eclipse.
 2. Import the REClipse_TreeViewer project into workspace.
+3. Import the REClipse_TreeViewer-tests project if you want to execute or create tests.
 3. Done!
 
 ### How to use the Tree Viewer Plugin with existing projects
