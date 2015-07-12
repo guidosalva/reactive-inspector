@@ -6,6 +6,7 @@ import de.tu_darmstadt.stg.reclipse.graphview.Texts;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
 import de.tu_darmstadt.stg.reclipse.graphview.util.BreakpointUtils;
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableLabel;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.TreeViewGraph;
 import de.tu_darmstadt.stg.reclipse.logger.BreakpointInformation;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
@@ -13,6 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
@@ -35,11 +37,11 @@ public class BreakpointAction {
   // Tracked watchpoints
   private final Map<mxCell, IJavaWatchpoint> watchpoints;
 
-  private final SessionContext ctx;
+  protected final TreeViewGraph graph;
 
-  public BreakpointAction(final SessionContext ctx) {
+  public BreakpointAction(final TreeViewGraph graph) {
     super();
-    this.ctx = ctx;
+    this.graph = graph;
 
     breakpointStatus = new HashMap<>();
     watchpoints = new HashMap<>();
@@ -66,7 +68,11 @@ public class BreakpointAction {
 
       @Override
       public void actionPerformed(final ActionEvent e) {
-        triggerBreakpoint(cell);
+        final Optional<SessionContext> ctx = graph.getSessionContext();
+
+        if (ctx.isPresent()) {
+          triggerBreakpoint(cell, ctx.get());
+        }
       }
     });
 
@@ -80,7 +86,7 @@ public class BreakpointAction {
    * @param cell
    *          A cell in the graph.
    */
-  void triggerBreakpoint(final mxCell cell) {
+  void triggerBreakpoint(final mxCell cell, final SessionContext ctx) {
     if (!breakpointStatus.containsKey(cell)) {
       breakpointStatus.put(cell, false);
     }
