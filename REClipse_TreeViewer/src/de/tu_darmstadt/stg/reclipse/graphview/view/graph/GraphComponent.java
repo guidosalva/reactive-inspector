@@ -9,6 +9,7 @@ import de.tu_darmstadt.stg.reclipse.graphview.view.graph.actions.LocateAction;
 import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
@@ -17,6 +18,8 @@ import java.util.Set;
 
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
+
+import org.eclipse.core.runtime.Platform;
 
 import com.mxgraph.model.mxCell;
 import com.mxgraph.swing.mxGraphComponent;
@@ -55,10 +58,11 @@ public class GraphComponent extends mxGraphComponent {
 
   private void addMouseListener() {
     getGraphControl().addMouseListener(new PopupMouseAdapter());
+    getGraphControl().addMouseListener(new ClickMouseAdapter());
 
-    final ScrollMouseAdapter mouseAdapter = new ScrollMouseAdapter();
-    graphControl.addMouseListener(mouseAdapter);
-    graphControl.addMouseMotionListener(mouseAdapter);
+    final ScrollMouseAdapter scrollAdapter = new ScrollMouseAdapter();
+    getGraphControl().addMouseListener(scrollAdapter);
+    getGraphControl().addMouseMotionListener(scrollAdapter);
 
     addMouseWheelListener(new ZoomMouseAdapter());
   }
@@ -218,6 +222,30 @@ public class GraphComponent extends mxGraphComponent {
       else if (e.getWheelRotation() > 0) {
         zoomOut();
       }
+    }
+  }
+
+  protected class ClickMouseAdapter extends MouseAdapter {
+
+    @Override
+    public void mouseClicked(final MouseEvent e) {
+      if (!SwingUtilities.isLeftMouseButton(e)) {
+        return;
+      }
+
+      if (isLocateShortcut(e)) {
+        final mxCell cell = (mxCell) getCellAt(e.getX(), e.getY());
+
+        if (cell != null) {
+          locater.locate(cell);
+        }
+      }
+    }
+
+    private boolean isLocateShortcut(final MouseEvent e) {
+      final int keyMask = Platform.getOS().equals(Platform.OS_MACOSX) ? InputEvent.META_DOWN_MASK : InputEvent.CTRL_DOWN_MASK;
+
+      return (e.getModifiersEx() & keyMask) == keyMask;
     }
   }
 

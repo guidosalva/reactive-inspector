@@ -63,23 +63,27 @@ public class LocateAction {
 
       @Override
       public void actionPerformed(final ActionEvent event) {
-        try {
-          final Optional<SessionContext> ctx = graph.getSessionContext();
-
-          if (ctx.isPresent()) {
-            openSourceCode(cell, ctx.get());
-          }
-        }
-        catch (final CoreException e) {
-          Activator.log(e);
-        }
+        locate(cell);
       }
     });
 
     return item;
   }
 
-  void openSourceCode(final mxCell cell, final SessionContext ctx) throws CoreException {
+  public void locate(final mxCell cell) {
+    try {
+      final Optional<SessionContext> ctx = graph.getSessionContext();
+
+      if (ctx.isPresent()) {
+        openSourceCode(cell, ctx.get());
+      }
+    }
+    catch (final CoreException e) {
+      Activator.log(e);
+    }
+  }
+
+  protected void openSourceCode(final mxCell cell, final SessionContext ctx) throws CoreException {
     // get reactive variable from cell
     final ReactiveVariableLabel reVarLabel = (ReactiveVariableLabel) cell.getValue();
     final ReactiveVariable reVar = reVarLabel.getVar();
