@@ -1,5 +1,6 @@
 package de.tu_darmstadt.stg.reclipse.graphview.view.graph;
 
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.TreeViewGraph.SearchResult;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.actions.BreakpointAction;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.actions.CollapseAction;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.actions.HighlightAction;
@@ -11,6 +12,8 @@ import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
@@ -28,6 +31,8 @@ public class GraphComponent extends mxGraphComponent {
   protected final HighlightAction highlighter;
   protected BreakpointAction breakpointer;
   protected LocateAction locater;
+
+  private SearchResult lastSearchResult;
 
   public GraphComponent(final TreeViewGraph graph) {
     super(graph);
@@ -56,6 +61,77 @@ public class GraphComponent extends mxGraphComponent {
     graphControl.addMouseMotionListener(mouseAdapter);
 
     addMouseWheelListener(new ZoomMouseAdapter());
+  }
+
+  public void searchNodes(final String name) {
+    final SearchResult searchResult = graph.searchNodes(name);
+
+    if (searchResult.getResultCount() == 0) {
+      lastSearchResult = null;
+      return;
+    }
+
+    lastSearchResult = searchResult;
+    highlightAndScrollTo(lastSearchResult.getCurrent());
+  }
+
+  public boolean clearSearch() {
+    if (lastSearchResult == null) {
+      return false;
+    }
+
+    lastSearchResult = null;
+    return true;
+  }
+
+  public void nextSearchResult() {
+    if (lastSearchResult == null) {
+      return;
+    }
+
+    lastSearchResult.nextResult();
+    highlightAndScrollTo(lastSearchResult.getCurrent());
+  }
+
+  public void prevSearchResult() {
+    if (lastSearchResult == null) {
+      return;
+    }
+
+    lastSearchResult.prevResult();
+    highlightAndScrollTo(lastSearchResult.getCurrent());
+  }
+
+  private void highlightAndScrollTo(final mxCell cell) {
+    graph.getModel().beginUpdate();
+    try {
+      final Set<Object> nodes = new HashSet<>();
+      nodes.add(cell);
+      graph.highlightNodes(nodes);
+    }
+    finally {
+      graph.getModel().endUpdate();
+    }
+
+    graph.refresh();
+
+    scrollCellToVisible(cell, true);
+  }
+
+  public int getCurrentSearchResult() {
+    if (lastSearchResult == null) {
+      return 0;
+    }
+
+    return lastSearchResult.getCurrentIndex() + 1;
+  }
+
+  public int getSearchResultCount() {
+    if (lastSearchResult == null) {
+      return 0;
+    }
+
+    return lastSearchResult.getResultCount();
   }
 
   protected class PopupMouseAdapter extends MouseAdapter {

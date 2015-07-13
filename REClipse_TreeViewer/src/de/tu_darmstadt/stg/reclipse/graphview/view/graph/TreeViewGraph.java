@@ -8,6 +8,7 @@ import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableVertex;
 import de.tu_darmstadt.stg.reclipse.logger.BreakpointInformation;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -175,6 +176,39 @@ public class TreeViewGraph extends mxGraph {
     return children;
   }
 
+  public SearchResult searchNodes(final String name) {
+    final List<mxCell> results = new ArrayList<>();
+
+    final Object[] vertices = getChildVertices(getDefaultParent());
+
+    for (final Object vertex : vertices) {
+      final mxCell cell = (mxCell) vertex;
+      final ReactiveVariableLabel reVarLabel = (ReactiveVariableLabel) cell.getValue();
+      final ReactiveVariable reVar = reVarLabel.getVar();
+
+      if (reVar.getName() != null && reVar.getName().equals(name)) {
+        results.add(cell);
+      }
+    }
+
+    return new SearchResult(results);
+  }
+
+  public void highlightNodes(final Set<Object> nodes) {
+    final Object[] vertices = getChildVertices(getDefaultParent());
+
+    for (final Object vertex : vertices) {
+      final mxCell cell = (mxCell) vertex;
+
+      if (nodes.contains(cell)) {
+        cell.setStyle(Stylesheet.Styles.getHighlight(cell.getStyle()).name());
+      }
+      else {
+        cell.setStyle(Stylesheet.Styles.removeHighlight(cell.getStyle()).name());
+      }
+    }
+  }
+
   /**
    * Enables or disables the heatmap mode.
    *
@@ -203,5 +237,40 @@ public class TreeViewGraph extends mxGraph {
 
   public Optional<SessionContext> getSessionContext() {
     return ctx;
+  }
+
+  public static class SearchResult {
+
+    private final List<mxCell> results;
+    private int index;
+
+    protected SearchResult(final List<mxCell> results) {
+      this.results = results;
+      this.index = 0;
+    }
+
+    public int getResultCount() {
+      return results.size();
+    }
+
+    public int getCurrentIndex() {
+      return index;
+    }
+
+    public mxCell getCurrent() {
+      return results.get(index);
+    }
+
+    public void nextResult() {
+      if ((index + 1) < results.size()) {
+        index++;
+      }
+    }
+
+    public void prevResult() {
+      if (index > 0) {
+        index--;
+      }
+    }
   }
 }

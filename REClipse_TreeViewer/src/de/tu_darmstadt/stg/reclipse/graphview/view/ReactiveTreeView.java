@@ -40,8 +40,10 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Scale;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPart;
@@ -61,12 +63,12 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
   public static final String ID = "de.tu-darmstadt.stg.reclipse.graphview.ReactiveTreeView"; //$NON-NLS-1$
 
   private static final String[] QUERY_TEMPLATES = new String[] {
-      "nodeCreated(<name>)", //$NON-NLS-1$
-      "nodeEvaluated(<name>)", //$NON-NLS-1$
-      "nodeValueSet(<name>)", //$NON-NLS-1$
-      "dependencyCreated(<name>, <name>)", //$NON-NLS-1$
-      "evaluationYielded(<name>, <value>)", //$NON-NLS-1$
-      "evaluationException(<name>)" //$NON-NLS-1$
+    "nodeCreated(<name>)", //$NON-NLS-1$
+    "nodeEvaluated(<name>)", //$NON-NLS-1$
+    "nodeValueSet(<name>)", //$NON-NLS-1$
+    "dependencyCreated(<name>, <name>)", //$NON-NLS-1$
+    "evaluationYielded(<name>, <value>)", //$NON-NLS-1$
+    "evaluationException(<name>)" //$NON-NLS-1$
   };
 
   protected final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
@@ -77,6 +79,8 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
   protected Button nextPointButton;
   protected Button prevPointButton;
   protected Combo queryTextField;
+  protected Text searchTextField;
+  protected Label searchResultsLabel;
   protected TreeViewGraph graph;
   protected GraphComponent graphComponent;
 
@@ -173,11 +177,71 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
       }
     });
 
-    final QueryController queryController = new QueryController(this);
-    final Composite queryComposite = new Composite(parent, SWT.NONE);
+    final Composite searchQueryComposite = new Composite(parent, SWT.NONE);
+    searchQueryComposite.setLayout(new GridLayout(2, false));
+    searchQueryComposite.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
+
+    final Composite searchComposite = new Composite(searchQueryComposite, SWT.BORDER);
+    searchComposite.setLayout(new GridLayout(5, false));
+    searchComposite.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
+
+    final Composite queryComposite = new Composite(searchQueryComposite, SWT.BORDER);
     queryComposite.setLayout(new GridLayout(4, false));
     queryComposite.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
 
+    searchTextField = new Text(searchComposite, SWT.BORDER);
+    searchTextField.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
+
+    final Button searchButton = new Button(searchComposite, SWT.PUSH);
+    searchButton.setText(Texts.Search_Submit);
+    searchButton.addSelectionListener(new SelectionAdapter() {
+
+      @Override
+      public void widgetSelected(final SelectionEvent e) {
+        final String name = searchTextField.getText();
+
+        if (name != null && name.trim().length() > 0) {
+          graphComponent.searchNodes(name);
+
+          if (graphComponent.getSearchResultCount() == 0) {
+            showInformation(Texts.Search_NoResults_Title, Texts.Search_NoResults_Message);
+          }
+        }
+        else {
+          graphComponent.clearSearch();
+        }
+
+        updateSearchResultsLabel();
+      }
+    });
+
+    final Button prevSearchResultButton = new Button(searchComposite, SWT.ARROW | SWT.LEFT);
+    prevSearchResultButton.addSelectionListener(new SelectionAdapter() {
+
+      @Override
+      public void widgetSelected(final SelectionEvent e) {
+        graphComponent.prevSearchResult();
+        updateSearchResultsLabel();
+      }
+    });
+
+    final Button nextSearchResultButton = new Button(searchComposite, SWT.ARROW | SWT.RIGHT);
+    nextSearchResultButton.addSelectionListener(new SelectionAdapter() {
+
+      @Override
+      public void widgetSelected(final SelectionEvent e) {
+        graphComponent.nextSearchResult();
+        updateSearchResultsLabel();
+      }
+    });
+
+    searchResultsLabel = new Label(searchComposite, SWT.NONE);
+    final GridData searchResultGridData = new GridData();
+    searchResultGridData.widthHint = 50;
+    searchResultsLabel.setLayoutData(searchResultGridData);
+    updateSearchResultsLabel();
+
+    final QueryController queryController = new QueryController(this);
     queryTextField = new Combo(queryComposite, SWT.DROP_DOWN);
     queryTextField.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
     queryTextField.setItems(QUERY_TEMPLATES);
@@ -273,6 +337,10 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
     }
 
     graph.setPointInTime(pointInTime, highlightChange);
+
+    if (graphComponent.clearSearch()) {
+      updateSearchResultsLabel();
+    }
   }
 
   public void updateGraph() {
@@ -396,6 +464,13 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
       return ""; //$NON-NLS-1$
     }
     return queryTextField.getText();
+  }
+
+  protected void updateSearchResultsLabel() {
+    final int current = graphComponent.getCurrentSearchResult();
+    final int count = graphComponent.getSearchResultCount();
+
+    searchResultsLabel.setText(current + " / " + count); //$NON-NLS-1$
   }
 
   public void showInformation(final String title, final String message) {
