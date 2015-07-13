@@ -62,6 +62,7 @@ public class Texts extends NLS {
   public static String Graph_Tooltip_Name;
   public static String Graph_Tooltip_Type;
   public static String Graph_Tooltip_Value;
+  public static String Graph_Tooltip_Exception;
   public static String Graph_Tooltip_Class;
   public static String Graph_Tooltip_Source;
   public static String Graph_Tooltip_Line;

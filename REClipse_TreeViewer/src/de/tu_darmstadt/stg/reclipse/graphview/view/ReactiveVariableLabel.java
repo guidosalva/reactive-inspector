@@ -24,7 +24,11 @@ public class ReactiveVariableLabel {
     }
 
     final ReactiveVariableType varType = var.getReactiveVariableType();
-    if (varType == ReactiveVariableType.VAR || varType == ReactiveVariableType.SIGNAL) {
+
+    if (var.isExceptionOccured()) {
+      label += "<h3><i>EXCEPTION</i></h3>"; //$NON-NLS-1$
+    }
+    else if (varType == ReactiveVariableType.VAR || varType == ReactiveVariableType.SIGNAL) {
       label += "<h3>" + getValueString() + "</h3>"; //$NON-NLS-1$ //$NON-NLS-2$
     }
 

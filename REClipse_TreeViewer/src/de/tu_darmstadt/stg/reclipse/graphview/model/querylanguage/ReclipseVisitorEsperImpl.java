@@ -26,7 +26,7 @@ public class ReclipseVisitorEsperImpl extends ReclipseBaseVisitor<String> {
     final String nodeName = ctx.NODE_NAME().getText();
     // TODO escape nodeName, see
     // https://stackoverflow.com/questions/25268583/how-can-i-sanitize-mysql-query-parameters-in-esper
-    return "dependencyGraphHistoryType = de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType.NODE_CREATED and name = '" + nodeName + "' and active = true"; //$NON-NLS-1$ //$NON-NLS-2$
+    return "dependencyGraphHistoryType = de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType.NODE_CREATED and name = '" + nodeName + "'"; //$NON-NLS-1$ //$NON-NLS-2$
   }
 
   @Override
@@ -34,7 +34,7 @@ public class ReclipseVisitorEsperImpl extends ReclipseBaseVisitor<String> {
     final String nodeName = ctx.NODE_NAME().getText();
     // TODO escape nodeName, see
     // https://stackoverflow.com/questions/25268583/how-can-i-sanitize-mysql-query-parameters-in-esper
-    return "dependencyGraphHistoryType = de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType.NODE_EVALUATION_STARTED and name = '" + nodeName + "' and active = true"; //$NON-NLS-1$ //$NON-NLS-2$
+    return "dependencyGraphHistoryType = de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType.NODE_EVALUATION_STARTED and name = '" + nodeName + "'"; //$NON-NLS-1$ //$NON-NLS-2$
   }
 
   @Override
@@ -42,7 +42,7 @@ public class ReclipseVisitorEsperImpl extends ReclipseBaseVisitor<String> {
     final String nodeName = ctx.NODE_NAME().getText();
     // TODO escape nodeName, see
     // https://stackoverflow.com/questions/25268583/how-can-i-sanitize-mysql-query-parameters-in-esper
-    return "dependencyGraphHistoryType = de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType.NODE_VALUE_SET and name = '" + nodeName + "' and active = true"; //$NON-NLS-1$ //$NON-NLS-2$
+    return "dependencyGraphHistoryType = de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType.NODE_VALUE_SET and name = '" + nodeName + "'"; //$NON-NLS-1$ //$NON-NLS-2$
   }
 
   @Override
@@ -66,7 +66,7 @@ public class ReclipseVisitorEsperImpl extends ReclipseBaseVisitor<String> {
     value = value.substring(1, value.length() - 1);
     // TODO escape nodeName, see
     // https://stackoverflow.com/questions/25268583/how-can-i-sanitize-mysql-query-parameters-in-esper
-    return "dependencyGraphHistoryType = de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType.NODE_EVALUATION_ENDED and name = '" + nodeName + "' and active = true and valueString = '" + value + "'"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+    return "dependencyGraphHistoryType = de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType.NODE_EVALUATION_ENDED and name = '" + nodeName + "' and valueString = '" + value + "'"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
   }
 
   @Override
@@ -74,7 +74,7 @@ public class ReclipseVisitorEsperImpl extends ReclipseBaseVisitor<String> {
     final String nodeName = ctx.NODE_NAME().getText();
     // TODO escape nodeName, see
     // https://stackoverflow.com/questions/25268583/how-can-i-sanitize-mysql-query-parameters-in-esper
-    return "dependencyGraphHistoryType = de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType.NODE_EVALUATION_ENDED_WITH_EXCEPTION and name = '" + nodeName + "' and active = true"; //$NON-NLS-1$ //$NON-NLS-2$
+    return "dependencyGraphHistoryType = de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType.NODE_EVALUATION_ENDED_WITH_EXCEPTION and name = '" + nodeName + "'"; //$NON-NLS-1$ //$NON-NLS-2$
   }
 
 }

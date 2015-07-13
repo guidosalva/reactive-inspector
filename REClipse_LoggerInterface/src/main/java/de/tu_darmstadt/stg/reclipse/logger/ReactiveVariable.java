@@ -50,11 +50,6 @@ public class ReactiveVariable implements Serializable,
 	private String additionalInformation;
 
 	/**
-	 * Whether the variable is active at this poin in time.
-	 */
-	private boolean active;
-
-	/**
 	 * The simple type of this variable - e.g. Integer
 	 */
 	private String typeSimple;
@@ -79,6 +74,8 @@ public class ReactiveVariable implements Serializable,
 	 * The current value of this variable as a String. Must not be null.
 	 */
 	private String valueString;
+	
+	private boolean exceptionOccured;
 
 	/**
 	 * IDs of variables to which this variable is connected.
@@ -93,7 +90,7 @@ public class ReactiveVariable implements Serializable,
 			final ReactiveVariableType theReactiveVariableType,
 			final int thePointInTime,
 			final DependencyGraphHistoryType theHistoryType,
-			final String theAdditionalInformation, final boolean isActive,
+			final String theAdditionalInformation,
 			final String theTypeSimple, final String theTypeFull,
 			final String theName, final String theValueString) {
 		id = theId;
@@ -101,11 +98,11 @@ public class ReactiveVariable implements Serializable,
 		pointInTime = thePointInTime;
 		dependencyGraphHistoryType = theHistoryType;
 		additionalInformation = theAdditionalInformation;
-		active = isActive;
 		typeSimple = theTypeSimple;
 		typeFull = theTypeFull;
 		name = theName;
 		valueString = theValueString;
+		exceptionOccured = false;
 	}
 
 	public ReactiveVariable(final ReactiveVariable reVar) {
@@ -114,7 +111,6 @@ public class ReactiveVariable implements Serializable,
 		setPointInTime(reVar.getPointInTime());
 		setDependencyGraphHistoryType(reVar.getDependencyGraphHistoryType());
 		setAdditionalInformation(reVar.getAdditionalInformation());
-		setActive(reVar.isActive());
 		setTypeSimple(reVar.getTypeSimple());
 		setTypeFull(reVar.getTypeFull());
 		setName(reVar.getName());
@@ -122,6 +118,7 @@ public class ReactiveVariable implements Serializable,
 			setAdditionalKeyValue(key, reVar.getAdditionalKeyValue(key));
 		}
 		setValueString(reVar.getValueString());
+		setExceptionOccured(reVar.isExceptionOccured());
 	}
 
 	public UUID getId() {
@@ -164,14 +161,6 @@ public class ReactiveVariable implements Serializable,
 
 	public void setAdditionalInformation(final String theAdditionalInformation) {
 		additionalInformation = theAdditionalInformation;
-	}
-
-	public boolean isActive() {
-		return active;
-	}
-
-	public void setActive(final boolean isActive) {
-		active = isActive;
 	}
 
 	public String getTypeSimple() {
@@ -224,6 +213,14 @@ public class ReactiveVariable implements Serializable,
 
 	public void setValueString(final String s) {
 		valueString = s;
+	}
+
+	public boolean isExceptionOccured() {
+		return exceptionOccured;
+	}
+
+	public void setExceptionOccured(boolean exceptionOccured) {
+		this.exceptionOccured = exceptionOccured;
 	}
 
 	public Set<UUID> getConnectedWith() {

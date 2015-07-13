@@ -68,7 +68,7 @@ object REScalaLogger {
 
     val varName = SrcReader.getVarName(r)
 
-    val reVar = new ReactiveVariable(id, reactiveVariableType, -1, historyType, null, true, varTypeSimple, varTypeFull, varName, valueString)
+    val reVar = new ReactiveVariable(id, reactiveVariableType, -1, historyType, null, varTypeSimple, varTypeFull, varName, valueString)
 
     if (classOf[DepHolder].isAssignableFrom(r.getClass)) {
       val d = r.asInstanceOf[DepHolder]
@@ -178,6 +178,7 @@ class REScalaLogger extends Logging {
   override def nodeEvaluationEndedWithException(r: Reactive, e: Exception) {
     val breakpointInformation = getBreakpointInformation()
     val reVar = REScalaLogger.createReactiveVariable(r, DependencyGraphHistoryType.NODE_EVALUATION_ENDED_WITH_EXCEPTION)
+    reVar.setExceptionOccured(true)
     remoteLogger.logNodeEvaluationEndedWithException(reVar, e, breakpointInformation)
   }
 

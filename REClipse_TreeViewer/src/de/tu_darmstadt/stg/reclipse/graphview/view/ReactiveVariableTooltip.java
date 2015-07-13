@@ -48,8 +48,10 @@ public class ReactiveVariableTooltip {
   }
 
   private void appendValue(final StringBuilder builder) {
+    final String name = var.isExceptionOccured() ? Texts.Graph_Tooltip_Exception : Texts.Graph_Tooltip_Value;
+
     builder.append("<tr>"); //$NON-NLS-1$
-    builder.append("<td><b>").append(Texts.Graph_Tooltip_Value).append("<b></td>"); //$NON-NLS-1$ //$NON-NLS-2$
+    builder.append("<td><b>").append(name).append("<b></td>"); //$NON-NLS-1$ //$NON-NLS-2$
     builder.append("<td>").append(var.getValueString()).append("</td>"); //$NON-NLS-1$//$NON-NLS-2$
     builder.append("</tr>"); //$NON-NLS-1$
   }
