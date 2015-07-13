@@ -17,8 +17,16 @@
 
 Once the project is set up, the plugin can be used by starting an Eclipse application. In this Eclipse application, perform the following steps to use the tree viewer.
 
-* Make sure the projects include "REClipse_REScala" as a dependency.
+* Make sure the projects include the REScala Logger as a dependency.
 * Add `rescala.ReactiveEngine.log = new REScalaLogger` to the main method of an application in order to allow the plugin to communicate with the debugger.
 
+####Hints
 SBT dependency for REClipse_REScala:
 `"de.tu_darmstadt.stg.reclipse" % "rescala-logger_2.11" % "0.0.0"`
+
+Since the projects are not published to a global repository yet, these projects have to be published locally:
+* REScala
+* REClipse_LoggerInterface
+* REClipse_REScala
+
+This can be done via sbt: `sbt compile publish-local`
