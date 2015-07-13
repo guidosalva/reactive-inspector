@@ -9,6 +9,7 @@ import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseParser
 import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseVisitorSQLImpl;
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveTreeView;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,13 +45,23 @@ public class QueryController {
       final String queryText = rtv.getQueryText();
       ctx.get().getEsperAdapter().updateLiveQueryText(queryText);
 
+      if (queryText == null || queryText.trim().isEmpty()) {
+        return;
+      }
+
       final String sqlQuery = parseReclipseQuery(queryText);
-      matches = ctx.get().getEsperAdapter().executeQuery(sqlQuery);
-      if (matches != null && matches.size() > 0) {
-        rtv.jumpToPointInTime(matches.get(0));
+
+      if (sqlQuery != null) {
+        matches = ctx.get().getEsperAdapter().executeQuery(sqlQuery);
+        if (matches != null && matches.size() > 0) {
+          rtv.jumpToPointInTime(matches.get(0));
+        }
+        else {
+          rtv.showInformation("", Texts.Query_NoResults); //$NON-NLS-1$
+        }
       }
       else {
-        rtv.showInformation("", Texts.Query_NoResults); //$NON-NLS-1$
+        matches = Collections.emptyList();
       }
     }
   }

@@ -624,4 +624,8 @@ public class DatabaseHelper {
   protected String getJdbcPassword() {
     return JDBC_PASSWORD;
   }
+
+  public String getSessionId() {
+    return sessionId;
+  }
 }

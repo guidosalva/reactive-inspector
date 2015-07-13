@@ -20,7 +20,9 @@ public class ReclipseVisitorSQLImpl extends ReclipseBaseVisitor<String> {
   @Override
   public String visitNodeEvaluatedQuery(final ReclipseParser.NodeEvaluatedQueryContext ctx) {
     final String nodeName = ctx.NODE_NAME().getText();
-    return createSimpleQuery(DependencyGraphHistoryType.NODE_EVALUATION_STARTED, nodeName);
+    final int endedId = DependencyGraphHistoryType.NODE_EVALUATION_ENDED.ordinal();
+    final int endedWithExceptionId = DependencyGraphHistoryType.NODE_EVALUATION_ENDED_WITH_EXCEPTION.ordinal();
+    return "SELECT pointInTime FROM event JOIN variable ON event.idVariable = variable.idVariable WHERE (event.type = " + endedId + " OR event.type = " + endedWithExceptionId + ") AND variable.variableName = '" + nodeName + "'"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
   }
 
   @Override

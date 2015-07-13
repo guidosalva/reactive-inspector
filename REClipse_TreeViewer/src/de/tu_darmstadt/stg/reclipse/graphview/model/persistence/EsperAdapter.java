@@ -43,9 +43,13 @@ public class EsperAdapter {
 
   private void setupEsper() {
     final Configuration engineConfig = new Configuration();
-    engineConfig.addDatabaseReference("reclipseDBRead", createEsperDBRef()); //$NON-NLS-1$
+    engineConfig.addDatabaseReference(getDatabaseReferenceName(), createEsperDBRef());
     engineConfig.addEventType("ReactiveVariable", ReactiveVariable.class); //$NON-NLS-1$
-    provider = EPServiceProviderManager.getDefaultProvider(engineConfig);
+    provider = EPServiceProviderManager.getProvider(dbHelper.getSessionId(), engineConfig);
+  }
+
+  private String getDatabaseReferenceName() {
+    return "reclipseDB" + dbHelper.getSessionId().replace("-", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
   }
 
   private ConfigurationDBRef createEsperDBRef() {
@@ -89,6 +93,15 @@ public class EsperAdapter {
     }
 
     final String conditions = parseReclipseQuery();
+
+    // check for invalid query
+    if (conditions == null) {
+      if (liveStmt != null) {
+        liveStmt.destroy();
+      }
+      return;
+    }
+
     final String query = "select pointInTime from ReactiveVariable where " + conditions; //$NON-NLS-1$
     // delete the old statement
     if (liveStmt != null) {
@@ -102,12 +115,6 @@ public class EsperAdapter {
     final ReclipseLexer lexer = new ReclipseLexer(new ANTLRInputStream(queryText));
     final CommonTokenStream tokens = new CommonTokenStream(lexer);
     final ReclipseParser parser = new ReclipseParser(tokens);
-
-    // redirect parsing errors to the RTV
-    parser.removeErrorListeners();
-    // parser.addErrorListener(new
-    // ReclipseErrorListener(getReactiveTreeView()));
-    // TODO add listener for ui events
 
     final ParseTree tree = parser.query();
     final ReclipseVisitorEsperImpl visitor = new ReclipseVisitorEsperImpl(dbHelper);
@@ -137,7 +144,8 @@ public class EsperAdapter {
    * @return matching points in time
    */
   public List<Integer> executeQuery(final String sqlQuery) {
-    final String esperQuery = "select pointInTime from sql:reclipseDBRead [\"" + sqlQuery + "\"]"; //$NON-NLS-1$ //$NON-NLS-2$
+    final String dbRef = getDatabaseReferenceName();
+    final String esperQuery = "select pointInTime from sql:" + dbRef + " [\"" + sqlQuery + "\"]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     final EPStatement stmt = provider.getEPAdministrator().createEPL(esperQuery);
     final Iterator<EventBean> iter = stmt.iterator();
     final List<Integer> result = new ArrayList<>();
