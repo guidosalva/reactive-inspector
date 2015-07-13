@@ -7,21 +7,9 @@ public class ReactiveVariableLabel {
 
   private final ReactiveVariable var;
 
-  private boolean isHighlighted;
-
   public ReactiveVariableLabel(final ReactiveVariable v) {
     super();
     this.var = v;
-
-    isHighlighted = false;
-  }
-
-  public boolean isHighlighted() {
-    return isHighlighted;
-  }
-
-  public void setHighlighted(final boolean h) {
-    this.isHighlighted = h;
   }
 
   @Override
@@ -37,12 +25,7 @@ public class ReactiveVariableLabel {
 
     final ReactiveVariableType varType = var.getReactiveVariableType();
     if (varType == ReactiveVariableType.VAR || varType == ReactiveVariableType.SIGNAL) {
-      if (isHighlighted) {
-        label += "<h3>CHANGE</h3>"; //$NON-NLS-1$
-      }
-      else {
-        label += "<h3>" + getValueString() + "</h3>"; //$NON-NLS-1$ //$NON-NLS-2$
-      }
+      label += "<h3>" + getValueString() + "</h3>"; //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     return label;

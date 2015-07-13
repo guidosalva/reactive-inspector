@@ -2,7 +2,6 @@ package de.tu_darmstadt.stg.reclipse.graphview.view.graph.actions;
 
 import de.tu_darmstadt.stg.reclipse.graphview.Images;
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
-import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableLabel;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.TreeViewGraph;
 
 import java.awt.event.ActionEvent;
@@ -86,28 +85,6 @@ public class HighlightAction {
   }
 
   /**
-   * Sets the highlighted flag in the cell's label.
-   *
-   * @param cell
-   *          A cell in the graph.
-   */
-  private static void setHighlightedFlag(final mxCell cell) {
-    final ReactiveVariableLabel label = (ReactiveVariableLabel) cell.getValue();
-    label.setHighlighted(true);
-  }
-
-  /**
-   * Removes the highlighted flag in the cell's label.
-   *
-   * @param cell
-   *          A cell in the graph.
-   */
-  private static void removeHighlightedFlag(final mxCell cell) {
-    final ReactiveVariableLabel label = (ReactiveVariableLabel) cell.getValue();
-    label.setHighlighted(false);
-  }
-
-  /**
    * Highlights a cell in the graph.
    *
    * @param cell
@@ -118,35 +95,13 @@ public class HighlightAction {
     try {
       // cell highlighted?
       if (highlighted.containsKey(cell)) {
-        // remove highlight from cell label
-        removeHighlightedFlag(cell);
-
-        for (final Object child : highlighted.get(cell)) {
-          final mxCell childCell = (mxCell) child;
-
-          // remove highlight from child cell label
-          removeHighlightedFlag(childCell);
-        }
-
         // remove cell from highlighted map
         highlighted.remove(cell);
       }
       else {
-        // set highlight on cell label
-        setHighlightedFlag(cell);
-
         final Set<Object> children = graph.getChildrenOfCell(cell);
-
         // add to highlighted map
         highlighted.put(cell, children);
-
-        // remove highlight from cells
-        for (final Object child : highlighted.get(cell)) {
-          final mxCell childCell = (mxCell) child;
-
-          // set highlight on child cell label
-          setHighlightedFlag(childCell);
-        }
       }
 
       final Set<Object> allHighlighted = new HashSet<>();
