@@ -71,10 +71,15 @@ public class ReclipseVisitorEsperImpl extends ReclipseBaseVisitor<String> {
 
   @Override
   public String visitEvaluationException(final EvaluationExceptionContext ctx) {
-    final String nodeName = ctx.NODE_NAME().getText();
     // TODO escape nodeName, see
     // https://stackoverflow.com/questions/25268583/how-can-i-sanitize-mysql-query-parameters-in-esper
-    return "dependencyGraphHistoryType = de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType.NODE_EVALUATION_ENDED_WITH_EXCEPTION and name = '" + nodeName + "'"; //$NON-NLS-1$ //$NON-NLS-2$
-  }
 
+    if (ctx.NODE_NAME() != null) {
+      final String nodeName = ctx.NODE_NAME().getText();
+      return "dependencyGraphHistoryType = de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType.NODE_EVALUATION_ENDED_WITH_EXCEPTION and name = '" + nodeName + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+    }
+    else {
+      return "dependencyGraphHistoryType = de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType.NODE_EVALUATION_ENDED_WITH_EXCEPTION"; //$NON-NLS-1$
+    }
+  }
 }

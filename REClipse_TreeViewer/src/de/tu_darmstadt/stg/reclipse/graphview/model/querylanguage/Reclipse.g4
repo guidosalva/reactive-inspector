@@ -20,7 +20,7 @@ nodeEvaluatedQuery: 'nodeEvaluated(' NODE_NAME ')' ;
 nodeValueSet: 'nodeValueSet(' NODE_NAME ')' ;
 dependencyCreated: 'dependencyCreated(' NODE_NAME ',' NODE_NAME ')' ;
 evaluationYielded: 'evaluationYielded(' NODE_NAME ',' VALUE ')' ;
-evaluationException: 'evaluationException(' NODE_NAME ')' ;
+evaluationException: 'evaluationException(' (NODE_NAME)? ')' ;
 
 NODE_NAME: Identifier ;
 

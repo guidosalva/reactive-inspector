@@ -1,4 +1,4 @@
-// Generated from Reclipse.g4 by ANTLR 4.2.2
+// Generated from Reclipse.g4 by ANTLR 4.4
 package de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
@@ -11,6 +11,8 @@ import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class ReclipseParser extends Parser {
+	static { RuntimeMetaData.checkVersion("4.4", RuntimeMetaData.VERSION); }
+
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
@@ -18,9 +20,9 @@ public class ReclipseParser extends Parser {
 		T__7=1, T__6=2, T__5=3, T__4=4, T__3=5, T__2=6, T__1=7, T__0=8, NODE_NAME=9, 
 		VALUE=10, Identifier=11, StringLiteral=12, WS=13;
 	public static final String[] tokenNames = {
-		"<INVALID>", "'evaluationYielded('", "')'", "','", "'nodeValueSet('", 
-		"'dependencyCreated('", "'nodeCreated('", "'nodeEvaluated('", "'evaluationException('", 
-		"NODE_NAME", "VALUE", "Identifier", "StringLiteral", "WS"
+		"<INVALID>", "'nodeEvaluated('", "'nodeValueSet('", "'evaluationException('", 
+		"'evaluationYielded('", "'nodeCreated('", "')'", "'dependencyCreated('", 
+		"','", "NODE_NAME", "VALUE", "Identifier", "StringLiteral", "WS"
 	};
 	public static final int
 		RULE_query = 0, RULE_nodeCreatedQuery = 1, RULE_nodeEvaluatedQuery = 2, 
@@ -51,8 +53,8 @@ public class ReclipseParser extends Parser {
 		_interp = new ParserATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
 	}
 	public static class QueryContext extends ParserRuleContext {
-		public NodeCreatedQueryContext nodeCreatedQuery() {
-			return getRuleContext(NodeCreatedQueryContext.class,0);
+		public NodeEvaluatedQueryContext nodeEvaluatedQuery() {
+			return getRuleContext(NodeEvaluatedQueryContext.class,0);
 		}
 		public EvaluationYieldedContext evaluationYielded() {
 			return getRuleContext(EvaluationYieldedContext.class,0);
@@ -60,8 +62,8 @@ public class ReclipseParser extends Parser {
 		public NodeValueSetContext nodeValueSet() {
 			return getRuleContext(NodeValueSetContext.class,0);
 		}
-		public NodeEvaluatedQueryContext nodeEvaluatedQuery() {
-			return getRuleContext(NodeEvaluatedQueryContext.class,0);
+		public NodeCreatedQueryContext nodeCreatedQuery() {
+			return getRuleContext(NodeCreatedQueryContext.class,0);
 		}
 		public DependencyCreatedContext dependencyCreated() {
 			return getRuleContext(DependencyCreatedContext.class,0);
@@ -86,37 +88,37 @@ public class ReclipseParser extends Parser {
 		try {
 			setState(20);
 			switch (_input.LA(1)) {
-			case 6:
+			case T__3:
 				enterOuterAlt(_localctx, 1);
 				{
 				setState(14); nodeCreatedQuery();
 				}
 				break;
-			case 7:
+			case T__7:
 				enterOuterAlt(_localctx, 2);
 				{
 				setState(15); nodeEvaluatedQuery();
 				}
 				break;
-			case 4:
+			case T__6:
 				enterOuterAlt(_localctx, 3);
 				{
 				setState(16); nodeValueSet();
 				}
 				break;
-			case 5:
+			case T__1:
 				enterOuterAlt(_localctx, 4);
 				{
 				setState(17); dependencyCreated();
 				}
 				break;
-			case 1:
+			case T__4:
 				enterOuterAlt(_localctx, 5);
 				{
 				setState(18); evaluationYielded();
 				}
 				break;
-			case 8:
+			case T__5:
 				enterOuterAlt(_localctx, 6);
 				{
 				setState(19); evaluationException();
@@ -156,9 +158,9 @@ public class ReclipseParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(22); match(6);
+			setState(22); match(T__3);
 			setState(23); match(NODE_NAME);
-			setState(24); match(2);
+			setState(24); match(T__2);
 			}
 		}
 		catch (RecognitionException re) {
@@ -191,9 +193,9 @@ public class ReclipseParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(26); match(7);
+			setState(26); match(T__7);
 			setState(27); match(NODE_NAME);
-			setState(28); match(2);
+			setState(28); match(T__2);
 			}
 		}
 		catch (RecognitionException re) {
@@ -226,9 +228,9 @@ public class ReclipseParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(30); match(4);
+			setState(30); match(T__6);
 			setState(31); match(NODE_NAME);
-			setState(32); match(2);
+			setState(32); match(T__2);
 			}
 		}
 		catch (RecognitionException re) {
@@ -264,11 +266,11 @@ public class ReclipseParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(34); match(5);
+			setState(34); match(T__1);
 			setState(35); match(NODE_NAME);
-			setState(36); match(3);
+			setState(36); match(T__0);
 			setState(37); match(NODE_NAME);
-			setState(38); match(2);
+			setState(38); match(T__2);
 			}
 		}
 		catch (RecognitionException re) {
@@ -302,11 +304,11 @@ public class ReclipseParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(40); match(1);
+			setState(40); match(T__4);
 			setState(41); match(NODE_NAME);
-			setState(42); match(3);
+			setState(42); match(T__0);
 			setState(43); match(VALUE);
-			setState(44); match(2);
+			setState(44); match(T__2);
 			}
 		}
 		catch (RecognitionException re) {
@@ -336,12 +338,20 @@ public class ReclipseParser extends Parser {
 	public final EvaluationExceptionContext evaluationException() throws RecognitionException {
 		EvaluationExceptionContext _localctx = new EvaluationExceptionContext(_ctx, getState());
 		enterRule(_localctx, 12, RULE_evaluationException);
+		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(46); match(8);
-			setState(47); match(NODE_NAME);
-			setState(48); match(2);
+			setState(46); match(T__5);
+			setState(48);
+			_la = _input.LA(1);
+			if (_la==NODE_NAME) {
+				{
+				setState(47); match(NODE_NAME);
+				}
+			}
+
+			setState(50); match(T__2);
 			}
 		}
 		catch (RecognitionException re) {
@@ -356,20 +366,20 @@ public class ReclipseParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3\17\65\4\2\t\2\4\3"+
+		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3\17\67\4\2\t\2\4\3"+
 		"\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\3\2\3\2\3\2\3\2\3\2\3\2\5"+
 		"\2\27\n\2\3\3\3\3\3\3\3\3\3\4\3\4\3\4\3\4\3\5\3\5\3\5\3\5\3\6\3\6\3\6"+
-		"\3\6\3\6\3\6\3\7\3\7\3\7\3\7\3\7\3\7\3\b\3\b\3\b\3\b\3\b\2\2\t\2\4\6\b"+
-		"\n\f\16\2\2\62\2\26\3\2\2\2\4\30\3\2\2\2\6\34\3\2\2\2\b \3\2\2\2\n$\3"+
-		"\2\2\2\f*\3\2\2\2\16\60\3\2\2\2\20\27\5\4\3\2\21\27\5\6\4\2\22\27\5\b"+
-		"\5\2\23\27\5\n\6\2\24\27\5\f\7\2\25\27\5\16\b\2\26\20\3\2\2\2\26\21\3"+
-		"\2\2\2\26\22\3\2\2\2\26\23\3\2\2\2\26\24\3\2\2\2\26\25\3\2\2\2\27\3\3"+
-		"\2\2\2\30\31\7\b\2\2\31\32\7\13\2\2\32\33\7\4\2\2\33\5\3\2\2\2\34\35\7"+
-		"\t\2\2\35\36\7\13\2\2\36\37\7\4\2\2\37\7\3\2\2\2 !\7\6\2\2!\"\7\13\2\2"+
-		"\"#\7\4\2\2#\t\3\2\2\2$%\7\7\2\2%&\7\13\2\2&\'\7\5\2\2\'(\7\13\2\2()\7"+
-		"\4\2\2)\13\3\2\2\2*+\7\3\2\2+,\7\13\2\2,-\7\5\2\2-.\7\f\2\2./\7\4\2\2"+
-		"/\r\3\2\2\2\60\61\7\n\2\2\61\62\7\13\2\2\62\63\7\4\2\2\63\17\3\2\2\2\3"+
-		"\26";
+		"\3\6\3\6\3\6\3\7\3\7\3\7\3\7\3\7\3\7\3\b\3\b\5\b\63\n\b\3\b\3\b\3\b\2"+
+		"\2\t\2\4\6\b\n\f\16\2\2\65\2\26\3\2\2\2\4\30\3\2\2\2\6\34\3\2\2\2\b \3"+
+		"\2\2\2\n$\3\2\2\2\f*\3\2\2\2\16\60\3\2\2\2\20\27\5\4\3\2\21\27\5\6\4\2"+
+		"\22\27\5\b\5\2\23\27\5\n\6\2\24\27\5\f\7\2\25\27\5\16\b\2\26\20\3\2\2"+
+		"\2\26\21\3\2\2\2\26\22\3\2\2\2\26\23\3\2\2\2\26\24\3\2\2\2\26\25\3\2\2"+
+		"\2\27\3\3\2\2\2\30\31\7\7\2\2\31\32\7\13\2\2\32\33\7\b\2\2\33\5\3\2\2"+
+		"\2\34\35\7\3\2\2\35\36\7\13\2\2\36\37\7\b\2\2\37\7\3\2\2\2 !\7\4\2\2!"+
+		"\"\7\13\2\2\"#\7\b\2\2#\t\3\2\2\2$%\7\t\2\2%&\7\13\2\2&\'\7\n\2\2\'(\7"+
+		"\13\2\2()\7\b\2\2)\13\3\2\2\2*+\7\6\2\2+,\7\13\2\2,-\7\n\2\2-.\7\f\2\2"+
+		"./\7\b\2\2/\r\3\2\2\2\60\62\7\5\2\2\61\63\7\13\2\2\62\61\3\2\2\2\62\63"+
+		"\3\2\2\2\63\64\3\2\2\2\64\65\7\b\2\2\65\17\3\2\2\2\4\26\62";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

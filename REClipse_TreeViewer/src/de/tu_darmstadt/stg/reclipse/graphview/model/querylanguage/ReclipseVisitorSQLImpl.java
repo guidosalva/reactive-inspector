@@ -52,12 +52,16 @@ public class ReclipseVisitorSQLImpl extends ReclipseBaseVisitor<String> {
 
   @Override
   public String visitEvaluationException(final EvaluationExceptionContext ctx) {
-    final String nodeName = ctx.NODE_NAME().getText();
-    return createSimpleQuery(DependencyGraphHistoryType.NODE_EVALUATION_ENDED_WITH_EXCEPTION, nodeName);
+    if (ctx.NODE_NAME() != null) {
+      final String nodeName = ctx.NODE_NAME().getText();
+      return createSimpleQuery(DependencyGraphHistoryType.NODE_EVALUATION_ENDED_WITH_EXCEPTION, nodeName);
+    }
+    else {
+      return "SELECT pointInTime FROM event WHERE event.type = " + DependencyGraphHistoryType.NODE_EVALUATION_ENDED_WITH_EXCEPTION.ordinal(); //$NON-NLS-1$
+    }
   }
 
   private String createSimpleQuery(final DependencyGraphHistoryType type, final String variableName) {
     return "SELECT pointInTime FROM event JOIN variable ON event.idVariable = variable.idVariable WHERE event.type = " + type.ordinal() + " AND variable.variableName = '" + variableName + "'"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
   }
-
 }
