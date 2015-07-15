@@ -3,9 +3,6 @@ package de.tu_darmstadt.stg.reclipse.graphview.view.graph;
 import de.tu_darmstadt.stg.reclipse.graphview.Properties;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
 import de.tu_darmstadt.stg.reclipse.graphview.provider.ContentModel;
-import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableLabel;
-import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableTooltip;
-import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableVertex;
 import de.tu_darmstadt.stg.reclipse.logger.BreakpointInformation;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
@@ -36,7 +33,7 @@ public class TreeViewGraph extends mxGraph {
 
   private final mxGraphLayout graphLayout;
 
-  private final List<IGraphListener> graphListeners = new CopyOnWriteArrayList<IGraphListener>();
+  private final List<IGraphListener> graphListeners = new CopyOnWriteArrayList<>();
 
   public TreeViewGraph() {
     super();

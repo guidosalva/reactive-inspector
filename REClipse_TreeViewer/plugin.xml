@@ -5,7 +5,7 @@
          point="org.eclipse.ui.views">
       <category
             id="de.tu-darmstadt.stg.reclipse.ReactiveViews"
-            name="%view.reactivetree.category.name">
+            name="%view.reactiveprogramming.category.name">
       </category>
       <view
             category="de.tu-darmstadt.stg.reclipse.ReactiveViews"
@@ -13,6 +13,13 @@
             id="de.tu-darmstadt.stg.reclipse.graphview.ReactiveTreeView"
             icon="icons/reactivetree.png"
             name="%view.reactivetree.name">
+      </view>
+      <view
+            category="de.tu-darmstadt.stg.reclipse.ReactiveViews"
+            class="de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveBreakpointView"
+            id="de.tu-darmstadt.stg.reclipse.graphview.ReactiveBreakpointView"
+            icon="icons/breakpoint_view.gif"
+            name="%view.reactivebreakpoint.name">
       </view>
    </extension>
    
@@ -26,7 +33,7 @@
             category="de.tu-darmstadt.stg.reclipse.StatisticsViews"
             class="de.tu_darmstadt.stg.reclipse.graphview.view.statistics.StatisticsView"
             id="de.tu-darmstadt.stg.reclipse.graphview.StatisticsView"
-            icon="icons/reactivetree.png"
+            icon="icons/statistics_view.png"
             name="%view.statistics.name">
       </view>
    </extension>

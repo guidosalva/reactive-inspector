@@ -494,7 +494,7 @@ public class DatabaseHelper {
     r.setAdditionalKeys(new HashMap<String, Object>()); // TODO load additional
     // keys field
     r.setValueString(rs.getString("valueString")); //$NON-NLS-1$
-    r.setExceptionOccured(rs.getBoolean("exception"));
+    r.setExceptionOccured(rs.getBoolean("exception")); //$NON-NLS-1$
 
     return r;
   }

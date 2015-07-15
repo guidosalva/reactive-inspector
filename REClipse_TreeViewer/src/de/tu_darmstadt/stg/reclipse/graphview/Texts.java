@@ -70,6 +70,8 @@ public class Texts extends NLS {
   public static String Graph_Tooltip_Source;
   public static String Graph_Tooltip_Line;
 
+  public static String BreakpointQuery_Add;
+
   private static final String BUNDLE_NAME = Texts.class.getPackage().getName() + ".texts"; //$NON-NLS-1$
 
   static {

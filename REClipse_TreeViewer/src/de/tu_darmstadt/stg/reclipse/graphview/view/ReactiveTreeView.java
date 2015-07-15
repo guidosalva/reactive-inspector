@@ -63,15 +63,6 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
    */
   public static final String ID = "de.tu-darmstadt.stg.reclipse.graphview.ReactiveTreeView"; //$NON-NLS-1$
 
-  private static final String[] QUERY_TEMPLATES = new String[] {
-      "nodeCreated(<name>)", //$NON-NLS-1$
-      "nodeEvaluated(<name>)", //$NON-NLS-1$
-      "nodeValueSet(<name>)", //$NON-NLS-1$
-      "dependencyCreated(<name>, <name>)", //$NON-NLS-1$
-      "evaluationYielded(<name>, <value>)", //$NON-NLS-1$
-      "evaluationException(<name>)" //$NON-NLS-1$
-  };
-
   protected final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
 
   protected Composite graphParent;
@@ -245,7 +236,7 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
     final QueryController queryController = new QueryController(this);
     queryTextField = new Combo(queryComposite, SWT.DROP_DOWN);
     queryTextField.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
-    queryTextField.setItems(QUERY_TEMPLATES);
+    queryTextField.setItems(QueryController.QUERY_TEMPLATES);
 
     final Button submitButton = new Button(queryComposite, SWT.PUSH);
     submitButton.addSelectionListener(queryController.new SubmitQueryButtonHandler());

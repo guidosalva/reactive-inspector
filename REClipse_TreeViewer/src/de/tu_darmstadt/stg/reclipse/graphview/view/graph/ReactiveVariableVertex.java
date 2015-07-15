@@ -1,7 +1,6 @@
-package de.tu_darmstadt.stg.reclipse.graphview.view;
+package de.tu_darmstadt.stg.reclipse.graphview.view.graph;
 
 import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.DependencyGraph.Vertex;
-import de.tu_darmstadt.stg.reclipse.graphview.view.graph.Stylesheet;
 import de.tu_darmstadt.stg.reclipse.logger.BreakpointInformation;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 

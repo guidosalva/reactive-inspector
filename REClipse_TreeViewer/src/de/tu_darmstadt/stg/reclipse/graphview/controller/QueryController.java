@@ -25,6 +25,15 @@ import org.eclipse.swt.events.SelectionEvent;
  */
 public class QueryController {
 
+  public static final String[] QUERY_TEMPLATES = new String[] {
+      "nodeCreated(<node>)", //$NON-NLS-1$
+      "nodeEvaluated(<node>)", //$NON-NLS-1$
+      "nodeValueSet(<node>)", //$NON-NLS-1$
+      "dependencyCreated(<node>, <node>)", //$NON-NLS-1$
+      "evaluationYielded(<node>, \"<value>\")", //$NON-NLS-1$
+      "evaluationException(<node>)" //$NON-NLS-1$
+  };
+
   protected final ReactiveTreeView rtv;
   protected List<Integer> matches;
 
