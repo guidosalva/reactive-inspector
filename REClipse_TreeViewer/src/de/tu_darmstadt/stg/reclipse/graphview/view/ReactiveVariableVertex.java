@@ -2,6 +2,7 @@ package de.tu_darmstadt.stg.reclipse.graphview.view;
 
 import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.DependencyGraph.Vertex;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.Stylesheet;
+import de.tu_darmstadt.stg.reclipse.logger.BreakpointInformation;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
 import com.mxgraph.view.mxGraph;
@@ -15,26 +16,28 @@ public class ReactiveVariableVertex implements Comparable<ReactiveVariableVertex
 
   private final Vertex vertex;
   private final ReactiveVariable var;
+  private final BreakpointInformation breakpointInformation;
 
   private boolean isHighlighted;
 
   private String customStyle;
 
-  public ReactiveVariableVertex(final Vertex v) {
+  public ReactiveVariableVertex(final Vertex v, final BreakpointInformation br) {
     this.vertex = v;
+    this.breakpointInformation = br;
     this.var = v.getVariable();
     this.isHighlighted = false;
     this.customStyle = null;
   }
 
-  public ReactiveVariableVertex(final Vertex v, final String cs) {
-    this(v);
+  public ReactiveVariableVertex(final Vertex v, final BreakpointInformation br, final String cs) {
+    this(v, br);
 
     this.customStyle = cs;
   }
 
-  public ReactiveVariableVertex(final Vertex v, final boolean h) {
-    this(v);
+  public ReactiveVariableVertex(final Vertex v, final BreakpointInformation br, final boolean h) {
+    this(v, br);
 
     this.isHighlighted = h;
   }
@@ -81,12 +84,12 @@ public class ReactiveVariableVertex implements Comparable<ReactiveVariableVertex
    *          A graph.
    * @return The cell representing the vertex in the graph.
    */
-  public Object draw(final mxGraph graph) {
+  public Object draw(final mxGraph graph, final boolean showClassName) {
     // use default parent of graph
     final Object parent = graph.getDefaultParent();
 
     // create label
-    final ReactiveVariableLabel label = new ReactiveVariableLabel(var);
+    final ReactiveVariableLabel label = new ReactiveVariableLabel(var, breakpointInformation, showClassName);
 
     // set style
     final String style = (customStyle != null) ? customStyle : getStyle();
@@ -101,5 +104,9 @@ public class ReactiveVariableVertex implements Comparable<ReactiveVariableVertex
    */
   public ReactiveVariable getVar() {
     return var;
+  }
+
+  public BreakpointInformation getBreakpointInformation() {
+    return breakpointInformation;
   }
 }

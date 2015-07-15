@@ -1,5 +1,6 @@
 package de.tu_darmstadt.stg.reclipse.graphview.view.graph;
 
+import de.tu_darmstadt.stg.reclipse.graphview.Properties;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
 import de.tu_darmstadt.stg.reclipse.graphview.provider.ContentModel;
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableLabel;
@@ -31,6 +32,7 @@ public class TreeViewGraph extends mxGraph {
   private Optional<SessionContext> ctx = Optional.empty();
   private Optional<ContentModel> contentModel = Optional.empty();
   private boolean activeHeatmap = false;
+  private boolean showClassName = true;
 
   private final mxGraphLayout graphLayout;
 
@@ -46,6 +48,8 @@ public class TreeViewGraph extends mxGraph {
     setStylesheet(new Stylesheet());
 
     this.graphLayout = new mxHierarchicalLayout(this, SwingConstants.WEST);
+
+    this.showClassName = Properties.getBoolean(Properties.SHOW_CLASS_NAME);
   }
 
   public void setSessionContext(final SessionContext ctx) {
@@ -110,7 +114,7 @@ public class TreeViewGraph extends mxGraph {
     // insert vertices
     final Map<UUID, Object> mapping = new HashMap<>();
     for (final ReactiveVariableVertex vertex : vertices) {
-      final Object cell = vertex.draw(this);
+      final Object cell = vertex.draw(this, showClassName);
 
       // add cell to mapping
       mapping.put(vertex.getVar().getId(), cell);
@@ -133,6 +137,8 @@ public class TreeViewGraph extends mxGraph {
     }
 
     doLayoutGraph();
+
+    fireGraphChanged();
   }
 
   /**
@@ -264,6 +270,27 @@ public class TreeViewGraph extends mxGraph {
 
   public boolean isHeatmapEnabled() {
     return activeHeatmap;
+  }
+
+  public boolean isShowClassName() {
+    return showClassName;
+  }
+
+  public void setShowClassName(final boolean showClassName) {
+    this.showClassName = showClassName;
+
+    updateShowClassName();
+    refresh();
+  }
+
+  private void updateShowClassName() {
+    final Object[] vertices = getChildVertices(getDefaultParent());
+
+    for (final Object vertex : vertices) {
+      final mxCell cell = (mxCell) vertex;
+      final ReactiveVariableLabel label = (ReactiveVariableLabel) cell.getValue();
+      label.setShowClassName(showClassName);
+    }
   }
 
   @Override

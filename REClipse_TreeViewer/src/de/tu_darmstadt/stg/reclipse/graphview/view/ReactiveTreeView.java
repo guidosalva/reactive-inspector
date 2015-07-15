@@ -5,6 +5,7 @@ import de.tu_darmstadt.stg.reclipse.graphview.Texts;
 import de.tu_darmstadt.stg.reclipse.graphview.action.Relayout;
 import de.tu_darmstadt.stg.reclipse.graphview.action.SaveGraphAsImage;
 import de.tu_darmstadt.stg.reclipse.graphview.action.SessionSelect;
+import de.tu_darmstadt.stg.reclipse.graphview.action.ShowClassName;
 import de.tu_darmstadt.stg.reclipse.graphview.action.ShowHeatmap;
 import de.tu_darmstadt.stg.reclipse.graphview.action.SuspendOnSessionStart;
 import de.tu_darmstadt.stg.reclipse.graphview.action.ZoomIn;
@@ -63,12 +64,12 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
   public static final String ID = "de.tu-darmstadt.stg.reclipse.graphview.ReactiveTreeView"; //$NON-NLS-1$
 
   private static final String[] QUERY_TEMPLATES = new String[] {
-    "nodeCreated(<name>)", //$NON-NLS-1$
-    "nodeEvaluated(<name>)", //$NON-NLS-1$
-    "nodeValueSet(<name>)", //$NON-NLS-1$
-    "dependencyCreated(<name>, <name>)", //$NON-NLS-1$
-    "evaluationYielded(<name>, <value>)", //$NON-NLS-1$
-    "evaluationException(<name>)" //$NON-NLS-1$
+      "nodeCreated(<name>)", //$NON-NLS-1$
+      "nodeEvaluated(<name>)", //$NON-NLS-1$
+      "nodeValueSet(<name>)", //$NON-NLS-1$
+      "dependencyCreated(<name>, <name>)", //$NON-NLS-1$
+      "evaluationYielded(<name>, <value>)", //$NON-NLS-1$
+      "evaluationException(<name>)" //$NON-NLS-1$
   };
 
   protected final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
@@ -281,6 +282,7 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
     // creating the toolbar entries
     getViewSite().getActionBars().getToolBarManager().add(new SessionSelect());
     getViewSite().getActionBars().getToolBarManager().add(new SuspendOnSessionStart());
+    getViewSite().getActionBars().getToolBarManager().add(new ShowClassName(graph));
     getViewSite().getActionBars().getToolBarManager().add(new Relayout(graph));
     getViewSite().getActionBars().getToolBarManager().add(new SaveGraphAsImage(getSite(), graph));
     getViewSite().getActionBars().getToolBarManager().add(new ZoomIn(graphComponent));

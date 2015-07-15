@@ -29,6 +29,9 @@ public class Texts extends NLS {
   public static String SuspendOnSessionStart_Text;
   public static String SuspendOnSessionStart_Tooltip;
 
+  public static String ShowClassName_Text;
+  public static String ShowClassName_Tooltip;
+
   public static String VariableNode_Collapsed;
   public static String VariableNode_Fulltype;
   public static String VariableNode_Name;

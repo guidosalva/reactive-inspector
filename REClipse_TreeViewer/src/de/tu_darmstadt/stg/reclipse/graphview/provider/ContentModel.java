@@ -6,6 +6,7 @@ import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.DependencyGraph.
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableVertex;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.Heatmap;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.Stylesheet;
+import de.tu_darmstadt.stg.reclipse.logger.BreakpointInformation;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
 import java.util.ArrayList;
@@ -81,7 +82,8 @@ public class ContentModel {
 
       // create reactive variable vertex
       final boolean isHighlighted = variableChanged && highlightChange;
-      final ReactiveVariableVertex variableVertext = new ReactiveVariableVertex(vertex, isHighlighted);
+      final BreakpointInformation breakpointInformation = ctx.getVariableLocation(variable.getId());
+      final ReactiveVariableVertex variableVertext = new ReactiveVariableVertex(vertex, breakpointInformation, isHighlighted);
 
       vertices.add(variableVertext);
     }
@@ -116,7 +118,8 @@ public class ContentModel {
       final String style = Stylesheet.calculateStyleFromColor(color);
 
       // create vertex instance
-      final ReactiveVariableVertex variableVertext = new ReactiveVariableVertex(vertex, style);
+      final BreakpointInformation breakpointInformation = ctx.getVariableLocation(variable.getId());
+      final ReactiveVariableVertex variableVertext = new ReactiveVariableVertex(vertex, breakpointInformation, style);
 
       vertices.add(variableVertext);
     }

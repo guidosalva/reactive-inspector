@@ -19,7 +19,6 @@ public class SuspendOnSessionStart extends Action {
 
   @Override
   public void run() {
-    final String value = Boolean.toString(this.isChecked());
-    Activator.getDefault().setProperty(Properties.SUSPEND_ON_SESSION_START, value);
+    Properties.setBoolean(Properties.SUSPEND_ON_SESSION_START, this.isChecked());
   }
 }
