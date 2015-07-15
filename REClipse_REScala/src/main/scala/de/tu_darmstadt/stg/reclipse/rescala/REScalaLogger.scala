@@ -141,7 +141,8 @@ class REScalaLogger extends Logging {
     }
     // breakpoint should be set one line after the current line
     val lineNumber = stackTraceElement.getLineNumber() + 1
-    new BreakpointInformation(sourceFile, className, lineNumber)
+    val threadName = Thread.currentThread().getName()
+    new BreakpointInformation(sourceFile, className, lineNumber, threadName)
   }
 
   override def nodeCreated(r: Reactive) {

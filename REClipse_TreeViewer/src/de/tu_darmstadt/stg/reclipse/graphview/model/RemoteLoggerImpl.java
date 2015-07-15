@@ -16,6 +16,11 @@ import java.util.HashSet;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.model.IDebugTarget;
+import org.eclipse.debug.core.model.IThread;
 import org.eclipse.jdt.debug.core.IJavaLineBreakpoint;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IViewPart;
@@ -76,7 +81,7 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
     this.logger = createLogger();
 
     if (ctx.getConfiguration().isSuspendOnSessionStart()) {
-      createBreakpoint(breakpointInformation);
+      suspendDebugTarget(breakpointInformation);
     }
   }
 
@@ -172,7 +177,7 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
     esperAdapter.sendEvent(r);
     final int pointInTime = esperAdapter.getPointInTime();
     if (pointInTime != -1) {
-      createBreakpoint(breakpointInformation);
+      suspendDebugTarget(breakpointInformation);
       jumpToPointInTime(pointInTime);
     }
   }
@@ -208,5 +213,30 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
     }
 
     logger.close();
+  }
+
+  private void suspendDebugTarget(final BreakpointInformation breakpointInformation) {
+    final ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
+    final IDebugTarget[] targets = launchManager.getDebugTargets();
+
+    if (targets.length > 0) {
+      final IDebugTarget target = targets[0];
+
+      try {
+        if (target.hasThreads()) {
+          final IThread[] threads = target.getThreads();
+
+          for (final IThread thread : threads) {
+            if (thread.getName().equals(breakpointInformation.getThreadName())) {
+              thread.suspend();
+              return;
+            }
+          }
+        }
+      }
+      catch (final DebugException e) {
+        Activator.log(e);
+      }
+    }
   }
 }
