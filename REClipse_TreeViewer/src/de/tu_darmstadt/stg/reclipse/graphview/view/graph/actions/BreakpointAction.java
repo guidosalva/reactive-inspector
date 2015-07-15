@@ -6,6 +6,7 @@ import de.tu_darmstadt.stg.reclipse.graphview.Texts;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
 import de.tu_darmstadt.stg.reclipse.graphview.util.BreakpointUtils;
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveVariableLabel;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.IGraphListener;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.TreeViewGraph;
 import de.tu_darmstadt.stg.reclipse.logger.BreakpointInformation;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
@@ -32,10 +33,10 @@ import com.mxgraph.model.mxCell;
 public class BreakpointAction {
 
   // Statuses of breakpoints
-  private final Map<mxCell, Boolean> breakpointStatus;
+  protected final Map<mxCell, Boolean> breakpointStatus;
 
   // Tracked watchpoints
-  private final Map<mxCell, IJavaWatchpoint> watchpoints;
+  protected final Map<mxCell, IJavaWatchpoint> watchpoints;
 
   protected final TreeViewGraph graph;
 
@@ -45,6 +46,15 @@ public class BreakpointAction {
 
     breakpointStatus = new HashMap<>();
     watchpoints = new HashMap<>();
+
+    graph.addGraphListener(new IGraphListener() {
+
+      @Override
+      public void onGraphChanged() {
+        breakpointStatus.clear();
+        watchpoints.clear();
+      }
+    });
   }
 
   /**

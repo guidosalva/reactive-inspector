@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.SwingConstants;
 
@@ -32,6 +33,8 @@ public class TreeViewGraph extends mxGraph {
   private boolean activeHeatmap = false;
 
   private final mxGraphLayout graphLayout;
+
+  private final List<IGraphListener> graphListeners = new CopyOnWriteArrayList<IGraphListener>();
 
   public TreeViewGraph() {
     super();
@@ -84,6 +87,7 @@ public class TreeViewGraph extends mxGraph {
     finally {
       getModel().endUpdate();
     }
+
   }
 
   private void doUpdateGraph() {
@@ -194,6 +198,16 @@ public class TreeViewGraph extends mxGraph {
     return new SearchResult(results);
   }
 
+  public void resetNodes() {
+    final Object[] vertices = getChildVertices(getDefaultParent());
+
+    for (final Object vertex : vertices) {
+      final mxCell cell = (mxCell) vertex;
+
+      cell.setStyle(Stylesheet.Styles.getEnabled(cell.getStyle()).name());
+    }
+  }
+
   public void highlightNodes(final Set<Object> nodes) {
     final Object[] vertices = getChildVertices(getDefaultParent());
 
@@ -206,6 +220,35 @@ public class TreeViewGraph extends mxGraph {
       else {
         cell.setStyle(Stylesheet.Styles.removeHighlight(cell.getStyle()).name());
       }
+    }
+  }
+
+  public void foregoundNodes(final Set<Object> nodes) {
+    final Object[] vertices = getChildVertices(getDefaultParent());
+
+    for (final Object vertex : vertices) {
+      final mxCell cell = (mxCell) vertex;
+
+      if (nodes.contains(cell)) {
+        cell.setStyle(Stylesheet.Styles.getEnabled(cell.getStyle()).name());
+      }
+      else {
+        cell.setStyle(Stylesheet.Styles.getDisabled(cell.getStyle()).name());
+      }
+    }
+  }
+
+  public void addGraphListener(final IGraphListener listener) {
+    graphListeners.add(listener);
+  }
+
+  public void removeGraphListener(final IGraphListener listener) {
+    graphListeners.remove(listener);
+  }
+
+  private void fireGraphChanged() {
+    for (final IGraphListener listener : graphListeners) {
+      listener.onGraphChanged();
     }
   }
 

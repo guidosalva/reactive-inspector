@@ -111,7 +111,7 @@ public class GraphComponent extends mxGraphComponent {
     try {
       final Set<Object> nodes = new HashSet<>();
       nodes.add(cell);
-      graph.highlightNodes(nodes);
+      graph.foregoundNodes(nodes);
     }
     finally {
       graph.getModel().endUpdate();

@@ -2,6 +2,7 @@ package de.tu_darmstadt.stg.reclipse.graphview.view.graph.actions;
 
 import de.tu_darmstadt.stg.reclipse.graphview.Images;
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.IGraphListener;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.TreeViewGraph;
 
 import java.awt.event.ActionEvent;
@@ -24,13 +25,21 @@ public class CollapseAction {
 
   private final TreeViewGraph graph;
 
-  private final Map<mxCell, Set<Object>> collapsed;
+  protected final Map<mxCell, Set<Object>> collapsed;
 
   public CollapseAction(final TreeViewGraph g) {
     super();
     this.graph = g;
 
     collapsed = new HashMap<>();
+
+    graph.addGraphListener(new IGraphListener() {
+
+      @Override
+      public void onGraphChanged() {
+        collapsed.clear();
+      }
+    });
   }
 
   /**

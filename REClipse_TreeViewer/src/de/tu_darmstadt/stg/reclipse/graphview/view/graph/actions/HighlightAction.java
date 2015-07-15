@@ -2,6 +2,7 @@ package de.tu_darmstadt.stg.reclipse.graphview.view.graph.actions;
 
 import de.tu_darmstadt.stg.reclipse.graphview.Images;
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
+import de.tu_darmstadt.stg.reclipse.graphview.view.graph.IGraphListener;
 import de.tu_darmstadt.stg.reclipse.graphview.view.graph.TreeViewGraph;
 
 import java.awt.event.ActionEvent;
@@ -25,13 +26,21 @@ public class HighlightAction {
 
   private final TreeViewGraph graph;
 
-  private final Map<mxCell, Set<Object>> highlighted;
+  protected final Map<mxCell, Set<Object>> highlighted;
 
   public HighlightAction(final TreeViewGraph g) {
     super();
     this.graph = g;
 
     highlighted = new HashMap<>();
+
+    graph.addGraphListener(new IGraphListener() {
+
+      @Override
+      public void onGraphChanged() {
+        highlighted.clear();
+      }
+    });
   }
 
   /**
@@ -110,7 +119,12 @@ public class HighlightAction {
         allHighlighted.addAll(children);
       }
 
-      graph.highlightNodes(allHighlighted);
+      if (allHighlighted.size() > 0) {
+        graph.foregoundNodes(allHighlighted);
+      }
+      else {
+        graph.resetNodes();
+      }
     }
     finally {
       graph.getModel().endUpdate();
