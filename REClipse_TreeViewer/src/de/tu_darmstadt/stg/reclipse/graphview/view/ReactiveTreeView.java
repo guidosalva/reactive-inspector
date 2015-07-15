@@ -189,8 +189,21 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
     queryComposite.setLayout(new GridLayout(4, false));
     queryComposite.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
 
-    searchTextField = new Text(searchComposite, SWT.BORDER);
+    searchTextField = new Text(searchComposite, SWT.SEARCH | SWT.ICON_CANCEL);
     searchTextField.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
+    searchTextField.addSelectionListener(new SelectionAdapter() {
+
+      @Override
+      public void widgetDefaultSelected(final SelectionEvent e) {
+        if (e.detail == SWT.ICON_CANCEL) {
+          clearSearch();
+        }
+        else {
+          searchNode();
+        }
+      }
+
+    });
 
     final Button searchButton = new Button(searchComposite, SWT.PUSH);
     searchButton.setText(Texts.Search_Submit);
@@ -198,20 +211,7 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
 
       @Override
       public void widgetSelected(final SelectionEvent e) {
-        final String name = searchTextField.getText();
-
-        if (name != null && name.trim().length() > 0) {
-          graphComponent.searchNodes(name);
-
-          if (graphComponent.getSearchResultCount() == 0) {
-            showInformation(Texts.Search_NoResults_Title, Texts.Search_NoResults_Message);
-          }
-        }
-        else {
-          graphComponent.clearSearch();
-        }
-
-        updateSearchResultsLabel();
+        searchNode();
       }
     });
 
@@ -464,6 +464,37 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
       return ""; //$NON-NLS-1$
     }
     return queryTextField.getText();
+  }
+
+  protected void searchNode() {
+    final String name = searchTextField.getText();
+
+    if (name != null && name.trim().length() > 0) {
+      graphComponent.searchNodes(name);
+
+      if (graphComponent.getSearchResultCount() == 0) {
+        showInformation(Texts.Search_NoResults_Title, Texts.Search_NoResults_Message);
+      }
+    }
+    else {
+      if (graphComponent.clearSearch()) {
+        graph.resetNodes();
+        graph.refresh();
+      }
+    }
+
+    updateSearchResultsLabel();
+  }
+
+  protected void clearSearch() {
+    searchTextField.setText(""); //$NON-NLS-1$
+
+    if (graphComponent.clearSearch()) {
+      graph.resetNodes();
+      graph.refresh();
+    }
+
+    updateSearchResultsLabel();
   }
 
   protected void updateSearchResultsLabel() {
