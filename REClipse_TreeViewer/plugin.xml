@@ -21,6 +21,12 @@
             icon="icons/breakpoint_view.gif"
             name="%view.reactivebreakpoint.name">
       </view>
+      <view
+            category="de.tu-darmstadt.stg.reclipse.ReactiveViews"
+            class="de.tu_darmstadt.stg.reclipse.graphview.view.GraphOutlineView"
+            id="de.tu-darmstadt.stg.reclipse.graphview.GraphOutlineView"
+            name="%view.graphoutline.name">
+      </view>
    </extension>
    
    <extension
