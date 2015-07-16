@@ -3,19 +3,15 @@ package de.tu_darmstadt.stg.reclipse.graphview.controller;
 import de.tu_darmstadt.stg.reclipse.graphview.Texts;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionContext;
 import de.tu_darmstadt.stg.reclipse.graphview.model.SessionManager;
+import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.Queries;
 import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseErrorListener;
-import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseLexer;
-import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseParser;
-import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseVisitorSQLImpl;
+import de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage.ReclipseQuery;
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveTreeView;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 
@@ -26,12 +22,12 @@ import org.eclipse.swt.events.SelectionEvent;
 public class QueryController {
 
   public static final String[] QUERY_TEMPLATES = new String[] {
-      "nodeCreated(<node>)", //$NON-NLS-1$
-      "nodeEvaluated(<node>)", //$NON-NLS-1$
-      "nodeValueSet(<node>)", //$NON-NLS-1$
-      "dependencyCreated(<node>, <node>)", //$NON-NLS-1$
-      "evaluationYielded(<node>, \"<value>\")", //$NON-NLS-1$
-      "evaluationException(<node>)" //$NON-NLS-1$
+    "nodeCreated(<node>)", //$NON-NLS-1$
+    "nodeEvaluated(<node>)", //$NON-NLS-1$
+    "nodeValueSet(<node>)", //$NON-NLS-1$
+    "dependencyCreated(<node>, <node>)", //$NON-NLS-1$
+    "evaluationYielded(<node>, \"<value>\")", //$NON-NLS-1$
+    "evaluationException(<node>)" //$NON-NLS-1$
   };
 
   protected final ReactiveTreeView rtv;
@@ -52,16 +48,15 @@ public class QueryController {
       }
 
       final String queryText = rtv.getQueryText();
-      ctx.get().getEsperAdapter().updateLiveQueryText(queryText);
 
       if (queryText == null || queryText.trim().isEmpty()) {
         return;
       }
 
-      final String sqlQuery = parseReclipseQuery(queryText);
+      final ReclipseQuery query = Queries.parse(queryText, new ReclipseErrorListener(rtv.getSite().getShell()));
 
-      if (sqlQuery != null) {
-        matches = ctx.get().getEsperAdapter().executeQuery(sqlQuery);
+      if (query != null) {
+        matches = ctx.get().getHistoryEsperAdapter().executeQuery(query);
         if (matches != null && matches.size() > 0) {
           rtv.jumpToPointInTime(matches.get(0));
         }
@@ -73,18 +68,6 @@ public class QueryController {
         matches = Collections.emptyList();
       }
     }
-  }
-
-  protected String parseReclipseQuery(final String queryText) {
-    final ReclipseLexer lexer = new ReclipseLexer(new ANTLRInputStream(queryText));
-    final CommonTokenStream tokens = new CommonTokenStream(lexer);
-    final ReclipseParser parser = new ReclipseParser(tokens);
-    // redirect parsing errors to the RTV
-    parser.removeErrorListeners();
-    parser.addErrorListener(new ReclipseErrorListener(rtv));
-    final ParseTree tree = parser.query();
-    final ReclipseVisitorSQLImpl visitor = new ReclipseVisitorSQLImpl();
-    return visitor.visit(tree);
   }
 
   public class PrevQueryResultButtonHandler extends SelectionAdapter {

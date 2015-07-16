@@ -1,7 +1,7 @@
 package de.tu_darmstadt.stg.reclipse.graphview.model;
 
 import de.tu_darmstadt.stg.reclipse.graphview.Activator;
-import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.EsperAdapter;
+import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.LiveEsperAdapter;
 import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.PersistenceFacade;
 import de.tu_darmstadt.stg.reclipse.graphview.util.BreakpointUtils;
 import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveTreeView;
@@ -68,7 +68,7 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
 
   private final SessionContext ctx;
   private final PersistenceFacade persistence;
-  private final EsperAdapter esperAdapter;
+  private final LiveEsperAdapter esperAdapter;
   private final IEventLogger logger;
   private final HashSet<IJavaLineBreakpoint> breakpoints = new HashSet<>();
 
@@ -77,7 +77,7 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
 
     this.ctx = ctx;
     this.persistence = ctx.getPersistence();
-    this.esperAdapter = ctx.getEsperAdapter();
+    this.esperAdapter = persistence.getLiveEsperAdapter();
     this.logger = createLogger();
 
     if (ctx.getConfiguration().isSuspendOnSessionStart()) {
@@ -174,11 +174,8 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
   }
 
   private void sendEventToEsper(final ReactiveVariable r, final BreakpointInformation breakpointInformation) {
-    esperAdapter.sendEvent(r);
-    final int pointInTime = esperAdapter.getPointInTime();
-    if (pointInTime != -1) {
+    if (esperAdapter.sendEvent(r)) {
       suspendDebugTarget(breakpointInformation);
-      jumpToPointInTime(pointInTime);
     }
   }
 

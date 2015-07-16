@@ -1,7 +1,7 @@
 package de.tu_darmstadt.stg.reclipse.graphview.model;
 
 import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.DatabaseHelper;
-import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.EsperAdapter;
+import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.HistoryEsperAdapter;
 import de.tu_darmstadt.stg.reclipse.graphview.model.persistence.PersistenceFacade;
 import de.tu_darmstadt.stg.reclipse.logger.BreakpointInformation;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
@@ -68,8 +68,8 @@ public class SessionContext {
     return persistence;
   }
 
-  public EsperAdapter getEsperAdapter() {
-    return persistence.getEsperAdapter();
+  public HistoryEsperAdapter getHistoryEsperAdapter() {
+    return persistence.getHistoryEsperAdapter();
   }
 
   public ISessionConfiguration getConfiguration() {

@@ -1,18 +1,20 @@
 package de.tu_darmstadt.stg.reclipse.graphview.model.querylanguage;
 
-import de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveTreeView;
+import de.tu_darmstadt.stg.reclipse.graphview.Texts;
 
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 
 public class ReclipseErrorListener extends BaseErrorListener {
 
-  protected final ReactiveTreeView rtv;
+  protected final Shell shell;
 
-  public ReclipseErrorListener(final ReactiveTreeView theRtv) {
-    rtv = theRtv;
+  public ReclipseErrorListener(final Shell shell) {
+    this.shell = shell;
   }
 
   @Override
@@ -22,7 +24,7 @@ public class ReclipseErrorListener extends BaseErrorListener {
 
       @Override
       public void run() {
-        rtv.showError("", msg); //$NON-NLS-1$
+        MessageDialog.openError(shell, Texts.Query_ParsingError_Title, msg);
       }
     });
   }

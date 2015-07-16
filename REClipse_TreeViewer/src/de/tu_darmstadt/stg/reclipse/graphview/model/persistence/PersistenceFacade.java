@@ -12,11 +12,13 @@ import java.util.UUID;
 public class PersistenceFacade implements ILoggerInterface {
 
   private final DatabaseHelper dbHelper;
-  private final EsperAdapter esperAdapter;
+  private final HistoryEsperAdapter historyEsperAdapter;
+  private final LiveEsperAdapter liveEsperAdapter;
 
   public PersistenceFacade(final UUID sessionId, final ISessionConfiguration configuration) {
     this.dbHelper = new DatabaseHelper(sessionId.toString(), configuration);
-    this.esperAdapter = new EsperAdapter(dbHelper);
+    this.historyEsperAdapter = new HistoryEsperAdapter(dbHelper);
+    this.liveEsperAdapter = new LiveEsperAdapter(sessionId.toString());
   }
 
   @Override
@@ -112,7 +114,11 @@ public class PersistenceFacade implements ILoggerInterface {
     return dbHelper;
   }
 
-  public EsperAdapter getEsperAdapter() {
-    return esperAdapter;
+  public HistoryEsperAdapter getHistoryEsperAdapter() {
+    return historyEsperAdapter;
+  }
+
+  public LiveEsperAdapter getLiveEsperAdapter() {
+    return liveEsperAdapter;
   }
 }

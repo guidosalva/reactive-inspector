@@ -45,6 +45,7 @@ public class Texts extends NLS {
 
   public static String Query_Submit;
   public static String Query_NoResults;
+  public static String Query_ParsingError_Title;
 
   public static String Search_Submit;
   public static String Search_NoResults_Title;
@@ -71,6 +72,8 @@ public class Texts extends NLS {
   public static String Graph_Tooltip_Line;
 
   public static String BreakpointQuery_Add;
+  public static String Breakpoint_Remove;
+  public static String Breakpoint_Remove_All;
 
   private static final String BUNDLE_NAME = Texts.class.getPackage().getName() + ".texts"; //$NON-NLS-1$
 

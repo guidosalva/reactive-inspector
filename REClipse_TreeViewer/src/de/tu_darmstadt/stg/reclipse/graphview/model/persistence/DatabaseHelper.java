@@ -186,6 +186,7 @@ public class DatabaseHelper {
       createVariableStatus(r, idVariable, oldVariableStatus, dependentVariable, null);
       createEvent(r, idVariable, dependentVariable);
 
+      // TODO use node name instead of id in additionalInformation
       final String additionalInformation = r.getId() + "->" + dependentId; //$NON-NLS-1$
       r.setPointInTime(lastPointInTime);
       r.setAdditionalInformation(additionalInformation);

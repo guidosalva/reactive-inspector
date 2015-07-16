@@ -13,7 +13,10 @@ public enum Images {
   SUSPEND("/icons/suspend.gif"), //$NON-NLS-1$
   REFRESH("/icons/refresh.gif"), //$NON-NLS-1$
   SHOW_CLASS_NAME("/icons/show_class_name.gif"), //$NON-NLS-1$
-  ADD("/icons/add.gif"); //$NON-NLS-1$
+  ADD("/icons/add.gif"), //$NON-NLS-1$
+  BREAKPOINT("/icons/breakpoint.gif"), //$NON-NLS-1$
+  REMOVE("/icons/remove.gif"), //$NON-NLS-1$
+  REMOVE_ALL("/icons/remove_all.gif"); //$NON-NLS-1$
 
   private final String path;
 
