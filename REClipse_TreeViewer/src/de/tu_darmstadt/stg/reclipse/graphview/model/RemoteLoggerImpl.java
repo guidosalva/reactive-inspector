@@ -17,8 +17,6 @@ import java.util.UUID;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugException;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IThread;
 import org.eclipse.jdt.debug.core.IJavaLineBreakpoint;
@@ -213,8 +211,11 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
   }
 
   private void suspendDebugTarget(final BreakpointInformation breakpointInformation) {
-    final ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
-    final IDebugTarget[] targets = launchManager.getDebugTargets();
+    if (ctx.getLaunch() == null) {
+      return;
+    }
+
+    final IDebugTarget[] targets = ctx.getLaunch().getDebugTargets();
 
     if (targets.length > 0) {
       final IDebugTarget target = targets[0];

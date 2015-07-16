@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.eclipse.debug.core.ILaunch;
+
 /**
  * A context for a logging session. It contains session details and the database
  * connection of the session.
@@ -19,14 +21,16 @@ import java.util.UUID;
 public class SessionContext {
 
   private final ISessionConfiguration configuration;
+  private final ILaunch launch;
   private final UUID id;
   private final Date created;
   private final PersistenceFacade persistence;
   private final Map<UUID, BreakpointInformation> variableLocations = new HashMap<>();
   private final Map<ReactiveVariable, BreakpointInformation> breakpointInformation = new HashMap<>();
 
-  protected SessionContext(final ISessionConfiguration configuration) {
+  protected SessionContext(final ISessionConfiguration configuration, final ILaunch launch) {
     this.configuration = configuration;
+    this.launch = launch;
     this.id = UUID.randomUUID();
     this.created = new Date();
     this.persistence = new PersistenceFacade(id, configuration);
@@ -74,5 +78,9 @@ public class SessionContext {
 
   public ISessionConfiguration getConfiguration() {
     return configuration;
+  }
+
+  public ILaunch getLaunch() {
+    return launch;
   }
 }

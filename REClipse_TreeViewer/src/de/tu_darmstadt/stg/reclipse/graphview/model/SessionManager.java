@@ -10,6 +10,10 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchListener;
+
 /**
  * This singleton class manages all logging sessions. Consumers can add
  * {@link ISessionSelectionListener}, to be notified if a session is
@@ -27,11 +31,28 @@ public class SessionManager {
 
   private Optional<SessionContext> selectedSession = Optional.empty();
 
+  protected ILaunch latestLaunch;
+
   private SessionManager() {
+    DebugPlugin.getDefault().getLaunchManager().addLaunchListener(new ILaunchListener() {
+
+      @Override
+      public void launchAdded(final ILaunch launch) {
+        latestLaunch = launch;
+      }
+
+      @Override
+      public void launchRemoved(final ILaunch arg0) {
+      }
+
+      @Override
+      public void launchChanged(final ILaunch arg0) {
+      }
+    });
   }
 
   public synchronized SessionContext createSession() {
-    final SessionContext ctx = new SessionContext(configuration);
+    final SessionContext ctx = new SessionContext(configuration, latestLaunch);
     sessions.put(ctx.getId(), ctx);
     selectSession(ctx);
     return ctx;
