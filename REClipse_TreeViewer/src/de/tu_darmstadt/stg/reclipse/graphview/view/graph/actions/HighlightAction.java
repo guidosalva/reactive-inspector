@@ -7,9 +7,6 @@ import de.tu_darmstadt.stg.reclipse.graphview.view.graph.TreeViewGraph;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import javax.swing.ImageIcon;
@@ -26,19 +23,17 @@ public class HighlightAction {
 
   private final TreeViewGraph graph;
 
-  protected final Map<mxCell, Set<Object>> highlighted;
+  protected mxCell highlightedCell;
 
   public HighlightAction(final TreeViewGraph g) {
     super();
     this.graph = g;
 
-    highlighted = new HashMap<>();
-
     graph.addGraphListener(new IGraphListener() {
 
       @Override
       public void onGraphChanged() {
-        highlighted.clear();
+        highlightedCell = null;
       }
     });
   }
@@ -79,7 +74,11 @@ public class HighlightAction {
    * @return True, if the cell is highlighted. False, otherwise.
    */
   private boolean isHighlighted(final mxCell cell) {
-    return highlighted.containsKey(cell);
+    if (highlightedCell == null) {
+      return false;
+    }
+
+    return cell.equals(highlightedCell);
   }
 
   /**
@@ -102,28 +101,17 @@ public class HighlightAction {
   public void highlightCell(final mxCell cell) {
     graph.getModel().beginUpdate();
     try {
-      // cell highlighted?
-      if (highlighted.containsKey(cell)) {
-        // remove cell from highlighted map
-        highlighted.remove(cell);
-      }
-      else {
-        final Set<Object> children = graph.getChildrenOfCell(cell);
-        // add to highlighted map
-        highlighted.put(cell, children);
-      }
-
-      final Set<Object> allHighlighted = new HashSet<>();
-
-      for (final Set<Object> children : highlighted.values()) {
-        allHighlighted.addAll(children);
-      }
-
-      if (allHighlighted.size() > 0) {
-        graph.foregoundNodes(allHighlighted);
-      }
-      else {
+      if (isHighlighted(cell)) {
         graph.resetNodes();
+
+        highlightedCell = null;
+      }
+      else {
+        final Set<Object> nodes = graph.getChildrenOfCell(cell);
+        nodes.add(cell);
+        graph.foregoundNodes(nodes);
+
+        highlightedCell = cell;
       }
     }
     finally {
