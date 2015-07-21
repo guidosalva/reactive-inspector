@@ -23,8 +23,8 @@
       </view>
       <view
             category="de.tu-darmstadt.stg.reclipse.ReactiveViews"
-            class="de.tu_darmstadt.stg.reclipse.graphview.view.GraphOutlineView"
-            id="de.tu-darmstadt.stg.reclipse.graphview.GraphOutlineView"
+            class="de.tu_darmstadt.stg.reclipse.graphview.view.TreeOutlineView"
+            id="de.tu-darmstadt.stg.reclipse.graphview.TreeOutlineView"
             name="%view.graphoutline.name">
       </view>
    </extension>
@@ -42,44 +42,6 @@
             icon="icons/statistics_view.png"
             name="%view.statistics.name">
       </view>
-   </extension>
-
-   <extension
-         point="org.eclipse.ui.popupMenus">
-      <objectContribution
-            objectClass="org.eclipse.debug.core.model.IVariable"
-            id="de.tu-darmstadt.stg.reclipse.graphview.debug.ui.VariableViewActions">
-         <action
-               label="%action.ViewReactiveTree.label"
-               tooltip="%action.ViewReactiveTree.tooltip"
-               icon="icons/reactivetree.png"
-               class="de.tu_darmstadt.stg.reclipse.graphview.action.ShowReactiveTree"
-               menubarPath="reactiveGroup"
-               enablesFor="1"
-               state="false"
-               style="push"
-               id="de.tu-darmstadt.stg.reclipse.graphview.debug.action.ShowReactiveTree">
-         </action>
-      </objectContribution>
-   </extension>
-   
-   <extension
-         point="org.eclipse.ui.popupMenus">
-      <objectContribution
-            objectClass="org.eclipse.debug.core.model.IVariable"
-            id="de.tu-darmstadt.stg.reclipse.graphview.debug.ui.VariableViewActions">
-         <action
-               label="%action.ViewStatistics.label"
-               tooltip="%action.ViewStatistics.tooltip"
-               icon="icons/heatmap.png"
-               class="de.tu_darmstadt.stg.reclipse.graphview.action.ShowStatistics"
-               menubarPath="reactiveGroup"
-               enablesFor="1"
-               state="false"
-               style="push"
-               id="de.tu-darmstadt.stg.reclipse.graphview.debug.action.ShowStatistics">
-         </action>
-      </objectContribution>
    </extension>
    
    <extension

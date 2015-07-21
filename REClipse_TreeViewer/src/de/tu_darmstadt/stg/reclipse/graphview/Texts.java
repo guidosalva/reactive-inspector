@@ -26,9 +26,6 @@ public class Texts extends NLS {
   public static String SessionSelect_Tooltip;
   public static String SessionSelect_Item;
 
-  public static String SuspendOnSessionStart_Text;
-  public static String SuspendOnSessionStart_Tooltip;
-
   public static String ShowClassName_Text;
   public static String ShowClassName_Tooltip;
 

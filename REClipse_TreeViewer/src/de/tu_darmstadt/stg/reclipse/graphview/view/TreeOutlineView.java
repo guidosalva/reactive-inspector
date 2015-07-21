@@ -17,7 +17,7 @@ import org.eclipse.ui.part.ViewPart;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.swing.mxGraphOutline;
 
-public class GraphOutlineView extends ViewPart implements IPartListener {
+public class TreeOutlineView extends ViewPart implements IPartListener {
 
   protected mxGraphOutline outline;
 
