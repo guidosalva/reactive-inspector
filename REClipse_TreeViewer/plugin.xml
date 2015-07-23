@@ -27,16 +27,8 @@
             id="de.tu-darmstadt.stg.reclipse.graphview.TreeOutlineView"
             name="%view.graphoutline.name">
       </view>
-   </extension>
-   
-   <extension
-         point="org.eclipse.ui.views">
-      <category
-            id="de.tu-darmstadt.stg.reclipse.StatisticsViews"
-            name="%view.statistics.category.name">
-      </category>
       <view
-            category="de.tu-darmstadt.stg.reclipse.StatisticsViews"
+            category="de.tu-darmstadt.stg.reclipse.ReactiveViews"
             class="de.tu_darmstadt.stg.reclipse.graphview.view.statistics.StatisticsView"
             id="de.tu-darmstadt.stg.reclipse.graphview.StatisticsView"
             icon="icons/statistics_view.png"
