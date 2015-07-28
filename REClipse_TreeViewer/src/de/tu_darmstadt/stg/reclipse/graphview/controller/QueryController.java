@@ -22,12 +22,12 @@ import org.eclipse.swt.events.SelectionEvent;
 public class QueryController {
 
   public static final String[] QUERY_TEMPLATES = new String[] {
-    "nodeCreated(<nodeName>)", //$NON-NLS-1$
-    "nodeEvaluated(<nodeName>)", //$NON-NLS-1$
-    "nodeValueSet(<nodeName>)", //$NON-NLS-1$
-    "dependencyCreated(<nodeName>, <nodeName>)", //$NON-NLS-1$
-    "evaluationYielded(<nodeName>, \"<value>\")", //$NON-NLS-1$
-    "evaluationException(<nodeName>?)" //$NON-NLS-1$
+      "nodeCreated(<nodeName>)", //$NON-NLS-1$
+      "nodeEvaluated(<signalName>)", //$NON-NLS-1$
+      "nodeValueSet(<varName>)", //$NON-NLS-1$
+      "dependencyCreated(<nodeName>, <nodeName>)", //$NON-NLS-1$
+      "evaluationYielded(<nodeName>, \"<value>\")", //$NON-NLS-1$
+      "evaluationException(<nodeName>?)" //$NON-NLS-1$
   };
 
   protected final ReactiveTreeView rtv;
