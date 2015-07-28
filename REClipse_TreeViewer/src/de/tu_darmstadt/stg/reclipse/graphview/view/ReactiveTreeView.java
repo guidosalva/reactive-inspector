@@ -66,6 +66,7 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
 
   protected Composite graphParent;
   protected Scale slider;
+  protected Label sliderLabel;
   protected Button autoNavButton;
   protected Button nextPointButton;
   protected Button prevPointButton;
@@ -116,7 +117,7 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
     graphFrame.add(graphComponent);
 
     final Composite navComposite = new Composite(parent, SWT.NONE);
-    navComposite.setLayout(new GridLayout(4, false));
+    navComposite.setLayout(new GridLayout(5, false));
     navComposite.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
 
     slider = new Scale(navComposite, SWT.HORIZONTAL);
@@ -150,6 +151,12 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
         }
       }
     });
+
+    sliderLabel = new Label(navComposite, SWT.RIGHT);
+    final GridData sliderLabelGridData = new GridData(GridData.VERTICAL_ALIGN_CENTER);
+    sliderLabelGridData.widthHint = 80;
+    sliderLabel.setLayoutData(sliderLabelGridData);
+    updateSliderLabel(0);
 
     prevPointButton = new Button(navComposite, SWT.ARROW | SWT.LEFT);
     prevPointButton.setEnabled(false);
@@ -210,6 +217,12 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
       }
     });
 
+    searchResultsLabel = new Label(searchComposite, SWT.RIGHT);
+    final GridData searchResultGridData = new GridData(GridData.VERTICAL_ALIGN_CENTER);
+    searchResultGridData.widthHint = 40;
+    searchResultsLabel.setLayoutData(searchResultGridData);
+    updateSearchResultsLabel();
+
     final Button prevSearchResultButton = new Button(searchComposite, SWT.ARROW | SWT.LEFT);
     prevSearchResultButton.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_CENTER));
     prevSearchResultButton.addSelectionListener(new SelectionAdapter() {
@@ -232,12 +245,6 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
       }
     });
 
-    searchResultsLabel = new Label(searchComposite, SWT.NONE);
-    final GridData searchResultGridData = new GridData(GridData.VERTICAL_ALIGN_CENTER);
-    searchResultGridData.widthHint = 40;
-    searchResultsLabel.setLayoutData(searchResultGridData);
-    updateSearchResultsLabel();
-
     queryController = new QueryController(this);
     queryTextField = new Combo(queryComposite, SWT.DROP_DOWN);
     queryTextField.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -257,6 +264,12 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
       }
     });
 
+    queryResultsLabel = new Label(queryComposite, SWT.RIGHT);
+    final GridData queryResultGridData = new GridData(GridData.VERTICAL_ALIGN_CENTER);
+    queryResultGridData.widthHint = 40;
+    queryResultsLabel.setLayoutData(queryResultGridData);
+    updateQueryResultsLabel();
+
     final Button prevResultButton = new Button(queryComposite, SWT.ARROW | SWT.LEFT);
     prevResultButton.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_CENTER));
     prevResultButton.addSelectionListener(queryController.new PrevQueryResultButtonHandler());
@@ -264,12 +277,6 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
     final Button nextResultButton = new Button(queryComposite, SWT.ARROW | SWT.RIGHT);
     nextResultButton.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_CENTER));
     nextResultButton.addSelectionListener(queryController.new NextQueryResultButtonHandler());
-
-    queryResultsLabel = new Label(queryComposite, SWT.NONE);
-    final GridData queryResultGridData = new GridData(GridData.VERTICAL_ALIGN_CENTER);
-    queryResultGridData.widthHint = 40;
-    queryResultsLabel.setLayoutData(queryResultGridData);
-    updateQueryResultsLabel();
 
     createActions();
 
@@ -313,6 +320,7 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
       @Override
       public void run() {
         disableManualMode();
+        updateSliderLabel(0);
         updateQueryResultsLabel();
       }
     });
@@ -346,6 +354,8 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
     }
 
     graph.setPointInTime(pointInTime, highlightChange);
+
+    updateSliderLabel(pointInTime);
 
     if (graphComponent.clearSearch()) {
       updateSearchResultsLabel();
@@ -504,6 +514,13 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
     }
 
     updateSearchResultsLabel();
+  }
+
+  protected void updateSliderLabel(final int pointInTime) {
+    final int current = (pointInTime > 0) ? pointInTime : 0;
+    final int count = (lastPointInTime > 0) ? lastPointInTime : 0;
+
+    sliderLabel.setText(current + " / " + count); //$NON-NLS-1$
   }
 
   protected void updateSearchResultsLabel() {
