@@ -52,6 +52,8 @@ public class Texts extends NLS {
   public static String MenuItem_Collapse_Unfold;
   public static String MenuItem_Highlighter_Highlight;
   public static String MenuItem_Highlighter_RemoveHighlight;
+  public static String MenuItem_Highlighter_Ancestors;
+  public static String MenuItem_Highlighter_Children;
   public static String MenuItem_Breakpoint_Enable;
   public static String MenuItem_Breakpoint_Disable;
   public static String MenuItem_Locate;

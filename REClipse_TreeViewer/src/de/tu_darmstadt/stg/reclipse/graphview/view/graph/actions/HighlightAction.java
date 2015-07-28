@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import java.util.Set;
 
 import javax.swing.ImageIcon;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
 import com.mxgraph.model.mxCell;
@@ -46,10 +47,14 @@ public class HighlightAction {
    * @return JMenuItem instance
    */
   public JMenuItem createMenuItem(final mxCell cell) {
+    return isHighlighted(cell) ? createRemoveMenuItem() : createHighlightMenuItem(cell);
+  }
+
+  private JMenuItem createRemoveMenuItem() {
     final JMenuItem item = new JMenuItem();
 
     // set text to label
-    item.setText(createLabelForCell(cell));
+    item.setText(Texts.MenuItem_Highlighter_RemoveHighlight);
 
     // load icon
     final ImageIcon icon = new ImageIcon(getClass().getResource(Images.HIGHLIGHT.getPath()));
@@ -59,11 +64,47 @@ public class HighlightAction {
 
       @Override
       public void actionPerformed(final ActionEvent e) {
-        highlightCell(cell);
+        removeHighlighting();
       }
     });
 
     return item;
+  }
+
+  private JMenuItem createHighlightMenuItem(final mxCell cell) {
+    final JMenu menu = new JMenu();
+
+    // set text to label
+    menu.setText(Texts.MenuItem_Highlighter_Highlight);
+
+    // load icon
+    final ImageIcon icon = new ImageIcon(getClass().getResource(Images.HIGHLIGHT.getPath()));
+    menu.setIcon(icon);
+
+    final JMenuItem ancestorsItem = new JMenuItem();
+    ancestorsItem.setText(Texts.MenuItem_Highlighter_Ancestors);
+    ancestorsItem.addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(final ActionEvent e) {
+        highlightAncestorCells(cell);
+      }
+    });
+
+    final JMenuItem childrenItem = new JMenuItem();
+    childrenItem.setText(Texts.MenuItem_Highlighter_Children);
+    childrenItem.addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(final ActionEvent e) {
+        highlightChildCells(cell);
+      }
+    });
+
+    menu.add(ancestorsItem);
+    menu.add(childrenItem);
+
+    return menu;
   }
 
   /**
@@ -82,37 +123,58 @@ public class HighlightAction {
   }
 
   /**
-   * Builds a label based on whether a cell is highlighted.
-   *
-   * @param cell
-   *          A cell in the graph.
-   * @return A label String.
+   * Remove the current highlighting.
    */
-  private String createLabelForCell(final mxCell cell) {
-    return isHighlighted(cell) ? Texts.MenuItem_Highlighter_RemoveHighlight : Texts.MenuItem_Highlighter_Highlight;
+  public void removeHighlighting() {
+    graph.getModel().beginUpdate();
+    try {
+      graph.resetNodes();
+
+      highlightedCell = null;
+    }
+    finally {
+      graph.getModel().endUpdate();
+    }
+
+    graph.refresh();
   }
 
   /**
-   * Highlights a cell in the graph.
+   * Highlights all ancestor cells in the graph.
    *
    * @param cell
    *          A cell in the graph.
    */
-  public void highlightCell(final mxCell cell) {
+  public void highlightAncestorCells(final mxCell cell) {
     graph.getModel().beginUpdate();
     try {
-      if (isHighlighted(cell)) {
-        graph.resetNodes();
+      final Set<Object> nodes = graph.getAncestorsOfCell(cell);
+      nodes.add(cell);
+      graph.foregoundNodes(nodes);
 
-        highlightedCell = null;
-      }
-      else {
-        final Set<Object> nodes = graph.getChildrenOfCell(cell);
-        nodes.add(cell);
-        graph.foregoundNodes(nodes);
+      highlightedCell = cell;
+    }
+    finally {
+      graph.getModel().endUpdate();
+    }
 
-        highlightedCell = cell;
-      }
+    graph.refresh();
+  }
+
+  /**
+   * Highlights all child cells in the graph.
+   *
+   * @param cell
+   *          A cell in the graph.
+   */
+  public void highlightChildCells(final mxCell cell) {
+    graph.getModel().beginUpdate();
+    try {
+      final Set<Object> nodes = graph.getChildrenOfCell(cell);
+      nodes.add(cell);
+      graph.foregoundNodes(nodes);
+
+      highlightedCell = cell;
     }
     finally {
       graph.getModel().endUpdate();

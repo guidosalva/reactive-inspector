@@ -7,8 +7,10 @@ import de.tu_darmstadt.stg.reclipse.logger.BreakpointInformation;
 import de.tu_darmstadt.stg.reclipse.logger.ReactiveVariable;
 
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -22,6 +24,7 @@ import com.mxgraph.layout.mxGraphLayout;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGraphModel;
+import com.mxgraph.model.mxICell;
 import com.mxgraph.view.mxGraph;
 
 public class TreeViewGraph extends mxGraph {
@@ -169,6 +172,7 @@ public class TreeViewGraph extends mxGraph {
   public Set<Object> getChildrenOfCell(final mxCell cell) {
     // collect children of cell
     final Set<Object> children = new HashSet<>();
+
     traverse(cell, true, new mxICellVisitor() {
 
       @Override
@@ -181,6 +185,48 @@ public class TreeViewGraph extends mxGraph {
     });
 
     return children;
+  }
+
+  /**
+   * Returns all ancestors of a cell.
+   *
+   * @param cell
+   *          A cell in the graph.
+   * @return A set of mxCell objects.
+   */
+  public Set<Object> getAncestorsOfCell(final mxCell cell) {
+    final Set<Object> ancestors = new HashSet<>();
+
+    final Deque<mxICell> queue = new LinkedList<>();
+    queue.addAll(getParents(cell));
+
+    while (!queue.isEmpty()) {
+      final mxICell next = queue.poll();
+      ancestors.add(next);
+
+      final Set<mxICell> parents = getParents(next);
+
+      for (final mxICell parent : parents) {
+        if (!ancestors.contains(parent) && !queue.contains(parent)) {
+          queue.add(parent);
+        }
+      }
+    }
+
+    return ancestors;
+  }
+
+  private Set<mxICell> getParents(final mxICell cell) {
+    final Set<mxICell> parents = new HashSet<>();
+
+    final Object[] edges = getIncomingEdges(cell);
+
+    for (final Object edge : edges) {
+      final mxICell source = ((mxCell) edge).getSource();
+      parents.add(source);
+    }
+
+    return parents;
   }
 
   public SearchResult searchNodes(final String name) {
