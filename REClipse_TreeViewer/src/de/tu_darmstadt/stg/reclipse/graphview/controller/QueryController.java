@@ -32,6 +32,7 @@ public class QueryController {
 
   protected final ReactiveTreeView rtv;
   protected List<Integer> matches;
+  protected int selection = 0;
 
   public QueryController(final ReactiveTreeView reactiveTreeView) {
     rtv = reactiveTreeView;
@@ -55,9 +56,12 @@ public class QueryController {
 
       final ReclipseQuery query = Queries.parse(queryText, new ReclipseErrorListener(rtv.getSite().getShell()));
 
+      selection = 0;
+
       if (query != null) {
         matches = ctx.get().getHistoryEsperAdapter().executeQuery(query);
         if (matches != null && matches.size() > 0) {
+          Collections.sort(matches);
           rtv.jumpToPointInTime(matches.get(0));
         }
         else {
@@ -67,6 +71,8 @@ public class QueryController {
       else {
         matches = Collections.emptyList();
       }
+
+      rtv.updateQueryResultsLabel();
     }
   }
 
@@ -77,21 +83,11 @@ public class QueryController {
       if (matches == null || matches.size() <= 1) {
         return;
       }
-      final int currentPointInTime = rtv.getCurrentSliderValue();
-      final int closest = closestMatch(currentPointInTime);
-      if (closest < currentPointInTime) {
-        rtv.jumpToPointInTime(closest);
-      }
-      else {
-        final int index = matches.indexOf(closest) - 1;
-        if (index >= 0 && index < matches.size()) {
-          rtv.jumpToPointInTime(matches.get(index));
-        }
-        else {
-          // if we are at the first position, jump to the last match again
-          rtv.jumpToPointInTime(matches.get(matches.size() - 1));
-        }
-      }
+
+      selection = Math.floorMod(selection - 1, matches.size());
+
+      rtv.jumpToPointInTime(matches.get(selection));
+      rtv.updateQueryResultsLabel();
     }
   }
 
@@ -99,44 +95,28 @@ public class QueryController {
 
     @Override
     public void widgetSelected(final SelectionEvent e) {
-      if (matches == null || matches.size() <= 1) {
+      if (matches == null || matches.isEmpty()) {
         return;
       }
-      final int currentPointInTime = rtv.getCurrentSliderValue();
-      final int closest = closestMatch(currentPointInTime);
-      if (closest > currentPointInTime) {
-        rtv.jumpToPointInTime(closest);
-      }
-      else {
-        final int index = matches.indexOf(closest) + 1;
-        if (index >= 0 && index < matches.size()) {
-          rtv.jumpToPointInTime(matches.get(index));
-        }
-        else {
-          // if we are at the last position, jump to the first match again
-          rtv.jumpToPointInTime(matches.get(0));
-        }
-      }
+
+      selection = Math.floorMod(selection + 1, matches.size());
+
+      rtv.jumpToPointInTime(matches.get(selection));
+      rtv.updateQueryResultsLabel();
     }
   }
 
-  protected int closestMatch(final int of) {
-    if (matches == null || matches.size() == 0) {
-      return -1;
-    }
-    int minDiff = Integer.MAX_VALUE;
-    int closest = of;
+  public void reset() {
+    matches = Collections.emptyList();
+    selection = 0;
+  }
 
-    for (final int v : matches) {
-      final int diff = Math.abs(v - of);
+  public int getResultCount() {
+    return matches != null ? matches.size() : 0;
+  }
 
-      if (diff < minDiff) {
-        minDiff = diff;
-        closest = v;
-      }
-    }
-
-    return closest;
+  public int getCurrentResultSelection() {
+    return (matches != null && matches.size() > 0) ? (selection + 1) : 0;
   }
 
 }

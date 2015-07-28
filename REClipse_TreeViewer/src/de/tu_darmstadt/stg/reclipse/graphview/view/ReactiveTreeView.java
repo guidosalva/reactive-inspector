@@ -70,10 +70,13 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
   protected Button nextPointButton;
   protected Button prevPointButton;
   protected Combo queryTextField;
+  protected Label queryResultsLabel;
   protected Text searchTextField;
   protected Label searchResultsLabel;
   protected TreeViewGraph graph;
   protected GraphComponent graphComponent;
+
+  protected QueryController queryController;
 
   protected long lastUpdate = 0;
   protected ScheduledFuture<?> delayedUpdateTask;
@@ -177,11 +180,11 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
     searchComposite.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
 
     final Composite queryComposite = new Composite(searchQueryComposite, SWT.BORDER);
-    queryComposite.setLayout(new GridLayout(4, false));
+    queryComposite.setLayout(new GridLayout(5, false));
     queryComposite.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
 
     searchTextField = new Text(searchComposite, SWT.SEARCH | SWT.ICON_CANCEL);
-    searchTextField.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
+    searchTextField.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     searchTextField.addSelectionListener(new SelectionAdapter() {
 
       @Override
@@ -198,6 +201,7 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
 
     final Button searchButton = new Button(searchComposite, SWT.PUSH);
     searchButton.setText(Texts.Search_Submit);
+    searchButton.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_CENTER));
     searchButton.addSelectionListener(new SelectionAdapter() {
 
       @Override
@@ -207,6 +211,7 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
     });
 
     final Button prevSearchResultButton = new Button(searchComposite, SWT.ARROW | SWT.LEFT);
+    prevSearchResultButton.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_CENTER));
     prevSearchResultButton.addSelectionListener(new SelectionAdapter() {
 
       @Override
@@ -217,6 +222,7 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
     });
 
     final Button nextSearchResultButton = new Button(searchComposite, SWT.ARROW | SWT.RIGHT);
+    nextSearchResultButton.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_CENTER));
     nextSearchResultButton.addSelectionListener(new SelectionAdapter() {
 
       @Override
@@ -227,19 +233,20 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
     });
 
     searchResultsLabel = new Label(searchComposite, SWT.NONE);
-    final GridData searchResultGridData = new GridData();
-    searchResultGridData.widthHint = 50;
+    final GridData searchResultGridData = new GridData(GridData.VERTICAL_ALIGN_CENTER);
+    searchResultGridData.widthHint = 40;
     searchResultsLabel.setLayoutData(searchResultGridData);
     updateSearchResultsLabel();
 
-    final QueryController queryController = new QueryController(this);
+    queryController = new QueryController(this);
     queryTextField = new Combo(queryComposite, SWT.DROP_DOWN);
-    queryTextField.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
+    queryTextField.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     queryTextField.setItems(QueryController.QUERY_TEMPLATES);
 
     final Button submitButton = new Button(queryComposite, SWT.PUSH);
     submitButton.addSelectionListener(queryController.new SubmitQueryButtonHandler());
     submitButton.setText(Texts.Query_Submit);
+    submitButton.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_CENTER));
     queryTextField.addTraverseListener(new TraverseListener() {
 
       @Override
@@ -251,10 +258,18 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
     });
 
     final Button prevResultButton = new Button(queryComposite, SWT.ARROW | SWT.LEFT);
+    prevResultButton.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_CENTER));
     prevResultButton.addSelectionListener(queryController.new PrevQueryResultButtonHandler());
 
     final Button nextResultButton = new Button(queryComposite, SWT.ARROW | SWT.RIGHT);
+    nextResultButton.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_CENTER));
     nextResultButton.addSelectionListener(queryController.new NextQueryResultButtonHandler());
+
+    queryResultsLabel = new Label(queryComposite, SWT.NONE);
+    final GridData queryResultGridData = new GridData(GridData.VERTICAL_ALIGN_CENTER);
+    queryResultGridData.widthHint = 40;
+    queryResultsLabel.setLayoutData(queryResultGridData);
+    updateQueryResultsLabel();
 
     createActions();
 
@@ -288,6 +303,8 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
   public void onSessionSelected(final SessionContext ctx) {
     lastPointInTime = ctx.getPersistence().getLastPointInTime();
 
+    queryController.reset();
+
     graph.setSessionContext(ctx);
     ctx.getDbHelper().addDependencyGraphListener(ReactiveTreeView.this);
 
@@ -296,6 +313,7 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
       @Override
       public void run() {
         disableManualMode();
+        updateQueryResultsLabel();
       }
     });
   }
@@ -493,6 +511,13 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
     final int count = graphComponent.getSearchResultCount();
 
     searchResultsLabel.setText(current + " / " + count); //$NON-NLS-1$
+  }
+
+  public void updateQueryResultsLabel() {
+    final int current = queryController.getCurrentResultSelection();
+    final int count = queryController.getResultCount();
+
+    queryResultsLabel.setText(current + " / " + count); //$NON-NLS-1$
   }
 
   public void showInformation(final String title, final String message) {

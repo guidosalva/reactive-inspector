@@ -375,15 +375,19 @@ public class TreeViewGraph extends mxGraph {
     }
 
     public void nextResult() {
-      if ((index + 1) < results.size()) {
-        index++;
+      if (results.isEmpty()) {
+        return;
       }
+
+      index = Math.floorMod(index + 1, results.size());
     }
 
     public void prevResult() {
-      if (index > 0) {
-        index--;
+      if (results.isEmpty()) {
+        return;
       }
+
+      index = Math.floorMod(index - 1, results.size());
     }
   }
 }
