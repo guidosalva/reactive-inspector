@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Bundle-SymbolicName: de.tu-darmstadt.stg.reclipse.Viewer;singleton:=true
+Bundle-SymbolicName: de.tuda.stg.reclipse.Viewer;singleton:=true
 Bundle-ManifestVersion: 2
 Bundle-ClassPath: .,
  lib/antlr-runtime-4.4.jar,
@@ -16,7 +16,7 @@ Bundle-ClassPath: .,
  lib/log4j-1.2.17.jar
 Bundle-Name: %pluginName
 Bundle-Version: 0.1.0.0
-Bundle-Activator: de.tu_darmstadt.stg.reclipse.graphview.Activator
+Bundle-Activator: de.tuda.stg.reclipse.graphview.Activator
 Bundle-Vendor: %providerName
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.platform,

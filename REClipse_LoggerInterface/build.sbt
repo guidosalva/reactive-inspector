@@ -1,6 +1,6 @@
 name := "logger-interface"
 
-organization := "de.tu_darmstadt.stg.reclipse"
+organization := "de.tuda.stg.reclipse"
 
 version := "0.1-SNAPSHOT"
 

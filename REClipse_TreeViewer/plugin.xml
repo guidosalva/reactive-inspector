@@ -9,27 +9,27 @@
       </category>
       <view
             category="de.tu-darmstadt.stg.reclipse.ReactiveViews"
-            class="de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveTreeView"
+            class="de.tuda.stg.reclipse.graphview.view.ReactiveTreeView"
             id="de.tu-darmstadt.stg.reclipse.graphview.ReactiveTreeView"
             icon="icons/reactivetree.png"
             name="%view.reactivetree.name">
       </view>
       <view
             category="de.tu-darmstadt.stg.reclipse.ReactiveViews"
-            class="de.tu_darmstadt.stg.reclipse.graphview.view.ReactiveBreakpointView"
+            class="de.tuda.stg.reclipse.graphview.view.ReactiveBreakpointView"
             id="de.tu-darmstadt.stg.reclipse.graphview.ReactiveBreakpointView"
             icon="icons/breakpoint_view.gif"
             name="%view.reactivebreakpoint.name">
       </view>
       <view
             category="de.tu-darmstadt.stg.reclipse.ReactiveViews"
-            class="de.tu_darmstadt.stg.reclipse.graphview.view.TreeOutlineView"
+            class="de.tuda.stg.reclipse.graphview.view.TreeOutlineView"
             id="de.tu-darmstadt.stg.reclipse.graphview.TreeOutlineView"
             name="%view.graphoutline.name">
       </view>
       <view
             category="de.tu-darmstadt.stg.reclipse.ReactiveViews"
-            class="de.tu_darmstadt.stg.reclipse.graphview.view.statistics.StatisticsView"
+            class="de.tuda.stg.reclipse.graphview.view.statistics.StatisticsView"
             id="de.tu-darmstadt.stg.reclipse.graphview.StatisticsView"
             icon="icons/statistics_view.png"
             name="%view.statistics.name">
@@ -39,21 +39,21 @@
    <extension
          point="org.eclipse.ui.startup">
       <startup
-            class="de.tu_darmstadt.stg.reclipse.graphview.Startup">
+            class="de.tuda.stg.reclipse.graphview.Startup">
       </startup>
    </extension>
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            class="de.tu_darmstadt.stg.reclipse.graphview.preferences.ReclipsePreferencePage"
-            id="de.tu_darmstadt.stg.reclipse.graphview.preferences.ReclipsePreferencePage"
+            class="de.tuda.stg.reclipse.graphview.preferences.ReclipsePreferencePage"
+            id="de.tuda.stg.reclipse.graphview.preferences.ReclipsePreferencePage"
             name="REclipse Preferences">
       </page>
    </extension>
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
-            class="de.tu_darmstadt.stg.reclipse.graphview.preferences.PreferenceInitializer">
+            class="de.tuda.stg.reclipse.graphview.preferences.PreferenceInitializer">
       </initializer>
    </extension>
 </plugin>
