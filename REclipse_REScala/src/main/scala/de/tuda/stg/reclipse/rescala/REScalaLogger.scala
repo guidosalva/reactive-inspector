@@ -103,8 +103,6 @@ object REScalaLogger {
 class REScalaLogger extends Logging {
 
   private lazy val remoteLogger: RemoteLoggerInterface = {
-    checkSecurityManager()
-    
     val breakpointInformation = getBreakpointInformation()
     
     val registry = LocateRegistry.getRegistry()
@@ -116,15 +114,6 @@ class REScalaLogger extends Logging {
     }
     
     logger
-  }
-  
-  private def checkSecurityManager() {
-    if (System.getSecurityManager() == null) {
-      val policyFile = getClass().getResource("/client.policy")
-      System.setProperty("java.security.policy", policyFile.toString())
-      System.setProperty("java.rmi.server.hostname", "127.0.0.1")
-      System.setSecurityManager(new RMISecurityManager())
-    }
   }
 
   private def getBreakpointInformation(): BreakpointInformation = {

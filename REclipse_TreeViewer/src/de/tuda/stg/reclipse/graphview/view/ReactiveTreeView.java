@@ -1,7 +1,5 @@
 package de.tuda.stg.reclipse.graphview.view;
 
-import de.tuda.stg.reclipse.logger.DependencyGraphHistoryType;
-
 import de.tuda.stg.reclipse.graphview.Activator;
 import de.tuda.stg.reclipse.graphview.Texts;
 import de.tuda.stg.reclipse.graphview.action.Relayout;
@@ -19,6 +17,7 @@ import de.tuda.stg.reclipse.graphview.model.persistence.IDependencyGraphListener
 import de.tuda.stg.reclipse.graphview.preferences.PreferenceConstants;
 import de.tuda.stg.reclipse.graphview.view.graph.GraphComponent;
 import de.tuda.stg.reclipse.graphview.view.graph.TreeViewGraph;
+import de.tuda.stg.reclipse.logger.DependencyGraphHistoryType;
 
 import java.awt.Frame;
 import java.util.Optional;
@@ -61,7 +60,7 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
   /**
    * The ID of the view as specified by the extension.
    */
-  public static final String ID = "de.tu-darmstadt.stg.reclipse.graphview.ReactiveTreeView"; //$NON-NLS-1$
+  public static final String ID = "de.tuda.stg.reclipse.graphview.ReactiveTreeView"; //$NON-NLS-1$
 
   protected final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
 

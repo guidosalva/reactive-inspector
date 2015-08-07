@@ -19,20 +19,20 @@ public class ReclipseVisitorEsperImpl extends ReclipseBaseVisitor<String> {
   public String visitNodeCreatedQuery(@NotNull final ReclipseParser.NodeCreatedQueryContext ctx) {
     final String nodeName = ctx.NODE_NAME().getText();
 
-    return "dependencyGraphHistoryType = de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType.NODE_CREATED and name = '" + nodeName + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+    return "dependencyGraphHistoryType = de.tuda.stg.reclipse.logger.DependencyGraphHistoryType.NODE_CREATED and name = '" + nodeName + "'"; //$NON-NLS-1$ //$NON-NLS-2$
   }
 
   @Override
   public String visitNodeEvaluatedQuery(@NotNull final ReclipseParser.NodeEvaluatedQueryContext ctx) {
     final String nodeName = ctx.NODE_NAME().getText();
 
-    return "dependencyGraphHistoryType = de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType.NODE_EVALUATION_STARTED and name = '" + nodeName + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+    return "dependencyGraphHistoryType = de.tuda.stg.reclipse.logger.DependencyGraphHistoryType.NODE_EVALUATION_STARTED and name = '" + nodeName + "'"; //$NON-NLS-1$ //$NON-NLS-2$
   }
 
   @Override
   public String visitNodeValueSet(final NodeValueSetContext ctx) {
     final String nodeName = ctx.NODE_NAME().getText();
-    return "dependencyGraphHistoryType = de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType.NODE_VALUE_SET and name = '" + nodeName + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+    return "dependencyGraphHistoryType = de.tuda.stg.reclipse.logger.DependencyGraphHistoryType.NODE_VALUE_SET and name = '" + nodeName + "'"; //$NON-NLS-1$ //$NON-NLS-2$
   }
 
   @Override
@@ -40,7 +40,7 @@ public class ReclipseVisitorEsperImpl extends ReclipseBaseVisitor<String> {
     final String nodeName1 = ctx.NODE_NAME(0).getText();
     final String nodeName2 = ctx.NODE_NAME(1).getText();
 
-    return "dependencyGraphHistoryType = de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType.NODE_ATTACHED and additionalInformation = '" + nodeName1 + "->" + nodeName2 + "'"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+    return "dependencyGraphHistoryType = de.tuda.stg.reclipse.logger.DependencyGraphHistoryType.NODE_ATTACHED and additionalInformation = '" + nodeName1 + "->" + nodeName2 + "'"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
   }
 
   @Override
@@ -49,7 +49,7 @@ public class ReclipseVisitorEsperImpl extends ReclipseBaseVisitor<String> {
     String value = ctx.VALUE().getText();
     value = value.substring(1, value.length() - 1);
 
-    return "dependencyGraphHistoryType = de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType.NODE_EVALUATION_ENDED and name = '" + nodeName + "' and valueString = '" + value + "'"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+    return "dependencyGraphHistoryType = de.tuda.stg.reclipse.logger.DependencyGraphHistoryType.NODE_EVALUATION_ENDED and name = '" + nodeName + "' and valueString = '" + value + "'"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
   }
 
   @Override
@@ -57,10 +57,10 @@ public class ReclipseVisitorEsperImpl extends ReclipseBaseVisitor<String> {
 
     if (ctx.NODE_NAME() != null) {
       final String nodeName = ctx.NODE_NAME().getText();
-      return "dependencyGraphHistoryType = de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType.NODE_EVALUATION_ENDED_WITH_EXCEPTION and name = '" + nodeName + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+      return "dependencyGraphHistoryType = de.tuda.stg.reclipse.logger.DependencyGraphHistoryType.NODE_EVALUATION_ENDED_WITH_EXCEPTION and name = '" + nodeName + "'"; //$NON-NLS-1$ //$NON-NLS-2$
     }
     else {
-      return "dependencyGraphHistoryType = de.tu_darmstadt.stg.reclipse.logger.DependencyGraphHistoryType.NODE_EVALUATION_ENDED_WITH_EXCEPTION"; //$NON-NLS-1$
+      return "dependencyGraphHistoryType = de.tuda.stg.reclipse.logger.DependencyGraphHistoryType.NODE_EVALUATION_ENDED_WITH_EXCEPTION"; //$NON-NLS-1$
     }
   }
 }

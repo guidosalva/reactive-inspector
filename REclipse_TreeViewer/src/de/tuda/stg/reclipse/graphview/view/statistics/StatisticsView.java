@@ -1,11 +1,10 @@
 package de.tuda.stg.reclipse.graphview.view.statistics;
 
-import de.tuda.stg.reclipse.logger.DependencyGraphHistoryType;
-
 import de.tuda.stg.reclipse.graphview.model.ISessionSelectionListener;
 import de.tuda.stg.reclipse.graphview.model.SessionContext;
 import de.tuda.stg.reclipse.graphview.model.SessionManager;
 import de.tuda.stg.reclipse.graphview.model.persistence.IDependencyGraphListener;
+import de.tuda.stg.reclipse.logger.DependencyGraphHistoryType;
 
 import java.awt.Frame;
 import java.util.Optional;
@@ -23,7 +22,7 @@ import org.jfree.chart.ChartPanel;
 public class StatisticsView extends ViewPart implements IDependencyGraphListener, ISessionSelectionListener {
 
   // ID of the view
-  public static final String ID = "de.tu-darmstadt.stg.reclipse.graphview.StatisticsView"; //$NON-NLS-1$
+  public static final String ID = "de.tuda.stg.reclipse.graphview.StatisticsView"; //$NON-NLS-1$
 
   private Charts pieCharts;
 
@@ -76,7 +75,7 @@ public class StatisticsView extends ViewPart implements IDependencyGraphListener
   }
 
   @Override
-  public void onDependencyGraphChanged(DependencyGraphHistoryType type, int pointInTime) {
+  public void onDependencyGraphChanged(final DependencyGraphHistoryType type, final int pointInTime) {
     if (pieCharts != null) {
       pieCharts.refresh();
     }
