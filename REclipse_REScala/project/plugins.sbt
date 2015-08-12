@@ -1,1 +1,1 @@
-addSbtPlugin("com.typesafe.sbteclipse" % "sbteclipse-plugin" % "3.0.0")
+addSbtPlugin("me.lessis" % "bintray-sbt" % "0.3.0")
