@@ -1,6 +1,6 @@
 name := "logger-interface"
 organization := "de.tuda.stg.reclipse"
-version := "0.1"
+version := "0.2-SNAPSHOT"
 
 licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 
