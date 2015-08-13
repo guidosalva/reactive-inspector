@@ -15,6 +15,13 @@ If you want to create a new project with REclipse support you can use the [REcli
 
 `git clone https://github.com/m1c3/reclipse-template.git`
 
+Then you can import the project into Eclipse via sbt:
+
+* `sbt eclipse`
+* Eclipse: *File* -> *Import...*
+* Select *General* -> *Existing Projects into Workspace*
+* Select the cloned template project.
+
 ### Use an existing REScala project with REclipse
 
 Add the **REScala Logger** to the dependencies of the *build.sbt*:
