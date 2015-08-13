@@ -15,9 +15,19 @@ If you want to create a new project with REclipse support you can use the [REcli
 
 `git clone https://github.com/m1c3/reclipse-template.git`
 
-### Use an existing project with REclipse
+### Use an existing REScala project with REclipse
 
-**TODO**
+Add the **REScala Logger** to the dependencies of the *build.sbt*:
+
+`"de.tuda.stg.reclipse" %% "rescala-logger" % "0.1"`
+
+Add a resolver for the REclipse maven repository in the *build.sbt*:
+
+`resolvers += Resolver.bintrayRepo("m1c3", "maven")`
+
+Attach the **REScala Logger** to REScala's logging in the *main* method of your application (or at a place **before** any Var, Signal or Event is created):
+
+`rescala.ReactiveEngine.log = new REScalaLogger`
 
 ### How to extend the plugin
 
