@@ -1,32 +1,54 @@
-## Eclipse Tree Viewer Plugin
+## REclipse Plugin
 
-### Prerequisites
+### Installation
+
+* Install and open Eclipse (the [Scala IDE](http://scala-ide.org) is recommended).
+* *Help* -> *Install New Software...*
+* Add the REclipse update site:
+`https://dl.bintray.com/m1c3/generic`
+* Select the just added REclipse update site from the drow-down.
+* Install the **REclipse** plugin from the **Reactive Programming** category.
+
+### Create a new project
+
+If you want to create a new project with REclipse support you can use the [REclipse Template](https://github.com/m1c3/reclipse-template) project as a starting point:
+
+`git clone https://github.com/m1c3/reclipse-template.git`
+
+Then you can import the project into Eclipse via sbt:
+
+* `sbt eclipse`
+* Eclipse: *File* -> *Import...*
+* Select *General* -> *Existing Projects into Workspace*
+* Select the cloned template project.
+
+### Use an existing REScala project with REclipse
+
+Add the **REScala Logger** to the dependencies of the *build.sbt*:
+
+`"de.tuda.stg.reclipse" %% "rescala-logger" % "0.1"`
+
+Add a resolver for the REclipse maven repository in the *build.sbt*:
+
+`resolvers += Resolver.bintrayRepo("m1c3", "maven")`
+
+Attach the **REScala Logger** to REScala's logging in the *main* method of your application (or at a place **before** any Var, Signal or Event is created):
+
+`rescala.ReactiveEngine.log = new REScalaLogger`
+
+### How to extend the plugin
+
+#### Prerequisites
 
 * Scala IDE for Eclipse
 * Plug-in Development Environment (PDE) (should be already included in Scala IDE)
 * Eclipse Test Framework (only for test project)
 
-### Installation
+#### Installation
 
-1. Set up the Scala IDE for Eclipse.
-2. Import the REClipse_TreeViewer project into workspace.
-3. Import the REClipse_TreeViewer-tests project if you want to execute or create tests.
-3. Done!
-
-### How to use the Tree Viewer Plugin with existing projects
-
-Once the project is set up, the plugin can be used by starting an Eclipse application. In this Eclipse application, perform the following steps to use the tree viewer.
-
-* Make sure the projects include the REScala Logger as a dependency.
-* Add `rescala.ReactiveEngine.log = new REScalaLogger` to the main method of an application in order to allow the plugin to communicate with the debugger.
-
-####Hints
-SBT dependency for REClipse_REScala:
-`"de.tu_darmstadt.stg.reclipse" % "rescala-logger_2.11" % "0.0.0"`
-
-Since the projects are not published to a global repository yet, these projects have to be published locally:
-* REScala
-* REClipse_LoggerInterface
-* REClipse_REScala
-
-This can be done via sbt: `sbt compile publish-local`
+* Set up the Scala IDE for Eclipse.
+* Install the *Eclipse Test Framework* from the Eclipse update site if you want to execute or create tests.
+* Clone this project.
+* Import the **REClipse_TreeViewer** project into the workspace.
+* Import the **REClipse_TreeViewer-tests project** if you want to execute or create tests.
+* Done!
