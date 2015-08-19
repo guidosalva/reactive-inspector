@@ -44,9 +44,7 @@ public class Texts extends NLS {
   public static String Query_NoResults;
   public static String Query_ParsingError_Title;
 
-  public static String Search_Submit;
-  public static String Search_NoResults_Title;
-  public static String Search_NoResults_Message;
+  public static String Search_Results;
 
   public static String MenuItem_Collapse_Fold;
   public static String MenuItem_Collapse_Unfold;

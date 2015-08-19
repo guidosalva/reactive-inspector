@@ -6,7 +6,6 @@ import de.tuda.stg.reclipse.graphview.provider.ContentModel;
 import de.tuda.stg.reclipse.logger.BreakpointInformation;
 import de.tuda.stg.reclipse.logger.ReactiveVariable;
 
-import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -229,8 +228,8 @@ public class TreeViewGraph extends mxGraph {
     return parents;
   }
 
-  public SearchResult searchNodes(final String name) {
-    final List<mxCell> results = new ArrayList<>();
+  public Set<mxCell> searchNodes(final String query) {
+    final Set<mxCell> nodes = new HashSet<>();
 
     final Object[] vertices = getChildVertices(getDefaultParent());
 
@@ -239,15 +238,30 @@ public class TreeViewGraph extends mxGraph {
       final ReactiveVariableLabel reVarLabel = (ReactiveVariableLabel) cell.getValue();
       final ReactiveVariable reVar = reVarLabel.getVar();
 
-      if (reVar.getName() != null && reVar.getName().equals(name)) {
-        results.add(cell);
+      final String prefix = query.trim().toLowerCase();
+
+      if (reVar.getName() != null && reVar.getName().toLowerCase().startsWith(prefix)) {
+        nodes.add(cell);
       }
     }
 
-    return new SearchResult(results);
+    return nodes;
   }
 
-  public void resetNodes() {
+  public void resetSearchHighlighting() {
+    final Object[] vertices = getChildVertices(getDefaultParent());
+
+    for (final Object vertex : vertices) {
+      final mxCell cell = (mxCell) vertex;
+      final ReactiveVariableLabel label = (ReactiveVariableLabel) cell.getValue();
+
+      label.getStyleProperties().setSearchResult(false);
+
+      cell.setStyle(Stylesheet.getStyle(label));
+    }
+  }
+
+  public void resetDependencyHighlighting() {
     final Object[] vertices = getChildVertices(getDefaultParent());
 
     for (final Object vertex : vertices) {
@@ -274,7 +288,7 @@ public class TreeViewGraph extends mxGraph {
     }
   }
 
-  public void highlightSearchResults(final Set<Object> nodes) {
+  public void highlightSearchResults(final Set<? extends Object> nodes) {
     final Object[] vertices = getChildVertices(getDefaultParent());
 
     for (final Object vertex : vertices) {

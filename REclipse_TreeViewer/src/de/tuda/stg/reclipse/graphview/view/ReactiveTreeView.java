@@ -27,8 +27,11 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TraverseEvent;
@@ -183,8 +186,8 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
     searchQueryComposite.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
 
     final Composite searchComposite = new Composite(searchQueryComposite, SWT.BORDER);
-    searchComposite.setLayout(new GridLayout(5, false));
-    searchComposite.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
+    searchComposite.setLayout(new GridLayout(2, false));
+    searchComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
     final Composite queryComposite = new Composite(searchQueryComposite, SWT.BORDER);
     queryComposite.setLayout(new GridLayout(5, false));
@@ -192,6 +195,13 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
 
     searchTextField = new Text(searchComposite, SWT.SEARCH | SWT.ICON_CANCEL);
     searchTextField.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    searchTextField.addKeyListener(new KeyAdapter() {
+
+      @Override
+      public void keyReleased(final KeyEvent e) {
+        searchNode();
+      }
+    });
     searchTextField.addSelectionListener(new SelectionAdapter() {
 
       @Override
@@ -199,51 +209,14 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
         if (e.detail == SWT.ICON_CANCEL) {
           clearSearch();
         }
-        else {
-          searchNode();
-        }
-      }
-
-    });
-
-    final Button searchButton = new Button(searchComposite, SWT.PUSH);
-    searchButton.setText(Texts.Search_Submit);
-    searchButton.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_CENTER));
-    searchButton.addSelectionListener(new SelectionAdapter() {
-
-      @Override
-      public void widgetSelected(final SelectionEvent e) {
-        searchNode();
       }
     });
 
     searchResultsLabel = new Label(searchComposite, SWT.RIGHT);
     final GridData searchResultGridData = new GridData(GridData.VERTICAL_ALIGN_CENTER);
-    searchResultGridData.widthHint = 40;
+    searchResultGridData.widthHint = 70;
     searchResultsLabel.setLayoutData(searchResultGridData);
     updateSearchResultsLabel();
-
-    final Button prevSearchResultButton = new Button(searchComposite, SWT.ARROW | SWT.LEFT);
-    prevSearchResultButton.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_CENTER));
-    prevSearchResultButton.addSelectionListener(new SelectionAdapter() {
-
-      @Override
-      public void widgetSelected(final SelectionEvent e) {
-        graphComponent.prevSearchResult();
-        updateSearchResultsLabel();
-      }
-    });
-
-    final Button nextSearchResultButton = new Button(searchComposite, SWT.ARROW | SWT.RIGHT);
-    nextSearchResultButton.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_CENTER));
-    nextSearchResultButton.addSelectionListener(new SelectionAdapter() {
-
-      @Override
-      public void widgetSelected(final SelectionEvent e) {
-        graphComponent.nextSearchResult();
-        updateSearchResultsLabel();
-      }
-    });
 
     queryController = new QueryController(this);
     queryTextField = new Combo(queryComposite, SWT.DROP_DOWN);
@@ -490,16 +463,9 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
 
     if (name != null && name.trim().length() > 0) {
       graphComponent.searchNodes(name);
-
-      if (graphComponent.getSearchResultCount() == 0) {
-        showInformation(Texts.Search_NoResults_Title, Texts.Search_NoResults_Message);
-      }
     }
     else {
-      if (graphComponent.clearSearch()) {
-        graph.resetNodes();
-        graph.refresh();
-      }
+      graphComponent.clearSearch();
     }
 
     updateSearchResultsLabel();
@@ -507,12 +473,7 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
 
   protected void clearSearch() {
     searchTextField.setText(""); //$NON-NLS-1$
-
-    if (graphComponent.clearSearch()) {
-      graph.resetNodes();
-      graph.refresh();
-    }
-
+    graphComponent.clearSearch();
     updateSearchResultsLabel();
   }
 
@@ -524,10 +485,14 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
   }
 
   protected void updateSearchResultsLabel() {
-    final int current = graphComponent.getCurrentSearchResult();
     final int count = graphComponent.getSearchResultCount();
 
-    searchResultsLabel.setText(current + " / " + count); //$NON-NLS-1$
+    if (graphComponent.hasSearchResult()) {
+      searchResultsLabel.setText(NLS.bind(Texts.Search_Results, count));
+    }
+    else {
+      searchResultsLabel.setText(""); //$NON-NLS-1$
+    }
   }
 
   public void updateQueryResultsLabel() {

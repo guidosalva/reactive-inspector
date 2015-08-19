@@ -128,7 +128,7 @@ public class HighlightAction {
   public void removeHighlighting() {
     graph.getModel().beginUpdate();
     try {
-      graph.resetNodes();
+      graph.resetDependencyHighlighting();
 
       highlightedCell = null;
     }
