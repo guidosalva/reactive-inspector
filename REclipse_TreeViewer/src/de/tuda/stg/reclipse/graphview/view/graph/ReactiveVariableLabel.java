@@ -9,6 +9,7 @@ public class ReactiveVariableLabel {
   private final ReactiveVariable var;
   private boolean showClassName;
   private final String className;
+  private final StyleProperties styleProperties = new StyleProperties();
 
   public ReactiveVariableLabel(final ReactiveVariable v, final BreakpointInformation br, final boolean showClassName) {
     super();
@@ -84,5 +85,9 @@ public class ReactiveVariableLabel {
 
   public void setShowClassName(final boolean showClassName) {
     this.showClassName = showClassName;
+  }
+
+  public StyleProperties getStyleProperties() {
+    return styleProperties;
   }
 }

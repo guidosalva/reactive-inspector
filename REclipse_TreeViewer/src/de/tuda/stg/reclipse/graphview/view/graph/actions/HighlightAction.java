@@ -57,7 +57,7 @@ public class HighlightAction {
     item.setText(Texts.MenuItem_Highlighter_RemoveHighlight);
 
     // load icon
-    final ImageIcon icon = new ImageIcon(getClass().getResource(Images.HIGHLIGHT.getPath()));
+    final ImageIcon icon = new ImageIcon(getClass().getResource('/' + Images.HIGHLIGHT.getPath()));
     item.setIcon(icon);
 
     item.addActionListener(new ActionListener() {
@@ -78,7 +78,7 @@ public class HighlightAction {
     menu.setText(Texts.MenuItem_Highlighter_Highlight);
 
     // load icon
-    final ImageIcon icon = new ImageIcon(getClass().getResource(Images.HIGHLIGHT.getPath()));
+    final ImageIcon icon = new ImageIcon(getClass().getResource('/' + Images.HIGHLIGHT.getPath()));
     menu.setIcon(icon);
 
     final JMenuItem ancestorsItem = new JMenuItem();
@@ -150,7 +150,7 @@ public class HighlightAction {
     try {
       final Set<Object> nodes = graph.getAncestorsOfCell(cell);
       nodes.add(cell);
-      graph.foregoundNodes(nodes);
+      graph.highlightDependentNodes(nodes);
 
       highlightedCell = cell;
     }
@@ -172,7 +172,7 @@ public class HighlightAction {
     try {
       final Set<Object> nodes = graph.getChildrenOfCell(cell);
       nodes.add(cell);
-      graph.foregoundNodes(nodes);
+      graph.highlightDependentNodes(nodes);
 
       highlightedCell = cell;
     }

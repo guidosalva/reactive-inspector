@@ -56,7 +56,7 @@ public class CollapseAction {
     item.setText(createLabelForCell(cell));
 
     // load icon
-    final ImageIcon icon = new ImageIcon(getClass().getResource(Images.COLLAPSE.getPath()));
+    final ImageIcon icon = new ImageIcon(getClass().getResource('/' + Images.COLLAPSE.getPath()));
     item.setIcon(icon);
 
     item.addActionListener(new ActionListener() {

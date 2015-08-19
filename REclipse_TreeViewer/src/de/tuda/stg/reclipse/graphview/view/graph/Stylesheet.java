@@ -12,95 +12,15 @@ import com.mxgraph.view.mxStylesheet;
  */
 public class Stylesheet extends mxStylesheet {
 
+  private static final String VAR = "VAR"; //$NON-NLS-1$
+  private static final String SIGNAL = "SIGNAL"; //$NON-NLS-1$
+  private static final String EVENT = "EVENT"; //$NON-NLS-1$
+  private static final String EVENT_HANDLER = "EVENT_HANDLER"; //$NON-NLS-1$
+  private static final String GRAYED_OUT_POSTFIX = "_GRAY"; //$NON-NLS-1$
+  private static final String HIGHLIGHT_VALUE_CHANGE = "HIGHLIGHT_VALUE_CHANGE"; //$NON-NLS-1$
+  private static final String HIGHLIGHT_SEARCH_RESULT = "HIGHLIGHT_SEARCH_RESULT"; //$NON-NLS-1$
+
   private final Hashtable<String, Object> baseStyle;
-
-  public enum Styles {
-    VAR, SIGNAL, EVENT, EVENTHANDLER, VAR_HIGHLIGHT, SIGNAL_HIGHLIGHT, EVENT_HIGHLIGHT, EVENTHANDLER_HIGHLIGHT, VAR_GRAY, SIGNAL_GRAY, EVENT_GRAY, EVENTHANDLER_GRAY;
-
-    public static Styles getHighlight(final Styles style) {
-      switch (style) {
-        case VAR:
-        case VAR_GRAY:
-          return Styles.VAR_HIGHLIGHT;
-        case SIGNAL:
-        case SIGNAL_GRAY:
-          return Styles.SIGNAL_HIGHLIGHT;
-        case EVENT:
-        case EVENT_GRAY:
-          return Styles.EVENT_HIGHLIGHT;
-        case EVENTHANDLER:
-        case EVENTHANDLER_GRAY:
-          return Styles.EVENTHANDLER_HIGHLIGHT;
-        default:
-          return style;
-      }
-    }
-
-    public static Styles getHighlight(final String styleName) {
-      return getHighlight(Styles.valueOf(styleName));
-    }
-
-    public static Styles removeHighlight(final Styles style) {
-      switch (style) {
-        case VAR_HIGHLIGHT:
-          return Styles.VAR;
-        case SIGNAL_HIGHLIGHT:
-          return Styles.SIGNAL;
-        case EVENT_HIGHLIGHT:
-          return Styles.EVENT;
-        case EVENTHANDLER_HIGHLIGHT:
-          return Styles.EVENTHANDLER;
-        default:
-          return style;
-      }
-    }
-
-    public static Styles removeHighlight(final String styleName) {
-      return removeHighlight(Styles.valueOf(styleName));
-    }
-
-    public static Styles getDisabled(final Styles style) {
-      switch (style) {
-        case VAR:
-        case VAR_HIGHLIGHT:
-          return Styles.VAR_GRAY;
-        case SIGNAL:
-        case SIGNAL_HIGHLIGHT:
-          return Styles.SIGNAL_GRAY;
-        case EVENT:
-        case EVENT_HIGHLIGHT:
-          return Styles.EVENT_GRAY;
-        case EVENTHANDLER:
-        case EVENTHANDLER_HIGHLIGHT:
-          return Styles.EVENTHANDLER_GRAY;
-        default:
-          return style;
-      }
-    }
-
-    public static Styles getDisabled(final String styleName) {
-      return getDisabled(Styles.valueOf(styleName));
-    }
-
-    public static Styles getEnabled(final Styles style) {
-      switch (style) {
-        case VAR_GRAY:
-          return Styles.VAR;
-        case SIGNAL_GRAY:
-          return Styles.SIGNAL;
-        case EVENT_GRAY:
-          return Styles.EVENT;
-        case EVENTHANDLER_GRAY:
-          return Styles.EVENTHANDLER;
-        default:
-          return style;
-      }
-    }
-
-    public static Styles getEnabled(final String styleName) {
-      return getEnabled(Styles.valueOf(styleName));
-    }
-  }
 
   public Stylesheet() {
     super();
@@ -117,7 +37,7 @@ public class Stylesheet extends mxStylesheet {
     putCellStyle("EDGE", edgeStyle); //$NON-NLS-1$
 
     addCustomStyles();
-    // addCustomHighlightStyles();
+    addAdditionalStyles();
   }
 
   private void addCustomStyles() {
@@ -126,43 +46,45 @@ public class Stylesheet extends mxStylesheet {
     varStyle.put(mxConstants.STYLE_FILLCOLOR, "#00DAF5"); //$NON-NLS-1$
     varStyle.put(mxConstants.STYLE_GRADIENTCOLOR, "#00C3DB"); //$NON-NLS-1$
     varStyle.put(mxConstants.STYLE_STROKECOLOR, "#00A1B5"); //$NON-NLS-1$
-    putCellStyle(Styles.VAR.name(), varStyle);
-    putCellStyle(Styles.VAR_HIGHLIGHT.name(), createHighlightedStyle(varStyle));
-    putCellStyle(Styles.VAR_GRAY.name(), createGrayStyle(varStyle));
+    putCellStyle(VAR, varStyle);
+    putCellStyle(VAR + GRAYED_OUT_POSTFIX, createGrayStyle(varStyle));
 
     // set style for SIGNAL vertices
     final Hashtable<String, Object> signalStyle = new Hashtable<>(baseStyle);
     signalStyle.put(mxConstants.STYLE_FILLCOLOR, "#DBFFB8"); //$NON-NLS-1$
     signalStyle.put(mxConstants.STYLE_GRADIENTCOLOR, "#CCFF99"); //$NON-NLS-1$
     signalStyle.put(mxConstants.STYLE_STROKECOLOR, "#B8E68A"); //$NON-NLS-1$
-    putCellStyle(Styles.SIGNAL.name(), signalStyle);
-    putCellStyle(Styles.SIGNAL_HIGHLIGHT.name(), createHighlightedStyle(signalStyle));
-    putCellStyle(Styles.SIGNAL_GRAY.name(), createGrayStyle(signalStyle));
+    putCellStyle(SIGNAL, signalStyle);
+    putCellStyle(SIGNAL + GRAYED_OUT_POSTFIX, createGrayStyle(signalStyle));
 
     // set style for EVENT vertices
     final Hashtable<String, Object> eventStyle = new Hashtable<>(baseStyle);
     eventStyle.put(mxConstants.STYLE_FILLCOLOR, "#FCFF9A"); //$NON-NLS-1$
     eventStyle.put(mxConstants.STYLE_GRADIENTCOLOR, "#E3E58B"); //$NON-NLS-1$
     eventStyle.put(mxConstants.STYLE_STROKECOLOR, "#BDBF73"); //$NON-NLS-1$
-    putCellStyle(Styles.EVENT.name(), eventStyle);
-    putCellStyle(Styles.EVENT_HIGHLIGHT.name(), createHighlightedStyle(eventStyle));
-    putCellStyle(Styles.EVENT_GRAY.name(), createGrayStyle(eventStyle));
+    putCellStyle(EVENT, eventStyle);
+    putCellStyle(EVENT + GRAYED_OUT_POSTFIX, createGrayStyle(eventStyle));
 
     // set style for EVENT_HANDLER vertices
     final Hashtable<String, Object> eventHandlerStyle = new Hashtable<>(baseStyle);
     eventHandlerStyle.put(mxConstants.STYLE_FILLCOLOR, "#FFC4A4"); //$NON-NLS-1$
     eventHandlerStyle.put(mxConstants.STYLE_GRADIENTCOLOR, "#E5B194"); //$NON-NLS-1$
     eventHandlerStyle.put(mxConstants.STYLE_STROKECOLOR, "#BF937B"); //$NON-NLS-1$
-    putCellStyle(Styles.EVENTHANDLER.name(), eventHandlerStyle);
-    putCellStyle(Styles.EVENTHANDLER_HIGHLIGHT.name(), createHighlightedStyle(eventHandlerStyle));
-    putCellStyle(Styles.EVENTHANDLER_GRAY.name(), createGrayStyle(eventHandlerStyle));
+    putCellStyle(EVENT_HANDLER, eventHandlerStyle);
+    putCellStyle(EVENT_HANDLER + GRAYED_OUT_POSTFIX, createGrayStyle(eventHandlerStyle));
   }
 
-  private Hashtable<String, Object> createHighlightedStyle(final Hashtable<String, Object> style) {
-    final Hashtable<String, Object> highlightedStyle = new Hashtable<>(style);
-    highlightedStyle.put(mxConstants.STYLE_STROKECOLOR, "#FF0000"); //$NON-NLS-1$
-    highlightedStyle.put(mxConstants.STYLE_STROKEWIDTH, 4);
-    return highlightedStyle;
+  private void addAdditionalStyles() {
+    final Hashtable<String, Object> highlightChangedStyle = new Hashtable<>();
+    highlightChangedStyle.put(mxConstants.STYLE_FONTCOLOR, "#FF0000"); //$NON-NLS-1$
+    highlightChangedStyle.put(mxConstants.STYLE_STROKECOLOR, "#FF0000"); //$NON-NLS-1$
+    highlightChangedStyle.put(mxConstants.STYLE_STROKEWIDTH, 4);
+    putCellStyle(HIGHLIGHT_VALUE_CHANGE, highlightChangedStyle);
+
+    final Hashtable<String, Object> highlightSearchStyle = new Hashtable<>();
+    highlightSearchStyle.put(mxConstants.STYLE_STROKECOLOR, "#0000FF"); //$NON-NLS-1$
+    highlightSearchStyle.put(mxConstants.STYLE_STROKEWIDTH, 4);
+    putCellStyle(HIGHLIGHT_SEARCH_RESULT, highlightSearchStyle);
   }
 
   private Hashtable<String, Object> createGrayStyle(final Hashtable<String, Object> style) {
@@ -178,6 +100,41 @@ public class Stylesheet extends mxStylesheet {
     final String original = (String) style.get(property);
     final String brightened = lightenColor(original, 0.75f);
     style.put(property, brightened);
+  }
+
+  public static String getStyle(final ReactiveVariableLabel label) {
+    String baseStyle = getBaseStyle(label);
+
+    if (label.getStyleProperties().isGrayedOut()) {
+      baseStyle += GRAYED_OUT_POSTFIX;
+    }
+
+    String style = baseStyle;
+
+    if (label.getStyleProperties().isValueChanged()) {
+      style += ";" + HIGHLIGHT_VALUE_CHANGE; //$NON-NLS-1$
+    }
+
+    if (label.getStyleProperties().isSearchResult()) {
+      style += ";" + HIGHLIGHT_SEARCH_RESULT; //$NON-NLS-1$
+    }
+
+    return style;
+  }
+
+  private static String getBaseStyle(final ReactiveVariableLabel label) {
+    switch (label.getVar().getReactiveVariableType()) {
+      case EVENT:
+        return EVENT;
+      case EVENT_HANDLER:
+        return EVENT_HANDLER;
+      case SIGNAL:
+        return SIGNAL;
+      case VAR:
+        return VAR;
+      default:
+        return ""; //$NON-NLS-1$
+    }
   }
 
   /**

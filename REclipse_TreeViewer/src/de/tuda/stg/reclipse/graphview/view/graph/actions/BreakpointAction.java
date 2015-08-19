@@ -1,8 +1,5 @@
 package de.tuda.stg.reclipse.graphview.view.graph.actions;
 
-import de.tuda.stg.reclipse.logger.BreakpointInformation;
-import de.tuda.stg.reclipse.logger.ReactiveVariable;
-
 import de.tuda.stg.reclipse.graphview.Activator;
 import de.tuda.stg.reclipse.graphview.Images;
 import de.tuda.stg.reclipse.graphview.Texts;
@@ -11,6 +8,8 @@ import de.tuda.stg.reclipse.graphview.util.BreakpointUtils;
 import de.tuda.stg.reclipse.graphview.view.graph.IGraphListener;
 import de.tuda.stg.reclipse.graphview.view.graph.ReactiveVariableLabel;
 import de.tuda.stg.reclipse.graphview.view.graph.TreeViewGraph;
+import de.tuda.stg.reclipse.logger.BreakpointInformation;
+import de.tuda.stg.reclipse.logger.ReactiveVariable;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -72,7 +71,7 @@ public class BreakpointAction {
     item.setText(createLabelForCell(cell));
 
     // load icon
-    final ImageIcon icon = new ImageIcon(getClass().getResource(Images.HIGHLIGHT.getPath()));
+    final ImageIcon icon = new ImageIcon(getClass().getResource('/' + Images.HIGHLIGHT.getPath()));
     item.setIcon(icon);
 
     item.addActionListener(new ActionListener() {

@@ -1,9 +1,8 @@
 package de.tuda.stg.reclipse.graphview.view.graph;
 
+import de.tuda.stg.reclipse.graphview.model.persistence.DependencyGraph.Vertex;
 import de.tuda.stg.reclipse.logger.BreakpointInformation;
 import de.tuda.stg.reclipse.logger.ReactiveVariable;
-
-import de.tuda.stg.reclipse.graphview.model.persistence.DependencyGraph.Vertex;
 
 import com.mxgraph.view.mxGraph;
 
@@ -18,7 +17,7 @@ public class ReactiveVariableVertex implements Comparable<ReactiveVariableVertex
   private final ReactiveVariable var;
   private final BreakpointInformation breakpointInformation;
 
-  private boolean isHighlighted;
+  private boolean highlighted;
 
   private String customStyle;
 
@@ -26,7 +25,7 @@ public class ReactiveVariableVertex implements Comparable<ReactiveVariableVertex
     this.vertex = v;
     this.breakpointInformation = br;
     this.var = v.getVariable();
-    this.isHighlighted = false;
+    this.highlighted = false;
     this.customStyle = null;
   }
 
@@ -39,42 +38,12 @@ public class ReactiveVariableVertex implements Comparable<ReactiveVariableVertex
   public ReactiveVariableVertex(final Vertex v, final BreakpointInformation br, final boolean h) {
     this(v, br);
 
-    this.isHighlighted = h;
+    this.highlighted = h;
   }
 
   @Override
   public int compareTo(final ReactiveVariableVertex other) {
     return Integer.compare(vertex.getCreated(), other.vertex.getCreated());
-  }
-
-  /**
-   *
-   * @return The style to be used when displaying this vertex in the graph.
-   */
-  public String getStyle() {
-    Stylesheet.Styles style;
-
-    // determine style
-    switch (var.getReactiveVariableType()) {
-      case SIGNAL:
-        style = Stylesheet.Styles.SIGNAL;
-        break;
-      case EVENT:
-        style = Stylesheet.Styles.EVENT;
-        break;
-      case EVENT_HANDLER:
-        style = Stylesheet.Styles.EVENTHANDLER;
-        break;
-      default:
-        style = Stylesheet.Styles.VAR;
-    }
-
-    // set highlight, if enabled
-    if (isHighlighted) {
-      style = Stylesheet.Styles.getHighlight(style);
-    }
-
-    return style.name();
   }
 
   /**
@@ -90,9 +59,10 @@ public class ReactiveVariableVertex implements Comparable<ReactiveVariableVertex
 
     // create label
     final ReactiveVariableLabel label = new ReactiveVariableLabel(var, breakpointInformation, showClassName);
+    label.getStyleProperties().setValueChanged(highlighted);
 
     // set style
-    final String style = (customStyle != null) ? customStyle : getStyle();
+    final String style = (customStyle != null) ? customStyle : Stylesheet.getStyle(label);
 
     // insert vertex and return it
     return graph.insertVertex(parent, var.getId().toString(), label, 0, 0, 160, 80, style);

@@ -1,11 +1,10 @@
 package de.tuda.stg.reclipse.graphview.view.graph;
 
-import de.tuda.stg.reclipse.logger.BreakpointInformation;
-import de.tuda.stg.reclipse.logger.ReactiveVariable;
-
 import de.tuda.stg.reclipse.graphview.Properties;
 import de.tuda.stg.reclipse.graphview.model.SessionContext;
 import de.tuda.stg.reclipse.graphview.provider.ContentModel;
+import de.tuda.stg.reclipse.logger.BreakpointInformation;
+import de.tuda.stg.reclipse.logger.ReactiveVariable;
 
 import java.util.ArrayList;
 import java.util.Deque;
@@ -253,38 +252,39 @@ public class TreeViewGraph extends mxGraph {
 
     for (final Object vertex : vertices) {
       final mxCell cell = (mxCell) vertex;
+      final ReactiveVariableLabel label = (ReactiveVariableLabel) cell.getValue();
 
-      cell.setStyle(Stylesheet.Styles.getEnabled(cell.getStyle()).name());
+      label.getStyleProperties().setGrayedOut(false);
+
+      cell.setStyle(Stylesheet.getStyle(label));
     }
   }
 
-  public void highlightNodes(final Set<Object> nodes) {
+  public void highlightDependentNodes(final Set<Object> nodes) {
     final Object[] vertices = getChildVertices(getDefaultParent());
 
     for (final Object vertex : vertices) {
       final mxCell cell = (mxCell) vertex;
+      final boolean highlight = nodes.contains(cell);
+      final ReactiveVariableLabel label = (ReactiveVariableLabel) cell.getValue();
 
-      if (nodes.contains(cell)) {
-        cell.setStyle(Stylesheet.Styles.getHighlight(cell.getStyle()).name());
-      }
-      else {
-        cell.setStyle(Stylesheet.Styles.removeHighlight(cell.getStyle()).name());
-      }
+      label.getStyleProperties().setGrayedOut(!highlight);
+
+      cell.setStyle(Stylesheet.getStyle(label));
     }
   }
 
-  public void foregoundNodes(final Set<Object> nodes) {
+  public void highlightSearchResults(final Set<Object> nodes) {
     final Object[] vertices = getChildVertices(getDefaultParent());
 
     for (final Object vertex : vertices) {
       final mxCell cell = (mxCell) vertex;
+      final boolean highlight = nodes.contains(cell);
+      final ReactiveVariableLabel label = (ReactiveVariableLabel) cell.getValue();
 
-      if (nodes.contains(cell)) {
-        cell.setStyle(Stylesheet.Styles.getEnabled(cell.getStyle()).name());
-      }
-      else {
-        cell.setStyle(Stylesheet.Styles.getDisabled(cell.getStyle()).name());
-      }
+      label.getStyleProperties().setSearchResult(highlight);
+
+      cell.setStyle(Stylesheet.getStyle(label));
     }
   }
 
