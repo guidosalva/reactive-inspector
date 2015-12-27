@@ -1,4 +1,4 @@
-package de.tuda.stg.reclipse.graphview.action;
+package de.tuda.stg.reclipse.graphview.view.action;
 
 import de.tuda.stg.reclipse.graphview.Texts;
 import de.tuda.stg.reclipse.graphview.view.graph.TreeViewGraph;
