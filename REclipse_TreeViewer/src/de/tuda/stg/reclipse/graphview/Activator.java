@@ -20,11 +20,10 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 /**
- * The activator class controls the plug-in life cycle
+ * The activator class controls the plug-in life cycle.
  */
 public class Activator extends AbstractUIPlugin {
 
-  // The plug-in ID
   public static final String PLUGIN_ID = "de.tuda.stg.reclipse.Viewer"; //$NON-NLS-1$
 
   // The shared instance
@@ -85,7 +84,6 @@ public class Activator extends AbstractUIPlugin {
 
   /**
    * Returns the shared instance
-   *
    * @return the shared instance
    */
   public static Activator getDefault() {
@@ -95,9 +93,7 @@ public class Activator extends AbstractUIPlugin {
   /**
    * Returns an image descriptor for the image file at the given plug-in
    * relative path
-   *
-   * @param path
-   *          the path
+   * @param path The path
    * @return the image descriptor
    */
   public static ImageDescriptor getImageDescriptor(final Images img) {
@@ -106,22 +102,16 @@ public class Activator extends AbstractUIPlugin {
 
   /**
    * Logs the given message.
-   *
-   * @param message
-   *          the message to log
+   * @param message The message to log
    */
   public static void logMessage(final String message) {
     logMessage(message, null);
   }
 
   /**
-   * Logs the given message and the given throwable or <code>null</code> if
-   * none.
-   *
-   * @param message
-   *          the message to log
-   * @param throwable
-   *          the exception that occurred or <code>null</code> if none
+   * Logs the given message and the given throwable or <code>null</code> if none.
+   * @param message The message to log
+   * @param throwable The exception that occurred or <code>null</code> if none
    */
   public static void logMessage(final String message, final Throwable throwable) {
     log(new Status(IStatus.ERROR, PLUGIN_ID, ERROR, message, throwable));
@@ -129,9 +119,7 @@ public class Activator extends AbstractUIPlugin {
 
   /**
    * Logs an info message.
-   *
-   * @param message
-   *          the message template
+   * @param message The message template
    */
   public static void logInfo(final String message) {
     log(new Status(IStatus.INFO, PLUGIN_ID, IStatus.OK, message, null));
@@ -139,9 +127,7 @@ public class Activator extends AbstractUIPlugin {
 
   /**
    * Logs the specified status.
-   *
-   * @param status
-   *          status to log
+   * @param status Status to log
    */
   public static void log(final IStatus status) {
     getDefault().getLog().log(status);
@@ -149,9 +135,7 @@ public class Activator extends AbstractUIPlugin {
 
   /**
    * Logs the specified throwable.
-   *
-   * @param t
-   *          throwable to log
+   * @param t Throwable to log
    */
   public static void log(final Throwable t) {
     log(new Status(IStatus.ERROR, PLUGIN_ID, ERROR, NLS.bind(Texts.Log_Error, t.getMessage()), t));
@@ -159,9 +143,7 @@ public class Activator extends AbstractUIPlugin {
 
   /**
    * Read a property from the plugin specific state
-   *
-   * @param key
-   *          the property key
+   * @param key The property key
    * @return value of the specified property key
    */
   public String getProperty(final String key) {
@@ -170,11 +152,8 @@ public class Activator extends AbstractUIPlugin {
 
   /**
    * Set a plugin specific property
-   *
-   * @param key
-   *          the property key
-   * @param value
-   *          value of the specified property key
+   * @param key The property key
+   * @param value Value of the specified property key
    */
   public void setProperty(final String key, final String value) {
     prop.setProperty(key, value);
