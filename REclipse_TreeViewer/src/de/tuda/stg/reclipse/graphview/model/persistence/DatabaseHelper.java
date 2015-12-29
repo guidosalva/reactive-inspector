@@ -203,6 +203,32 @@ public class DatabaseHelper {
     fireChangedEvent(DependencyGraphHistoryType.NODE_ATTACHED, lastPointInTime);
   }
 
+  public synchronized void logNodeEvaluationStarted(final ReactiveVariable r) throws PersistenceException {
+    try {
+      beginTx();
+
+      nextPointInTime();
+
+      final int idVariable = findVariableById(r.getId());
+      final int oldVariableStatus = findActiveVariableStatus(idVariable);
+      createVariableStatus(r, idVariable, oldVariableStatus, null);
+      createEvent(r, idVariable, null);
+
+      r.setPointInTime(lastPointInTime);
+
+      commit();
+    }
+    catch (PersistenceException | RuntimeException e) {
+      rollback();
+      throw e;
+    }
+    finally {
+      closeTx();
+    }
+
+    fireChangedEvent(DependencyGraphHistoryType.NODE_EVALUATION_STARTED, lastPointInTime);
+  }
+
   public synchronized void logNodeEvaluationEnded(final ReactiveVariable r) throws PersistenceException {
     try {
       beginTx();
@@ -254,32 +280,6 @@ public class DatabaseHelper {
     }
 
     fireChangedEvent(DependencyGraphHistoryType.NODE_EVALUATION_ENDED_WITH_EXCEPTION, lastPointInTime);
-  }
-
-  public synchronized void logNodeEvaluationStarted(final ReactiveVariable r) throws PersistenceException {
-    try {
-      beginTx();
-
-      nextPointInTime();
-
-      final int idVariable = findVariableById(r.getId());
-      final int oldVariableStatus = findActiveVariableStatus(idVariable);
-      createVariableStatus(r, idVariable, oldVariableStatus, null);
-      createEvent(r, idVariable, null);
-
-      r.setPointInTime(lastPointInTime);
-
-      commit();
-    }
-    catch (PersistenceException | RuntimeException e) {
-      rollback();
-      throw e;
-    }
-    finally {
-      closeTx();
-    }
-
-    fireChangedEvent(DependencyGraphHistoryType.NODE_EVALUATION_STARTED, lastPointInTime);
   }
 
   public synchronized void logNodeValueSet(final ReactiveVariable r) throws PersistenceException {
