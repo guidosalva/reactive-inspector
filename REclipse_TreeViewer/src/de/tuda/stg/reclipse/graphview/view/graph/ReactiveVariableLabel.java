@@ -12,26 +12,23 @@ public class ReactiveVariableLabel {
   private final StyleProperties styleProperties = new StyleProperties();
 
   public ReactiveVariableLabel(final ReactiveVariable v, final BreakpointInformation br, final boolean showClassName) {
-    super();
     this.var = v;
     this.showClassName = showClassName;
     this.className = parseClassName(br);
   }
 
   private String parseClassName(final BreakpointInformation br) {
-    if (br != null && br.getClassName() != null && !br.getClassName().trim().isEmpty()) {
-      final int start = br.getClassName().lastIndexOf('.');
-
-      if (start >= 0) {
-        return br.getClassName().substring(start + 1);
-      }
-      else {
-        return br.getClassName();
-      }
-    }
-    else {
+    if (br == null || br.getClassName() == null || br.getClassName().trim().isEmpty()) {
       return null;
     }
+
+    String className = br.getClassName();
+    final int start = className.lastIndexOf('.');
+    if (start >= 0) {
+      className = className.substring(start + 1);
+    }
+
+    return className;
   }
 
   @Override
