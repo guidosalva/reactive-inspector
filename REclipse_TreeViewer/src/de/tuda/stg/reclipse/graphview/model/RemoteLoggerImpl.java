@@ -97,6 +97,7 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
     }
   }
 
+  @SuppressWarnings("unused")
   private void createBreakpoint(final BreakpointInformation breakpointInformation) {
     final IJavaLineBreakpoint breakpoint = BreakpointUtils.createBreakoint(breakpointInformation);
 
@@ -177,6 +178,7 @@ public class RemoteLoggerImpl extends UnicastRemoteObject implements RemoteLogge
     }
   }
 
+  @SuppressWarnings("unused")
   private static void jumpToPointInTime(final int pointInTime) {
     Display.getDefault().syncExec(new Runnable() {
 
