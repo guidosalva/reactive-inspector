@@ -33,12 +33,10 @@ public class GraphComponent extends mxGraphComponent {
   protected BreakpointAction breakpointer;
   protected LocateAction locater;
 
-  private String searchQuery;
   private Set<mxCell> searchResults;
 
   public GraphComponent(final TreeViewGraph graph) {
     super(graph);
-
     this.graph = graph;
 
     setToolTips(true);
@@ -67,7 +65,6 @@ public class GraphComponent extends mxGraphComponent {
   }
 
   public void searchNodes(final String query) {
-    searchQuery = query;
     searchResults = graph.searchNodes(query);
 
     highlightSearchResult();
@@ -94,7 +91,6 @@ public class GraphComponent extends mxGraphComponent {
       return false;
     }
 
-    searchQuery = null;
     searchResults = null;
     resetSearchHighlighting();
 
