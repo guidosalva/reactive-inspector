@@ -1,11 +1,10 @@
 package de.tuda.stg.reclipse.graphview.model;
 
-import de.tuda.stg.reclipse.logger.BreakpointInformation;
-import de.tuda.stg.reclipse.logger.ReactiveVariable;
-
 import de.tuda.stg.reclipse.graphview.model.persistence.DatabaseHelper;
 import de.tuda.stg.reclipse.graphview.model.persistence.HistoryEsperAdapter;
 import de.tuda.stg.reclipse.graphview.model.persistence.PersistenceFacade;
+import de.tuda.stg.reclipse.logger.BreakpointInformation;
+import de.tuda.stg.reclipse.logger.ReactiveVariable;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -34,7 +33,7 @@ public class SessionContext {
     this.launch = launch;
     this.id = UUID.randomUUID();
     this.created = new Date();
-    this.persistence = new PersistenceFacade(id, configuration);
+    this.persistence = new PersistenceFacade(id);
   }
 
   public void close() {

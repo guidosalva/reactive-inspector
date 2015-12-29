@@ -1,12 +1,10 @@
 package de.tuda.stg.reclipse.graphview.model.persistence;
 
+import de.tuda.stg.reclipse.graphview.Activator;
+import de.tuda.stg.reclipse.graphview.model.persistence.DependencyGraph.Vertex;
 import de.tuda.stg.reclipse.logger.DependencyGraphHistoryType;
 import de.tuda.stg.reclipse.logger.ReactiveVariable;
 import de.tuda.stg.reclipse.logger.ReactiveVariableType;
-
-import de.tuda.stg.reclipse.graphview.Activator;
-import de.tuda.stg.reclipse.graphview.model.ISessionConfiguration;
-import de.tuda.stg.reclipse.graphview.model.persistence.DependencyGraph.Vertex;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -48,7 +46,7 @@ public class DatabaseHelper {
 
   private int lastPointInTime = 0;
 
-  public DatabaseHelper(final String sessionId, final ISessionConfiguration configuration) {
+  public DatabaseHelper(final String sessionId) {
     this.sessionId = sessionId;
 
     establishConnection();

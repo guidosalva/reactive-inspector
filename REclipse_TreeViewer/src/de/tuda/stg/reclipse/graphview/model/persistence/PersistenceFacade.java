@@ -1,10 +1,8 @@
 package de.tuda.stg.reclipse.graphview.model.persistence;
 
-import de.tuda.stg.reclipse.logger.ReactiveVariable;
-
 import de.tuda.stg.reclipse.graphview.Activator;
 import de.tuda.stg.reclipse.graphview.model.ILoggerInterface;
-import de.tuda.stg.reclipse.graphview.model.ISessionConfiguration;
+import de.tuda.stg.reclipse.logger.ReactiveVariable;
 
 import java.util.Collections;
 import java.util.List;
@@ -16,8 +14,8 @@ public class PersistenceFacade implements ILoggerInterface {
   private final HistoryEsperAdapter historyEsperAdapter;
   private final LiveEsperAdapter liveEsperAdapter;
 
-  public PersistenceFacade(final UUID sessionId, final ISessionConfiguration configuration) {
-    this.dbHelper = new DatabaseHelper(sessionId.toString(), configuration);
+  public PersistenceFacade(final UUID sessionId) {
+    this.dbHelper = new DatabaseHelper(sessionId.toString());
     this.historyEsperAdapter = new HistoryEsperAdapter(dbHelper);
     this.liveEsperAdapter = new LiveEsperAdapter(sessionId.toString());
   }
