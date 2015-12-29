@@ -341,7 +341,7 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
       return;
     }
     else if (isInUpdateInterval()) {
-      deleayUpdate();
+      delayUpdate();
     }
     else {
       doUpdateGraph();
@@ -369,7 +369,7 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
     });
   }
 
-  private void deleayUpdate() {
+  private void delayUpdate() {
     final long delay = updateInterval - (System.currentTimeMillis() - lastUpdate);
 
     delayedUpdateTask = executorService.schedule(new Runnable() {
