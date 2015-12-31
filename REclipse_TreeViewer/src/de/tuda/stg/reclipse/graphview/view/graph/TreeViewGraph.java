@@ -3,6 +3,7 @@ package de.tuda.stg.reclipse.graphview.view.graph;
 import de.tuda.stg.reclipse.graphview.Properties;
 import de.tuda.stg.reclipse.graphview.model.SessionContext;
 import de.tuda.stg.reclipse.graphview.provider.ContentModel;
+import de.tuda.stg.reclipse.graphview.util.ViewMode;
 import de.tuda.stg.reclipse.logger.BreakpointInformation;
 import de.tuda.stg.reclipse.logger.ReactiveVariable;
 
@@ -30,7 +31,7 @@ public class TreeViewGraph extends mxGraph {
 
   private Optional<SessionContext> ctx = Optional.empty();
   private Optional<ContentModel> contentModel = Optional.empty();
-  private boolean activeHeatmap = false;
+  private ViewMode viewMode = ViewMode.DEFAULT;
   private boolean showClassName = true;
 
   private final mxGraphLayout graphLayout;
@@ -100,11 +101,23 @@ public class TreeViewGraph extends mxGraph {
     // load vertices from content model
     List<ReactiveVariableVertex> vertices;
 
-    if (activeHeatmap) {
-      vertices = contentModel.get().getHeatmapVertices();
-    }
-    else {
-      vertices = contentModel.get().getVertices();
+    switch (viewMode) {
+
+      case RELATIVE:
+        vertices = contentModel.get().getHeatmapVertices();
+        break;
+
+      case ABSOLUTE:
+        vertices = contentModel.get().getVertices();
+        break;
+
+      case DEFAULT:
+        vertices = contentModel.get().getVertices();
+        break;
+
+      default:
+        vertices = contentModel.get().getVertices();
+
     }
 
     // load edges from content model
@@ -322,12 +335,12 @@ public class TreeViewGraph extends mxGraph {
    * @param heatmapMode
    *          The heatmap mode.
    */
-  public void setHeatmapEnabled(final boolean heatmapMode) {
-    this.activeHeatmap = heatmapMode;
+  public void setViewMode(final ViewMode viewMode) {
+    this.viewMode = viewMode;
   }
 
-  public boolean isHeatmapEnabled() {
-    return activeHeatmap;
+  public ViewMode getViewMode() {
+    return viewMode;
   }
 
   public boolean isShowClassName() {
