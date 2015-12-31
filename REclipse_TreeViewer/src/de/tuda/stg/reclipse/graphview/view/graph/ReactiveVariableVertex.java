@@ -21,12 +21,15 @@ public class ReactiveVariableVertex implements Comparable<ReactiveVariableVertex
 
   private String customStyle;
 
+  private Long evaluationTime;
+
   public ReactiveVariableVertex(final Vertex v, final BreakpointInformation br) {
     this.vertex = v;
     this.breakpointInformation = br;
     this.var = v.getVariable();
     this.highlighted = false;
     this.customStyle = null;
+    this.evaluationTime = null;
   }
 
   public ReactiveVariableVertex(final Vertex v, final BreakpointInformation br, final String cs) {
@@ -39,6 +42,11 @@ public class ReactiveVariableVertex implements Comparable<ReactiveVariableVertex
     this(v, br);
 
     this.highlighted = h;
+  }
+
+  public ReactiveVariableVertex(final Vertex vertex, final BreakpointInformation information, final Long evaluationTime) {
+    this(vertex, information);
+    this.evaluationTime = evaluationTime;
   }
 
   @Override
@@ -58,7 +66,12 @@ public class ReactiveVariableVertex implements Comparable<ReactiveVariableVertex
     final Object parent = graph.getDefaultParent();
 
     // create label
-    final ReactiveVariableLabel label = new ReactiveVariableLabel(var, breakpointInformation, showClassName);
+    ReactiveVariableLabel label;
+    if (evaluationTime == null) {
+      label = new ReactiveVariableLabel(var, breakpointInformation, showClassName);
+    } else {
+      label = new ReactiveVariableLabel(var, breakpointInformation, evaluationTime);
+    }
     label.getStyleProperties().setValueChanged(highlighted);
 
     // set style

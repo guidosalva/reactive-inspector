@@ -11,10 +11,18 @@ public class ReactiveVariableLabel {
   private final String className;
   private final StyleProperties styleProperties = new StyleProperties();
 
+  private Long evaluationTime;
+
   public ReactiveVariableLabel(final ReactiveVariable v, final BreakpointInformation br, final boolean showClassName) {
     this.var = v;
     this.showClassName = showClassName;
     this.className = parseClassName(br);
+    this.evaluationTime = null;
+  }
+
+  public ReactiveVariableLabel(final ReactiveVariable v, final BreakpointInformation br, final Long evaluationTime) {
+    this(v, br, false);
+    this.evaluationTime = evaluationTime;
   }
 
   private String parseClassName(final BreakpointInformation br) {
@@ -60,6 +68,11 @@ public class ReactiveVariableLabel {
   }
 
   private String getValueString() {
+    if (evaluationTime != null) {
+      final long evaluationTime = this.evaluationTime;
+      return String.valueOf(evaluationTime / 1_000_000.0);
+    }
+
     if (var.getValueString() == null) {
       return "null"; //$NON-NLS-1$
     }

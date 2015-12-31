@@ -102,22 +102,20 @@ public class TreeViewGraph extends mxGraph {
     List<ReactiveVariableVertex> vertices;
 
     switch (viewMode) {
+      case DEFAULT:
+        vertices = contentModel.get().getVertices();
+        break;
 
       case RELATIVE:
         vertices = contentModel.get().getHeatmapVertices();
         break;
 
       case ABSOLUTE:
-        vertices = contentModel.get().getVertices();
-        break;
-
-      case DEFAULT:
-        vertices = contentModel.get().getVertices();
+        vertices = contentModel.get().getTimeProfilerVertices();
         break;
 
       default:
         vertices = contentModel.get().getVertices();
-
     }
 
     // load edges from content model

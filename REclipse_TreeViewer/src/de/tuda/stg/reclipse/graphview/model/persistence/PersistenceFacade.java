@@ -5,6 +5,7 @@ import de.tuda.stg.reclipse.graphview.model.ILoggerInterface;
 import de.tuda.stg.reclipse.logger.ReactiveVariable;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -106,6 +107,10 @@ public class PersistenceFacade implements ILoggerInterface {
       Activator.log(e);
       return DependencyGraph.emptyGraph();
     }
+  }
+
+  public HashMap<UUID, Long> getEvaluationTimes() {
+    return timeProfiler.evaluationTimes;
   }
 
   public int getLastPointInTime() {
