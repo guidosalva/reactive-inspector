@@ -13,11 +13,13 @@ public class PersistenceFacade implements ILoggerInterface {
   private final DatabaseHelper dbHelper;
   private final HistoryEsperAdapter historyEsperAdapter;
   private final LiveEsperAdapter liveEsperAdapter;
+  private final TimeProfiler timeProfiler;
 
   public PersistenceFacade(final UUID sessionId) {
     this.dbHelper = new DatabaseHelper(sessionId.toString());
     this.historyEsperAdapter = new HistoryEsperAdapter(dbHelper);
     this.liveEsperAdapter = new LiveEsperAdapter(sessionId.toString());
+    timeProfiler = new TimeProfiler();
   }
 
   @Override
@@ -28,6 +30,7 @@ public class PersistenceFacade implements ILoggerInterface {
     catch (final PersistenceException e) {
       Activator.log(e);
     }
+    timeProfiler.logNodeCreated(r);
   }
 
   @Override
@@ -38,7 +41,7 @@ public class PersistenceFacade implements ILoggerInterface {
     catch (final PersistenceException e) {
       Activator.log(e);
     }
-
+    timeProfiler.logNodeAttached(r, dependentId);
   }
 
   @Override
@@ -49,6 +52,7 @@ public class PersistenceFacade implements ILoggerInterface {
     catch (final PersistenceException e) {
       Activator.log(e);
     }
+    timeProfiler.logNodeEvaluationEnded(r);
   }
 
   @Override
@@ -59,6 +63,7 @@ public class PersistenceFacade implements ILoggerInterface {
     catch (final PersistenceException e) {
       Activator.log(e);
     }
+    timeProfiler.logNodeEvaluationEndedWithException(r, exception);
   }
 
   @Override
@@ -69,6 +74,7 @@ public class PersistenceFacade implements ILoggerInterface {
     catch (final PersistenceException e) {
       Activator.log(e);
     }
+    timeProfiler.logNodeEvaluationStarted(r);
   }
 
   @Override
@@ -79,6 +85,7 @@ public class PersistenceFacade implements ILoggerInterface {
     catch (final PersistenceException e) {
       Activator.log(e);
     }
+    timeProfiler.logNodeValueSet(r);
   }
 
   public List<ReactiveVariable> getReVars(final int pointInTime) {
