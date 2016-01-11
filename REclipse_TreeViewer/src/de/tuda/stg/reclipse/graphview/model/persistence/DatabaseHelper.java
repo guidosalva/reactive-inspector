@@ -428,7 +428,7 @@ public class DatabaseHelper {
 
       try (final ResultSet rs = stmt.executeQuery()) {
         while (rs.next()) {
-          final ReactiveVariable r = createReVar(rs, pointInTime);
+          final ReactiveVariable r = reactiveVariableFromResultSet(rs, pointInTime);
           updateConnectedWith(r, rs);
           variables.add(r);
         }
@@ -441,7 +441,7 @@ public class DatabaseHelper {
     return variables;
   }
 
-  private ReactiveVariable createReVar(final ResultSet rs, final int pointInTime) throws SQLException {
+  private ReactiveVariable reactiveVariableFromResultSet(final ResultSet rs, final int pointInTime) throws SQLException {
     final ReactiveVariable r = new ReactiveVariable();
     r.setId(UUID.fromString(rs.getString("variableId"))); //$NON-NLS-1$
     r.setName(rs.getString("variableName")); //$NON-NLS-1$
@@ -512,7 +512,7 @@ public class DatabaseHelper {
         while (rs.next()) {
           final int idVariable = rs.getInt("idVariable"); //$NON-NLS-1$
           final int created = rs.getInt("timeFrom"); //$NON-NLS-1$
-          final ReactiveVariable r = createReVar(rs, pointInTime);
+          final ReactiveVariable r = reactiveVariableFromResultSet(rs, pointInTime);
           final Vertex vertex = new Vertex(idVariable, created, r);
           vertices.add(vertex);
         }
