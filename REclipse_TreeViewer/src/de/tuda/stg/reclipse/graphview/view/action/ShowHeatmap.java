@@ -49,6 +49,61 @@ public class ShowHeatmap extends Action implements IMenuCreator {
   }
    */
 
+  private void setupMenu() {
+    if (menu != null) {
+
+      final MenuItem defaultMenuItem = new MenuItem(menu, SWT.RADIO);
+      defaultMenuItem.setText("Default Settings");
+      defaultMenuItem.addSelectionListener(new SelectionListener() {
+
+        @Override
+        public void widgetSelected(final SelectionEvent event) {
+          graph.setViewMode(ViewMode.DEFAULT);
+          graph.updateGraph();
+        }
+
+        @Override
+        public void widgetDefaultSelected(final SelectionEvent event) {
+          widgetSelected(event);
+        }
+      });
+
+      //   final MenuItem separator = new MenuItem(menu, SWT.SEPARATOR);
+
+      final MenuItem relativePerformanceMenuItem = new MenuItem(menu, SWT.RADIO);
+      relativePerformanceMenuItem.setText("Show relative Performance");
+      relativePerformanceMenuItem.addSelectionListener(new SelectionListener() {
+
+        @Override
+        public void widgetSelected(final SelectionEvent event) {
+          graph.setViewMode(ViewMode.RELATIVE);
+          graph.updateGraph();
+        }
+
+        @Override
+        public void widgetDefaultSelected(final SelectionEvent event) {
+          widgetSelected(event);
+        }
+      });
+
+      final MenuItem absolutePerformanceMenuItem = new MenuItem(menu, SWT.RADIO);
+      absolutePerformanceMenuItem.setText("Show absolute Performance");
+      absolutePerformanceMenuItem.addSelectionListener(new SelectionListener() {
+
+        @Override
+        public void widgetSelected(final SelectionEvent event) {
+          graph.setViewMode(ViewMode.ABSOLUTE);
+          graph.updateGraph();
+        }
+
+        @Override
+        public void widgetDefaultSelected(final SelectionEvent event) {
+          widgetSelected(event);
+        }
+      });
+    }
+  }
+
   @Override
   public void dispose() {
     if (menu != null) {
@@ -59,47 +114,10 @@ public class ShowHeatmap extends Action implements IMenuCreator {
 
   @Override
   public Menu getMenu(final Control parent) {
-    if (menu != null) {
-      menu.dispose();
+    if (menu == null) {
+      menu = new Menu(parent);
+      setupMenu();
     }
-
-    final ViewMode viewMode = ViewMode.DEFAULT;
-    menu = new Menu(parent);
-
-    final MenuItem relativePerformanceMenuItem = new MenuItem(menu, SWT.PUSH);
-    relativePerformanceMenuItem.setText("relative Performance");
-    relativePerformanceMenuItem.addSelectionListener(new SelectionListener() {
-
-      @Override
-      public void widgetSelected(final SelectionEvent event) {
-        graph.setViewMode(ViewMode.RELATIVE);
-        graph.updateGraph();
-      }
-
-      @Override
-      public void widgetDefaultSelected(final SelectionEvent event) {
-        widgetSelected(event);
-      }
-    });
-
-    final MenuItem absolutePerformanceMenuItem = new MenuItem(menu, SWT.PUSH);
-    absolutePerformanceMenuItem.setText("absolute Performance");
-    absolutePerformanceMenuItem.addSelectionListener(new SelectionListener() {
-
-      @Override
-      public void widgetSelected(final SelectionEvent event) {
-        graph.setViewMode(ViewMode.ABSOLUTE);
-        graph.updateGraph();
-
-      }
-
-      @Override
-      public void widgetDefaultSelected(final SelectionEvent event) {
-        widgetSelected(event);
-
-      }
-    });
-
     return menu;
   }
 
