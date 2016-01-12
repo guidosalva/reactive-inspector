@@ -37,7 +37,7 @@ public class DatabaseHelper {
                   "CREATE TABLE variable_status (idVariableStatus  INTEGER NOT NULL PRIMARY KEY, idVariable integer(10) NOT NULL, valueString varchar(200), timeFrom integer(10) NOT NULL, timeTo integer(10) NOT NULL, exception integer(1) NOT NULL)", //$NON-NLS-1$
                   "CREATE TABLE event (pointInTime  INTEGER NOT NULL PRIMARY KEY, type integer(10) NOT NULL, idVariable integer(10) NOT NULL, dependentVariable integer(10))", //$NON-NLS-1$
                   "CREATE TABLE variable_dependency (idVariableStatus integer(10) NOT NULL, dependentVariable integer(10) NOT NULL, PRIMARY KEY (idVariableStatus, dependentVariable))", //$NON-NLS-1$
-                  "CREATE TABLE evaluation_duration (pointInTime INTEGER NOT NULL PRIMARY KEY, variableId varchar(36) NOT NULL, evaluationDuration BIGINT)"); //$NON-NLS-1$
+                  "CREATE TABLE evaluation_duration (pointInTime INTEGER NOT NULL PRIMARY KEY, idVariable INTEGER NOT NULL, evaluationDuration BIGINT)"); //$NON-NLS-1$
 
   private final List<IDependencyGraphListener> listeners = new CopyOnWriteArrayList<>();
   private final String sessionId;
@@ -229,10 +229,9 @@ public class DatabaseHelper {
       createVariableStatus(r, idVariable, oldVariableStatus, null);
       createEvent(r, idVariable, null);
       timeProfiler.logNodeEvaluationEnded(r);
-      final Long evaluationDuration = timeProfiler.evaluationTimes.get(r.getId());
+      final Long evaluationDuration = timeProfiler.evaluationTimes.getOrDefault(r.getId(), 0L);
       final int rowId = variableIdToRowIdMap.get(r.getId());
-      createEvaluationDurationEntry(r.getPointInTime(), rowId, evaluationDuration);
-
+      createEvaluationDurationEntry(lastPointInTime, rowId, evaluationDuration);
 
       r.setPointInTime(lastPointInTime);
 
@@ -251,9 +250,9 @@ public class DatabaseHelper {
       createVariableStatus(r, idVariable, oldVariableStatus, exception);
       createEvent(r, idVariable, null);
       timeProfiler.logNodeEvaluationEndedWithException(r, exception);
-      final Long evaluationDuration = timeProfiler.evaluationTimes.get(r.getId());
+      final Long evaluationDuration = timeProfiler.evaluationTimes.getOrDefault(r.getId(), 0L);
       final int rowId = variableIdToRowIdMap.get(r.getId());
-      createEvaluationDurationEntry(r.getPointInTime(), rowId, evaluationDuration);
+      createEvaluationDurationEntry(lastPointInTime, rowId, evaluationDuration);
 
       r.setPointInTime(lastPointInTime);
 
@@ -428,12 +427,12 @@ public class DatabaseHelper {
     }
   }
 
-  private void createEvaluationDurationEntry(final int pointInTime, final int rowId, final long evaluationDuration) throws PersistenceException {
-    final String statementString = "INSERT INTO evaluation_duration (pointInTime, rowId, evaluationDuration) VALUES (?, ?, ?)"; //$NON-NLS-1$
+  private void createEvaluationDurationEntry(final int pointInTime, final int idVariable, final long evaluationDuration) throws PersistenceException {
+    final String statementString = "INSERT INTO evaluation_duration (pointInTime, idVariable, evaluationDuration) VALUES (?, ?, ?)"; //$NON-NLS-1$
 
     try (final PreparedStatement statement = connection.prepareStatement(statementString)) {
       statement.setInt(1, pointInTime);
-      statement.setInt(2, rowId);
+      statement.setInt(2, idVariable);
       statement.setLong(3, evaluationDuration);
 
       statement.executeUpdate();
@@ -523,6 +522,7 @@ public class DatabaseHelper {
   public DependencyGraph getDependencyGraph(final int pointInTime) throws PersistenceException {
     final List<Vertex> vertices = loadVertices(pointInTime);
     connectVertices(vertices, pointInTime);
+    loadEvaluationTimes(vertices, pointInTime);
     return new DependencyGraph(vertices);
   }
 
@@ -580,6 +580,37 @@ public class DatabaseHelper {
       }
     }
     catch (final SQLException e) {
+      throw new PersistenceException(e);
+    }
+  }
+
+  @SuppressWarnings("nls")
+  private void loadEvaluationTimes(final List<Vertex> vertices, final int pointInTime) throws PersistenceException {
+    final Map<Integer, Vertex> vertexMap = new HashMap<>();
+
+    for (final Vertex vertex : vertices) {
+      vertexMap.put(vertex.getId(), vertex);
+    }
+
+    final String evaluationTimesQuery = "SELECT idVariable, evaluationDuration FROM evaluation_duration WHERE pointInTime <= ? GROUP BY idVariable HAVING pointInTime == MAX(pointInTime)";
+
+    try (final PreparedStatement statement = connection.prepareStatement(evaluationTimesQuery)) {
+      statement.setInt(1, pointInTime);
+
+      try (ResultSet rs = statement.executeQuery()) {
+        while (rs.next()) {
+          final int idVariable = rs.getInt("idVariable");
+          final Long evaluationDuration = rs.getLong("evaluationDuration");
+
+          if (!vertexMap.containsKey(idVariable)) {
+            throw new PersistenceException("vertex for variable with internal id " + idVariable + " is missing");
+          }
+
+          final Vertex vertex = vertexMap.get(idVariable);
+          vertex.getVariable().getAdditionalKeys().put("evaluationDuration", evaluationDuration);
+        }
+      }
+    } catch (final SQLException e) {
       throw new PersistenceException(e);
     }
   }

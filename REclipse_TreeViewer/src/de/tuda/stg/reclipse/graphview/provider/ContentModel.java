@@ -93,9 +93,9 @@ public class ContentModel {
     return vertices;
   }
 
+  @SuppressWarnings("nls")
   public List<ReactiveVariableVertex> getTimeProfilerVertices() {
     final List<ReactiveVariableVertex> vertices = new ArrayList<>();
-    final HashMap<UUID, Long> evaluationTimes = ctx.getPersistence().getEvaluationTimes();
 
     for (final Vertex vertex : dependencyGraph.getVertices()) {
       final ReactiveVariable variable = vertex.getVariable();
@@ -103,9 +103,9 @@ public class ContentModel {
       // create reactive variable vertex
       final BreakpointInformation breakpointInformation = ctx.getVariableLocation(variable.getId());
 
-      final Long evaluationTime = evaluationTimes.get(vertex.getVariable().getId());
+      final Long evaluationDuration = (Long)variable.getAdditionalKeys().getOrDefault("evaluationDuration", Long.valueOf(0));
 
-      final ReactiveVariableVertex variableVertex = new ReactiveVariableVertex(vertex, breakpointInformation, evaluationTime);
+      final ReactiveVariableVertex variableVertex = new ReactiveVariableVertex(vertex, breakpointInformation, evaluationDuration);
 
       vertices.add(variableVertex);
     }
