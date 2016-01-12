@@ -36,12 +36,15 @@ public class DatabaseHelper {
           .asList("CREATE TABLE variable (idVariable  INTEGER NOT NULL PRIMARY KEY, variableId varchar(36) NOT NULL, variableName varchar(200), reactiveType integer(10), typeSimple varchar(200), typeFull varchar(200), timeFrom integer(10) NOT NULL)", //$NON-NLS-1$
                   "CREATE TABLE variable_status (idVariableStatus  INTEGER NOT NULL PRIMARY KEY, idVariable integer(10) NOT NULL, valueString varchar(200), timeFrom integer(10) NOT NULL, timeTo integer(10) NOT NULL, exception integer(1) NOT NULL)", //$NON-NLS-1$
                   "CREATE TABLE event (pointInTime  INTEGER NOT NULL PRIMARY KEY, type integer(10) NOT NULL, idVariable integer(10) NOT NULL, dependentVariable integer(10))", //$NON-NLS-1$
-                  "CREATE TABLE variable_dependency (idVariableStatus integer(10) NOT NULL, dependentVariable integer(10) NOT NULL, PRIMARY KEY (idVariableStatus, dependentVariable))"); //$NON-NLS-1$
+                  "CREATE TABLE variable_dependency (idVariableStatus integer(10) NOT NULL, dependentVariable integer(10) NOT NULL, PRIMARY KEY (idVariableStatus, dependentVariable))", //$NON-NLS-1$
+                  "CREATE TABLE evaluation_duration (pointInTime INTEGER NOT NULL PRIMARY KEY, variableId varchar(36) NOT NULL, evaluationDuration BIGINT)"); //$NON-NLS-1$
 
   private final List<IDependencyGraphListener> listeners = new CopyOnWriteArrayList<>();
   private final String sessionId;
-  private final Map<UUID, Integer> variableMap = new HashMap<>();
-  private final Map<Integer, Integer> variableStatusMap = new HashMap<>();
+  private final Map<UUID, Integer> variableIdToRowIdMap = new HashMap<>();
+  private final Map<Integer, Integer> variableRowIdToVariableStatusIdMap = new HashMap<>();
+  private final TimeProfiler timeProfiler = new TimeProfiler();
+
 
   private Connection connection;
 
@@ -207,6 +210,7 @@ public class DatabaseHelper {
       final int oldVariableStatus = findActiveVariableStatus(idVariable);
       createVariableStatus(r, idVariable, oldVariableStatus, null);
       createEvent(r, idVariable, null);
+      timeProfiler.logNodeEvaluationStarted(r);
 
       r.setPointInTime(lastPointInTime);
 
@@ -224,6 +228,11 @@ public class DatabaseHelper {
       final int oldVariableStatus = findActiveVariableStatus(idVariable);
       createVariableStatus(r, idVariable, oldVariableStatus, null);
       createEvent(r, idVariable, null);
+      timeProfiler.logNodeEvaluationEnded(r);
+      final Long evaluationDuration = timeProfiler.evaluationTimes.get(r.getId());
+      final int rowId = variableIdToRowIdMap.get(r.getId());
+      createEvaluationDurationEntry(r.getPointInTime(), rowId, evaluationDuration);
+
 
       r.setPointInTime(lastPointInTime);
 
@@ -239,9 +248,12 @@ public class DatabaseHelper {
 
       final int idVariable = findVariableById(r.getId());
       final int oldVariableStatus = findActiveVariableStatus(idVariable);
-
       createVariableStatus(r, idVariable, oldVariableStatus, exception);
       createEvent(r, idVariable, null);
+      timeProfiler.logNodeEvaluationEndedWithException(r, exception);
+      final Long evaluationDuration = timeProfiler.evaluationTimes.get(r.getId());
+      final int rowId = variableIdToRowIdMap.get(r.getId());
+      createEvaluationDurationEntry(r.getPointInTime(), rowId, evaluationDuration);
 
       r.setPointInTime(lastPointInTime);
 
@@ -283,19 +295,19 @@ public class DatabaseHelper {
   }
 
   public int findVariableById(final UUID id) throws PersistenceException {
-    if (!variableMap.containsKey(id)) {
+    if (!variableIdToRowIdMap.containsKey(id)) {
       throw new PersistenceException("unknown variable with id " + id); //$NON-NLS-1$
     }
 
-    return variableMap.get(id);
+    return variableIdToRowIdMap.get(id);
   }
 
   private int findActiveVariableStatus(final int idVariable) throws PersistenceException {
-    if (!variableStatusMap.containsKey(idVariable)) {
+    if (!variableRowIdToVariableStatusIdMap.containsKey(idVariable)) {
       throw new PersistenceException("no active status for variable " + idVariable); //$NON-NLS-1$
     }
 
-    return variableStatusMap.get(idVariable);
+    return variableRowIdToVariableStatusIdMap.get(idVariable);
   }
 
   private int createVariable(final ReactiveVariable variable) throws PersistenceException {
@@ -311,7 +323,7 @@ public class DatabaseHelper {
       stmt.executeUpdate();
 
       final int key = getAutoIncrementKey(stmt);
-      variableMap.put(variable.getId(), key);
+      variableIdToRowIdMap.put(variable.getId(), key);
       return key;
     }
     catch (final SQLException e) {
@@ -340,7 +352,7 @@ public class DatabaseHelper {
       stmt.executeUpdate();
 
       final int key = getAutoIncrementKey(stmt);
-      variableStatusMap.put(idVariable, key);
+      variableRowIdToVariableStatusIdMap.put(idVariable, key);
       return key;
     }
     catch (final SQLException e) {
@@ -395,7 +407,7 @@ public class DatabaseHelper {
   }
 
   private void createEvent(final ReactiveVariable variable, final int idVariable, final Integer dependentVariable) throws PersistenceException {
-    final String insertStmt = "INSERT INTO event (pointInTime, type, idVariable, dependentVariable) VALUES (?, ? ,?, ?)"; //$NON-NLS-1$
+    final String insertStmt = "INSERT INTO event (pointInTime, type, idVariable, dependentVariable) VALUES (?, ?, ?, ?)"; //$NON-NLS-1$
 
     try (PreparedStatement stmt = connection.prepareStatement(insertStmt)) {
       stmt.setInt(1, lastPointInTime);
@@ -413,6 +425,21 @@ public class DatabaseHelper {
     }
     catch (final SQLException e) {
       throw new PersistenceException(e);
+    }
+  }
+
+  private void createEvaluationDurationEntry(final int pointInTime, final int rowId, final long evaluationDuration) throws PersistenceException {
+    final String statementString = "INSERT INTO evaluation_duration (pointInTime, rowId, evaluationDuration) VALUES (?, ?, ?)"; //$NON-NLS-1$
+
+    try (final PreparedStatement statement = connection.prepareStatement(statementString)) {
+      statement.setInt(1, pointInTime);
+      statement.setInt(2, rowId);
+      statement.setLong(3, evaluationDuration);
+
+      statement.executeUpdate();
+    }
+    catch (final SQLException exception) {
+      throw new PersistenceException(exception);
     }
   }
 
