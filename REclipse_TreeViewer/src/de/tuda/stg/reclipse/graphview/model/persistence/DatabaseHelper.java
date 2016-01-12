@@ -130,6 +130,7 @@ public class DatabaseHelper {
       commit();
     }
     catch (PersistenceException | RuntimeException exception) {
+      rollback();
       throw exception;
     }
     finally {
