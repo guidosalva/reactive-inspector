@@ -78,10 +78,7 @@ public class DatabaseHelper {
       connection = DriverManager.getConnection(jdbcUrl, JDBC_USER, JDBC_PASSWORD);
       connection.setAutoCommit(true);
     }
-    catch (final ClassNotFoundException e) {
-      Activator.log(e);
-    }
-    catch (final SQLException e) {
+    catch (final ClassNotFoundException | SQLException e) {
       Activator.log(e);
     }
   }
