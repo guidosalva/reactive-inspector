@@ -3,6 +3,7 @@ package de.tuda.stg.reclipse.graphview.view.action;
 import de.tuda.stg.reclipse.graphview.Activator;
 import de.tuda.stg.reclipse.graphview.Images;
 import de.tuda.stg.reclipse.graphview.Texts;
+import de.tuda.stg.reclipse.graphview.javaextensions.FunctionalSelectionListener;
 import de.tuda.stg.reclipse.graphview.util.ViewMode;
 import de.tuda.stg.reclipse.graphview.view.graph.TreeViewGraph;
 
@@ -10,8 +11,6 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuCreator;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -22,57 +21,40 @@ public class ViewModeAction extends Action implements IMenuCreator {
   private Menu menu;
 
   public ViewModeAction(final TreeViewGraph graph) {
-    super("", IAction.AS_DROP_DOWN_MENU);
+    super("", IAction.AS_DROP_DOWN_MENU); //$NON-NLS-1$
     this.graph = graph;
-    setToolTipText(Texts.Show_Heatmap_Tooltip);
+    setToolTipText(Texts.ViewMode_ToolTip);
     setImageDescriptor(Activator.getImageDescriptor(Images.HEATMAP));
     setMenuCreator(this);
   }
 
+  @FunctionalInterface
+  interface Runnable {
+    void run();
+  }
+
   private void setupMenu() {
-    if (menu != null) {
-      final MenuItem defaultMenuItem = new MenuItem(menu, SWT.RADIO);
-      defaultMenuItem.setText("Default Settings");
-      defaultMenuItem.addSelectionListener(new SelectionListener() {
+    final MenuItem defaultMenuItem = new MenuItem(menu, SWT.RADIO);
+    defaultMenuItem.setText(Texts.DefaultViewMode);
+    defaultMenuItem.setSelection(true);
+    defaultMenuItem.addSelectionListener((FunctionalSelectionListener) (event) -> {
+      graph.setViewMode(ViewMode.DEFAULT);
+      graph.updateGraph();
+    });
 
-        @Override
-        public void widgetSelected(final SelectionEvent event) {
-          graph.setViewMode(ViewMode.DEFAULT);
-          graph.updateGraph();
-        }
+    final MenuItem relativePerformanceMenuItem = new MenuItem(menu, SWT.RADIO);
+    relativePerformanceMenuItem.setText(Texts.RelativePerformanceViewMode);
+    relativePerformanceMenuItem.addSelectionListener((FunctionalSelectionListener) (event) -> {
+      graph.setViewMode(ViewMode.RELATIVE);
+      graph.updateGraph();
+    });
 
-        @Override
-        public void widgetDefaultSelected(final SelectionEvent event) {}
-      });
-
-      final MenuItem relativePerformanceMenuItem = new MenuItem(menu, SWT.RADIO);
-      relativePerformanceMenuItem.setText("Show relative Performance");
-      relativePerformanceMenuItem.addSelectionListener(new SelectionListener() {
-
-        @Override
-        public void widgetSelected(final SelectionEvent event) {
-          graph.setViewMode(ViewMode.RELATIVE);
-          graph.updateGraph();
-        }
-
-        @Override
-        public void widgetDefaultSelected(final SelectionEvent event) {}
-      });
-
-      final MenuItem absolutePerformanceMenuItem = new MenuItem(menu, SWT.RADIO);
-      absolutePerformanceMenuItem.setText("Show absolute Performance");
-      absolutePerformanceMenuItem.addSelectionListener(new SelectionListener() {
-
-        @Override
-        public void widgetSelected(final SelectionEvent event) {
-          graph.setViewMode(ViewMode.ABSOLUTE);
-          graph.updateGraph();
-        }
-
-        @Override
-        public void widgetDefaultSelected(final SelectionEvent event) {}
-      });
-    }
+    final MenuItem absolutePerformanceMenuItem = new MenuItem(menu, SWT.RADIO);
+    absolutePerformanceMenuItem.setText(Texts.AbsolutePerformanceViewMode);
+    absolutePerformanceMenuItem.addSelectionListener((FunctionalSelectionListener) (event) -> {
+      graph.setViewMode(ViewMode.ABSOLUTE);
+      graph.updateGraph();
+    });
   }
 
   @Override
@@ -94,6 +76,6 @@ public class ViewModeAction extends Action implements IMenuCreator {
 
   @Override
   public Menu getMenu(final Menu parent) {
-    throw new UnsupportedOperationException("the menu is designed to be opened by a button"); //$NON-NLS-1$
+    throw new UnsupportedOperationException("The menu is designed to be opened by a button."); //$NON-NLS-1$
   }
 }

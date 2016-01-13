@@ -4,12 +4,16 @@ import org.eclipse.osgi.util.NLS;
 
 public class Texts extends NLS {
 
+  public static String AbsolutePerformanceViewMode;
+
   public static String Log_Error;
 
   public static String SaveImage_Text;
   public static String SaveImage_Tooltip;
   public static String SaveImage_Error;
   public static String SaveImage_Result;
+
+  public static String RelativePerformanceViewMode;
 
   public static String Relayout_Text;
   public static String Relayout_Tooltip;
@@ -20,8 +24,6 @@ public class Texts extends NLS {
   public static String ZoomOut_Tooltip;
 
   public static String Show_Heatmap;
-  public static String Show_Heatmap_Tooltip;
-
   public static String SessionSelect_Text;
   public static String SessionSelect_Tooltip;
   public static String SessionSelect_Item;
@@ -71,6 +73,9 @@ public class Texts extends NLS {
   public static String BreakpointQuery_Add;
   public static String Breakpoint_Remove;
   public static String Breakpoint_Remove_All;
+
+  public static String DefaultViewMode;
+  public static String ViewMode_ToolTip;
 
   private static final String BUNDLE_NAME = Texts.class.getPackage().getName() + ".texts"; //$NON-NLS-1$
 
