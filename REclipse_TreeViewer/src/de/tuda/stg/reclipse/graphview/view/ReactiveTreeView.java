@@ -12,7 +12,7 @@ import de.tuda.stg.reclipse.graphview.view.action.Relayout;
 import de.tuda.stg.reclipse.graphview.view.action.SaveGraphAsImage;
 import de.tuda.stg.reclipse.graphview.view.action.SessionSelect;
 import de.tuda.stg.reclipse.graphview.view.action.ShowClassName;
-import de.tuda.stg.reclipse.graphview.view.action.ShowHeatmap;
+import de.tuda.stg.reclipse.graphview.view.action.ViewModeAction;
 import de.tuda.stg.reclipse.graphview.view.action.ZoomIn;
 import de.tuda.stg.reclipse.graphview.view.action.ZoomOut;
 import de.tuda.stg.reclipse.graphview.view.graph.GraphComponent;
@@ -271,7 +271,7 @@ public class ReactiveTreeView extends ViewPart implements IDependencyGraphListen
     getViewSite().getActionBars().getToolBarManager().add(new SaveGraphAsImage(getSite(), graph));
     getViewSite().getActionBars().getToolBarManager().add(new ZoomIn(graphComponent));
     getViewSite().getActionBars().getToolBarManager().add(new ZoomOut(graphComponent));
-    getViewSite().getActionBars().getToolBarManager().add(new ShowHeatmap(graph));
+    getViewSite().getActionBars().getToolBarManager().add(new ViewModeAction(graph));
   }
 
   @Override

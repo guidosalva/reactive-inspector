@@ -16,42 +16,21 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 
-public class ShowHeatmap extends Action implements IMenuCreator {
+public class ViewModeAction extends Action implements IMenuCreator {
 
   private final TreeViewGraph graph;
   private Menu menu;
 
-  public ShowHeatmap(final TreeViewGraph graph) {
+  public ViewModeAction(final TreeViewGraph graph) {
     super("", IAction.AS_DROP_DOWN_MENU);
     this.graph = graph;
     setToolTipText(Texts.Show_Heatmap_Tooltip);
     setImageDescriptor(Activator.getImageDescriptor(Images.HEATMAP));
     setMenuCreator(this);
-    /*
-    setText(Texts.Show_Heatmap);
-     */
   }
-
-  /*
-  @Override
-  public void run() {
-    final boolean status = !graph.isHeatmapEnabled();
-
-    if (status) {
-      setImageDescriptor(Activator.getImageDescriptor(Images.HEATMAP));
-    }
-    else {
-      setImageDescriptor(Activator.getImageDescriptor(Images.HEATMAP_GREY));
-    }
-
-    graph.setHeatmapEnabled(status);
-    graph.updateGraph();
-  }
-   */
 
   private void setupMenu() {
     if (menu != null) {
-
       final MenuItem defaultMenuItem = new MenuItem(menu, SWT.RADIO);
       defaultMenuItem.setText("Default Settings");
       defaultMenuItem.addSelectionListener(new SelectionListener() {
@@ -63,12 +42,8 @@ public class ShowHeatmap extends Action implements IMenuCreator {
         }
 
         @Override
-        public void widgetDefaultSelected(final SelectionEvent event) {
-          widgetSelected(event);
-        }
+        public void widgetDefaultSelected(final SelectionEvent event) {}
       });
-
-      //   final MenuItem separator = new MenuItem(menu, SWT.SEPARATOR);
 
       final MenuItem relativePerformanceMenuItem = new MenuItem(menu, SWT.RADIO);
       relativePerformanceMenuItem.setText("Show relative Performance");
@@ -81,9 +56,7 @@ public class ShowHeatmap extends Action implements IMenuCreator {
         }
 
         @Override
-        public void widgetDefaultSelected(final SelectionEvent event) {
-          widgetSelected(event);
-        }
+        public void widgetDefaultSelected(final SelectionEvent event) {}
       });
 
       final MenuItem absolutePerformanceMenuItem = new MenuItem(menu, SWT.RADIO);
@@ -97,9 +70,7 @@ public class ShowHeatmap extends Action implements IMenuCreator {
         }
 
         @Override
-        public void widgetDefaultSelected(final SelectionEvent event) {
-          widgetSelected(event);
-        }
+        public void widgetDefaultSelected(final SelectionEvent event) {}
       });
     }
   }
