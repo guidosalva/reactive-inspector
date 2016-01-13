@@ -73,7 +73,6 @@ public class DatabaseHelper {
    */
   private void establishConnection() {
     try {
-      // establish DB connection
       Class.forName(JDBC_CLASS_NAME);
       final String jdbcUrl = getJdbcUrl();
       connection = DriverManager.getConnection(jdbcUrl, JDBC_USER, JDBC_PASSWORD);
