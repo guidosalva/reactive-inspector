@@ -94,7 +94,7 @@ public class ContentModel {
   }
 
   @SuppressWarnings("nls")
-  public List<ReactiveVariableVertex> getTimeProfilerVertices() {
+  public List<ReactiveVariableVertex> getAbsolutePerformanceLatestVertices() {
     final List<ReactiveVariableVertex> vertices = new ArrayList<>();
 
     for (final Vertex vertex : dependencyGraph.getVertices()) {
@@ -104,6 +104,27 @@ public class ContentModel {
       final BreakpointInformation breakpointInformation = ctx.getVariableLocation(variable.getId());
 
       final Long evaluationDuration = (Long)variable.getAdditionalKeys().getOrDefault("evaluationDuration", Long.valueOf(0));
+
+      final ReactiveVariableVertex variableVertex = new ReactiveVariableVertex(vertex, breakpointInformation, evaluationDuration);
+
+      vertices.add(variableVertex);
+    }
+
+    Collections.sort(vertices);
+
+    return vertices;
+  }
+
+  public List<ReactiveVariableVertex> getAbsolutePerformanceSumVertices() {
+    final List<ReactiveVariableVertex> vertices = new ArrayList<>();
+
+    for (final Vertex vertex : dependencyGraph.getVertices()) {
+      final ReactiveVariable variable = vertex.getVariable();
+
+      // create reactive variable vertex
+      final BreakpointInformation breakpointInformation = ctx.getVariableLocation(variable.getId());
+
+      final Long evaluationDuration = (Long)variable.getAdditionalKeys().getOrDefault("sumOfEvaluationDurations", Long.valueOf(0));
 
       final ReactiveVariableVertex variableVertex = new ReactiveVariableVertex(vertex, breakpointInformation, evaluationDuration);
 

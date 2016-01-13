@@ -110,8 +110,12 @@ public class TreeViewGraph extends mxGraph {
         vertices = contentModel.get().getHeatmapVertices();
         break;
 
-      case ABSOLUTE:
-        vertices = contentModel.get().getTimeProfilerVertices();
+      case ABSOLUTE_LATEST:
+        vertices = contentModel.get().getAbsolutePerformanceLatestVertices();
+        break;
+
+      case ABSOLUTE_SUM:
+        vertices = contentModel.get().getAbsolutePerformanceSumVertices();
         break;
 
       default:

@@ -4,7 +4,8 @@ import org.eclipse.osgi.util.NLS;
 
 public class Texts extends NLS {
 
-  public static String AbsolutePerformanceViewMode;
+  public static String AbsolutePerformanceLatestViewMode;
+  public static String AbsolutePerformanceSumViewMode;
 
   public static String Log_Error;
 

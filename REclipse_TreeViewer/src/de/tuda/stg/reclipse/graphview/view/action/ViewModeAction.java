@@ -49,10 +49,17 @@ public class ViewModeAction extends Action implements IMenuCreator {
       graph.updateGraph();
     });
 
-    final MenuItem absolutePerformanceMenuItem = new MenuItem(menu, SWT.RADIO);
-    absolutePerformanceMenuItem.setText(Texts.AbsolutePerformanceViewMode);
-    absolutePerformanceMenuItem.addSelectionListener((FunctionalSelectionListener) (event) -> {
-      graph.setViewMode(ViewMode.ABSOLUTE);
+    final MenuItem absolutePerformanceLatestMenuItem = new MenuItem(menu, SWT.RADIO);
+    absolutePerformanceLatestMenuItem.setText(Texts.AbsolutePerformanceLatestViewMode);
+    absolutePerformanceLatestMenuItem.addSelectionListener((FunctionalSelectionListener) (event) -> {
+      graph.setViewMode(ViewMode.ABSOLUTE_LATEST);
+      graph.updateGraph();
+    });
+
+    final MenuItem absolutePerformanceSumMenuItem = new MenuItem(menu, SWT.RADIO);
+    absolutePerformanceSumMenuItem.setText(Texts.AbsolutePerformanceSumViewMode);
+    absolutePerformanceSumMenuItem.addSelectionListener((FunctionalSelectionListener) (event) -> {
+      graph.setViewMode(ViewMode.ABSOLUTE_SUM);
       graph.updateGraph();
     });
   }
