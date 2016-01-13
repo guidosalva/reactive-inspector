@@ -520,6 +520,7 @@ public class DatabaseHelper {
     final List<Vertex> vertices = loadVertices(pointInTime);
     connectVertices(vertices, pointInTime);
     loadEvaluationTimes(vertices, pointInTime);
+    loadSumOfEvaluationTimes(vertices, pointInTime);
     return new DependencyGraph(vertices);
   }
 
@@ -604,6 +605,36 @@ public class DatabaseHelper {
 
           final Vertex vertex = vertexMap.get(idVariable);
           vertex.getVariable().getAdditionalKeys().put("evaluationDuration", evaluationDuration);
+        }
+      }
+    } catch (final SQLException e) {
+      throw new PersistenceException(e);
+    }
+  }
+
+  private void loadSumOfEvaluationTimes(final List<Vertex> vertices, final int pointInTime) throws PersistenceException {
+    final Map<Integer, Vertex> vertexMap = new HashMap<>();
+
+    for (final Vertex vertex : vertices) {
+      vertexMap.put(vertex.getId(), vertex);
+    }
+
+    final String evaluationTimesQuery = "SELECT idVariable, SUM(evaluationDuration) AS sumOfEvaluationDurations FROM evaluation_duration WHERE pointInTime <= ? GROUP BY idVariable";
+
+    try (final PreparedStatement statement = connection.prepareStatement(evaluationTimesQuery)) {
+      statement.setInt(1, pointInTime);
+
+      try (ResultSet rs = statement.executeQuery()) {
+        while (rs.next()) {
+          final int idVariable = rs.getInt("idVariable");
+          final Long sumOfEvaluationDurations = rs.getLong("sumOfEvaluationDurations");
+
+          if (!vertexMap.containsKey(idVariable)) {
+            throw new PersistenceException("vertex for variable with internal id " + idVariable + " is missing");
+          }
+
+          final Vertex vertex = vertexMap.get(idVariable);
+          vertex.getVariable().getAdditionalKeys().put("sumOfEvaluationDurations", sumOfEvaluationDurations);
         }
       }
     } catch (final SQLException e) {
