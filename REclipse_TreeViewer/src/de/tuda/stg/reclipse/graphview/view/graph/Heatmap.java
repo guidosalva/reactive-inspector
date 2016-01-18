@@ -1,8 +1,7 @@
 package de.tuda.stg.reclipse.graphview.view.graph;
 
-import de.tuda.stg.reclipse.logger.ReactiveVariable;
-
 import de.tuda.stg.reclipse.graphview.model.SessionContext;
+import de.tuda.stg.reclipse.logger.ReactiveVariable;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,25 +18,19 @@ public class Heatmap {
    * Generates a heatmap for the specified point in time. The heatmap maps from
    * names of reactive variables to HEX color codes.
    *
-   * @param lastPointInTime
+   * @param pointInTime
    *          Point in time for which the heatmap should be generated.
    * @return A map of names and color codes.
    */
-  public static Map<String, String> generateHeatmap(final int lastPointInTime, final SessionContext ctx) {
-    final Map<String, String> heatmap = new HashMap<>();
-
+  public static Map<String, String> generateHeatmap(final int pointInTime, final SessionContext ctx) {
     // calculate change map
-    final Map<String, Integer> changes = calculateChangeMap(lastPointInTime, ctx);
+    final Map<String, Integer> changes = calculateChangeMap(pointInTime, ctx);
 
-    // find the maxmimum
-    int maximum = 0;
-    for (final String name : changes.keySet()) {
-      final Integer value = changes.get(name);
+    final int maximum = changes.values().stream().max((element1, element2) -> {
+      return element1.compareTo(element2);
+    }).get();
 
-      if (value > maximum) {
-        maximum = value;
-      }
-    }
+    final Map<String, String> heatmap = new HashMap<>();
 
     // generate heatmap
     for (final String name : changes.keySet()) {
