@@ -106,15 +106,15 @@ public class Heatmap {
     // calculate normalized value
     final double norm = (value * 1.0f) / max;
 
+    // lower limit color
+    final int rl = 240;
+    final int gl = 237;
+    final int bl = 160;
+
     // upper limit color
     final int rh = 255;
-    final int rl = 240;
-    final int gh = 237;
-
-    // lower limit color
-    final int gl = 59;
-    final int bh = 160;
-    final int bl = 32;
+    final int gh = 59;
+    final int bh = 32;
 
     // calculate color
     final int r = (int) (rl + (rh - rl) * norm);
