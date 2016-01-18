@@ -20,9 +20,7 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- *
  * @author Sebastian Ruhleder <sebastian.ruhleder@gmail.com>
- *
  */
 public class ContentModel {
 
@@ -41,9 +39,7 @@ public class ContentModel {
 
   /**
    * Updates the point in time.
-   *
-   * @param newPointInTime
-   *          The new point in time.
+   * @param newPointInTime  The new point in time.
    */
   public void setPointInTime(final int newPointInTime) {
     setPointInTime(newPointInTime, false);
@@ -148,19 +144,12 @@ public class ContentModel {
   public List<ReactiveVariableVertex> getHeatmapVertices() {
     final List<ReactiveVariableVertex> vertices = new ArrayList<>();
 
-    // generate heatmap based on point in time
     final Map<String, String> heatmap = Heatmap.generateHeatmap(pointInTime, ctx);
 
     for (final Vertex vertex : dependencyGraph.getVertices()) {
       final ReactiveVariable variable = vertex.getVariable();
-
-      // get color for reactive variable
       final String color = heatmap.get(variable.getName());
-
-      // generate style from color
       final String style = Stylesheet.calculateStyleFromColor(color);
-
-      // create vertex instance
       final BreakpointInformation breakpointInformation = ctx.getVariableLocation(variable.getId());
       final ReactiveVariableVertex variableVertext = new ReactiveVariableVertex(vertex, breakpointInformation, style);
 
