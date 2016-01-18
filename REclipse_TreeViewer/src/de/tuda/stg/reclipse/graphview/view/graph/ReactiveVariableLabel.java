@@ -4,6 +4,7 @@ import de.tuda.stg.reclipse.logger.BreakpointInformation;
 import de.tuda.stg.reclipse.logger.ReactiveVariable;
 import de.tuda.stg.reclipse.logger.ReactiveVariableType;
 
+@SuppressWarnings("nls")
 public class ReactiveVariableLabel {
 
   private final ReactiveVariable var;
@@ -12,6 +13,8 @@ public class ReactiveVariableLabel {
   private final StyleProperties styleProperties = new StyleProperties();
 
   private Long evaluationDuration;
+
+  // Setup
 
   public ReactiveVariableLabel(final ReactiveVariable v, final BreakpointInformation br, final boolean showClassName) {
     this.var = v;
@@ -39,51 +42,86 @@ public class ReactiveVariableLabel {
     return className;
   }
 
+  // Display
+
+  private interface HTML {
+
+    static String italic(final String html) {
+      return wrap("i", html);
+    }
+
+    static String wrap(final String tag, final String html) {
+      return "<" + tag + ">" + html + "</" + tag + ">";
+    }
+
+    static String style(final String style, final String html) {
+      return "<div style=\"" + style + "\">" + html + "</div>";
+    }
+
+    static String titleStyle = "padding: 0px 0px 4px 0px; margin: 0px; font-size: 10px;";
+    static String bodyStyle = "padding: 0px; margin: 0px; font-size: 11px;";
+    static String detailStyle = "padding: 0px; margin: 0px;  font-size: 9px;";
+
+  }
+
   @Override
   public String toString() {
-    String label = ""; //$NON-NLS-1$
+    return HTML.style(HTML.titleStyle, getTitle()) +
+            HTML.style(HTML.bodyStyle, getBody()) +
+            HTML.style(HTML.detailStyle, getDetailString());
+  }
 
-    if (var.getName() != null && !var.getName().equals("?")) { //$NON-NLS-1$
+  private String getTitle() {
+    if (isNameValid(var)) {
       if (showClassName && className != null) {
-        label += "<h4>" + className + "." + var.getName() + "</h4>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        return className + "." + var.getName();
+      } else {
+        return var.getName();
       }
-      else {
-        label += "<h4>" + var.getName() + "</h4>"; //$NON-NLS-1$ //$NON-NLS-2$
-      }
+    } else {
+      return HTML.italic("[" + var.getTypeSimple() + "]");
     }
-    else {
-      label += "<h4><i>[" + var.getTypeSimple() + "]</i></h4>"; //$NON-NLS-1$ //$NON-NLS-2$
-    }
+  }
 
+  private String getBody() {
     final ReactiveVariableType varType = var.getReactiveVariableType();
 
     if (var.isExceptionOccured()) {
-      label += "<h3><i>EXCEPTION</i></h3>"; //$NON-NLS-1$
+      return HTML.italic("EXCEPTION");
+    } else if (varType == ReactiveVariableType.VAR || varType == ReactiveVariableType.SIGNAL) {
+      return getValueString();
+    } else {
+      return "";
     }
-    else if (varType == ReactiveVariableType.VAR || varType == ReactiveVariableType.SIGNAL) {
-      label += "<h3>" + getValueString() + "</h3>"; //$NON-NLS-1$ //$NON-NLS-2$
-    }
+  }
 
-    return label;
+  private boolean isNameValid(final ReactiveVariable variable) {
+    return variable.getName() != null && !variable.getName().equals("?");
   }
 
   private String getValueString() {
-    if (evaluationDuration != null) {
-      final long evaluationDuration = this.evaluationDuration;
-      return String.valueOf(evaluationDuration / 1_000_000.0);
+    final String valueString = var.getValueString();
+    if (valueString == null) {
+      return "null";
     }
 
-    if (var.getValueString() == null) {
-      return "null"; //$NON-NLS-1$
-    }
-
-    if (var.getValueString().length() > 18) {
-      return var.getValueString().substring(0, 17) + '\u2026';
-    }
-    else {
-      return var.getValueString();
+    if (valueString.length() > 18) {
+      return valueString.substring(0, 17) + '\u2026';
+    } else {
+      return valueString;
     }
   }
+
+  private String getDetailString() {
+    if (evaluationDuration != null) {
+      final long evaluationDuration = this.evaluationDuration / 1_000_000L;
+      return String.valueOf(evaluationDuration) + " ms";
+    }
+
+    return "";
+  }
+
+  // Getters and Setters
 
   public ReactiveVariable getVar() {
     return var;
