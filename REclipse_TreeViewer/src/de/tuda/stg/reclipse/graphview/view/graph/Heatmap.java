@@ -63,10 +63,6 @@ public class Heatmap {
       final List<ReactiveVariable> currentReVars = ctx.getPersistence().getReVars(pointInTime);
 
       for (final ReactiveVariable reVar : currentReVars) {
-        if (reVar == null) {
-          continue;
-        }
-
         final String name = reVar.getName();
 
         // create non-empty string from value
