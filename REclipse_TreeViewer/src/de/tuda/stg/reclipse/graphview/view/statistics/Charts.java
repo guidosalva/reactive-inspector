@@ -1,9 +1,8 @@
 package de.tuda.stg.reclipse.graphview.view.statistics;
 
-import de.tuda.stg.reclipse.logger.ReactiveVariable;
-
 import de.tuda.stg.reclipse.graphview.model.SessionContext;
 import de.tuda.stg.reclipse.graphview.view.graph.Heatmap;
+import de.tuda.stg.reclipse.logger.ReactiveVariable;
 
 import java.util.HashMap;
 import java.util.List;
@@ -104,10 +103,10 @@ public class Charts {
   private void populateChangeDataset() {
     final int lastPointInTime = ctx.getPersistence().getLastPointInTime();
 
-    final Map<String, Integer> changemap = Heatmap.calculateChangeMap(lastPointInTime, ctx);
+    final Map<String, Long> changemap = Heatmap.calculateChangeMap(lastPointInTime, ctx);
 
     for (final String name : changemap.keySet()) {
-      final Integer value = changemap.get(name);
+      final Long value = changemap.get(name);
 
       if (value == 0) {
         continue;

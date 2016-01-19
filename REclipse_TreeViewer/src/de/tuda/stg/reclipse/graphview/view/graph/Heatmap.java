@@ -22,23 +22,15 @@ public class Heatmap {
    *          Point in time for which the heatmap should be generated.
    * @return A map of names and color codes.
    */
-  public static Map<String, String> generateHeatmap(final int pointInTime, final SessionContext ctx) {
-    // calculate change map
-    final Map<String, Integer> changes = calculateChangeMap(pointInTime, ctx);
-
-    final int maximum = changes.values().stream().max((element1, element2) -> {
-      return element1.compareTo(element2);
-    }).get();
+  public static Map<String, String> generateHeatmap(final Map<String, Long> values) {
+    final long maximum = values.values().stream().max(Long::compare).orElse(1L).longValue();
 
     final Map<String, String> heatmap = new HashMap<>();
 
-    // generate heatmap
-    for (final String name : changes.keySet()) {
-      final Integer value = changes.get(name);
-
-      final String color = calculateColor(value, maximum);
-
+    for (final String name : values.keySet()) {
+      final Long value = values.get(name);
       heatmap.put(name, color);
+      final String color = calculateColor(value, maximum);
     }
 
     return heatmap;
@@ -52,8 +44,8 @@ public class Heatmap {
    *          Point in time for which the change map should be calculated.
    * @return A map of names and change counters.
    */
-  public static Map<String, Integer> calculateChangeMap(final int lastPointInTime, final SessionContext ctx) {
-    final Map<String, Integer> changes = new HashMap<>();
+  public static Map<String, Long> calculateChangeMap(final int lastPointInTime, final SessionContext ctx) {
+    final Map<String, Long> changes = new HashMap<>();
 
     final Map<String, String> values = new HashMap<>();
 
@@ -78,7 +70,7 @@ public class Heatmap {
           }
         }
         else {
-          changes.put(name, 0);
+          changes.put(name, 0L);
         }
 
         // save count
@@ -98,9 +90,9 @@ public class Heatmap {
    *          The maximum value in the range.
    * @return A HEX color code string.
    */
-  private static String calculateColor(final int value, final int max) {
+  private static String calculateColor(final long value, final long max) {
     // calculate normalized value
-    final double norm = (value * 1.0f) / max;
+    final double norm = (value * 1.0) / max;
 
     // lower limit color
     final int rl = 240;

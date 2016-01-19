@@ -1,5 +1,6 @@
 package de.tuda.stg.reclipse.graphview.provider;
 
+import de.tuda.stg.reclipse.graphview.Activator;
 import de.tuda.stg.reclipse.graphview.model.SessionContext;
 import de.tuda.stg.reclipse.graphview.model.persistence.DependencyGraph;
 import de.tuda.stg.reclipse.graphview.model.persistence.DependencyGraph.Vertex;
@@ -91,6 +92,17 @@ public class ContentModel {
 
   @SuppressWarnings("nls")
   public List<ReactiveVariableVertex> getAbsolutePerformanceLatestVertices() {
+    final Map<String, Long> values = new HashMap<>();
+
+    for (final Vertex vertex : dependencyGraph.getVertices()) {
+      final ReactiveVariable variable = vertex.getVariable();
+      final Long evaluationDuration = (Long)variable.getAdditionalKeys().getOrDefault("evaluationDuration", Long.valueOf(0));
+      final String name = variable.getName();
+      values.put(name, evaluationDuration);
+    }
+
+    final Map<String, String> heatmap = Heatmap.generateHeatmap(values);
+
     final List<ReactiveVariableVertex> vertices = new ArrayList<>();
 
     for (final Vertex vertex : dependencyGraph.getVertices()) {
@@ -99,30 +111,45 @@ public class ContentModel {
       // create reactive variable vertex
       final BreakpointInformation breakpointInformation = ctx.getVariableLocation(variable.getId());
 
+      final String color = heatmap.get(variable.getName());
+      final String style = Stylesheet.calculateStyleFromColor(color);
+
       final Long evaluationDuration = (Long)variable.getAdditionalKeys().getOrDefault("evaluationDuration", Long.valueOf(0));
 
-      final ReactiveVariableVertex variableVertex = new ReactiveVariableVertex(vertex, breakpointInformation, evaluationDuration);
+      final ReactiveVariableVertex variableVertex = new ReactiveVariableVertex(vertex, breakpointInformation, style, evaluationDuration);
 
       vertices.add(variableVertex);
     }
-
     Collections.sort(vertices);
 
     return vertices;
   }
 
+  @SuppressWarnings("nls")
   public List<ReactiveVariableVertex> getAbsolutePerformanceSumVertices() {
-    final List<ReactiveVariableVertex> vertices = new ArrayList<>();
+    final Map<String, Long> values = new HashMap<>();
 
     for (final Vertex vertex : dependencyGraph.getVertices()) {
       final ReactiveVariable variable = vertex.getVariable();
+      final Long evaluationDuration = (Long)variable.getAdditionalKeys().getOrDefault("sumOfEvaluationDurations", Long.valueOf(0));
+      final String name = variable.getName();
+      values.put(name, evaluationDuration);
+    }
 
+    final Map<String, String> heatmap = Heatmap.generateHeatmap(values);
+
+    final List<ReactiveVariableVertex> vertices = new ArrayList<>();
+    for (final Vertex vertex : dependencyGraph.getVertices()) {
+      final ReactiveVariable variable = vertex.getVariable();
       // create reactive variable vertex
       final BreakpointInformation breakpointInformation = ctx.getVariableLocation(variable.getId());
 
+      final String color = heatmap.get(variable.getName());
+      final String style = Stylesheet.calculateStyleFromColor(color);
+
       final Long evaluationDuration = (Long)variable.getAdditionalKeys().getOrDefault("sumOfEvaluationDurations", Long.valueOf(0));
 
-      final ReactiveVariableVertex variableVertex = new ReactiveVariableVertex(vertex, breakpointInformation, evaluationDuration);
+      final ReactiveVariableVertex variableVertex = new ReactiveVariableVertex(vertex, breakpointInformation, style, evaluationDuration);
 
       vertices.add(variableVertex);
     }
@@ -144,7 +171,8 @@ public class ContentModel {
   public List<ReactiveVariableVertex> getHeatmapVertices() {
     final List<ReactiveVariableVertex> vertices = new ArrayList<>();
 
-    final Map<String, String> heatmap = Heatmap.generateHeatmap(pointInTime, ctx);
+    final Map<String, Long> values = Heatmap.calculateChangeMap(pointInTime, ctx);
+    final Map<String, String> heatmap = Heatmap.generateHeatmap(values);
 
     for (final Vertex vertex : dependencyGraph.getVertices()) {
       final ReactiveVariable variable = vertex.getVariable();
@@ -152,6 +180,8 @@ public class ContentModel {
       final String style = Stylesheet.calculateStyleFromColor(color);
       final BreakpointInformation breakpointInformation = ctx.getVariableLocation(variable.getId());
       final ReactiveVariableVertex variableVertext = new ReactiveVariableVertex(vertex, breakpointInformation, style);
+
+      Activator.logInfo("Name: " + variable.getName() + "  Evaluations: " + values.getOrDefault(variable.getName(), Long.valueOf(0L)));
 
       vertices.add(variableVertext);
     }

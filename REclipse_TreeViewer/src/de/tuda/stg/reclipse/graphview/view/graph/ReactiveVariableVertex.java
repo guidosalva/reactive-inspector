@@ -44,8 +44,8 @@ public class ReactiveVariableVertex implements Comparable<ReactiveVariableVertex
     this.highlighted = h;
   }
 
-  public ReactiveVariableVertex(final Vertex vertex, final BreakpointInformation information, final Long evaluationDuration) {
-    this(vertex, information);
+  public ReactiveVariableVertex(final Vertex vertex, final BreakpointInformation information, final String cs, final Long evaluationDuration) {
+    this(vertex, information, cs);
     this.evaluationDuration = evaluationDuration;
   }
 
