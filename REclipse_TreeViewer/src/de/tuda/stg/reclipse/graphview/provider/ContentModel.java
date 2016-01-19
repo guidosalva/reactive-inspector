@@ -92,16 +92,17 @@ public class ContentModel {
 
   @SuppressWarnings("nls")
   public List<ReactiveVariableVertex> getAbsolutePerformanceLatestVertices() {
-    final Map<String, Long> values = new HashMap<>();
+    final Map<UUID, Long> values = new HashMap<>();
 
     for (final Vertex vertex : dependencyGraph.getVertices()) {
       final ReactiveVariable variable = vertex.getVariable();
       final Long evaluationDuration = (Long)variable.getAdditionalKeys().getOrDefault("evaluationDuration", Long.valueOf(0));
-      final String name = variable.getName();
-      values.put(name, evaluationDuration);
+      final UUID id = variable.getId();
+      values.put(id, evaluationDuration);
     }
 
-    final Map<String, String> heatmap = Heatmap.generateHeatmap(values);
+
+    final Map<UUID, String> heatmap = Heatmap.generateHeatmap(values);
 
     final List<ReactiveVariableVertex> vertices = new ArrayList<>();
 
@@ -111,7 +112,7 @@ public class ContentModel {
       // create reactive variable vertex
       final BreakpointInformation breakpointInformation = ctx.getVariableLocation(variable.getId());
 
-      final String color = heatmap.get(variable.getName());
+      final String color = heatmap.get(variable.getId());
       final String style = Stylesheet.calculateStyleFromColor(color);
 
       final Long evaluationDuration = (Long)variable.getAdditionalKeys().getOrDefault("evaluationDuration", Long.valueOf(0));
@@ -127,16 +128,16 @@ public class ContentModel {
 
   @SuppressWarnings("nls")
   public List<ReactiveVariableVertex> getAbsolutePerformanceSumVertices() {
-    final Map<String, Long> values = new HashMap<>();
+    final Map<UUID, Long> values = new HashMap<>();
 
     for (final Vertex vertex : dependencyGraph.getVertices()) {
       final ReactiveVariable variable = vertex.getVariable();
       final Long evaluationDuration = (Long)variable.getAdditionalKeys().getOrDefault("sumOfEvaluationDurations", Long.valueOf(0));
-      final String name = variable.getName();
-      values.put(name, evaluationDuration);
+      final UUID id = variable.getId();
+      values.put(id, evaluationDuration);
     }
 
-    final Map<String, String> heatmap = Heatmap.generateHeatmap(values);
+    final Map<UUID, String> heatmap = Heatmap.generateHeatmap(values);
 
     final List<ReactiveVariableVertex> vertices = new ArrayList<>();
     for (final Vertex vertex : dependencyGraph.getVertices()) {
@@ -144,7 +145,7 @@ public class ContentModel {
       // create reactive variable vertex
       final BreakpointInformation breakpointInformation = ctx.getVariableLocation(variable.getId());
 
-      final String color = heatmap.get(variable.getName());
+      final String color = heatmap.get(variable.getId());
       final String style = Stylesheet.calculateStyleFromColor(color);
 
       final Long evaluationDuration = (Long)variable.getAdditionalKeys().getOrDefault("sumOfEvaluationDurations", Long.valueOf(0));
@@ -171,12 +172,12 @@ public class ContentModel {
   public List<ReactiveVariableVertex> getHeatmapVertices() {
     final List<ReactiveVariableVertex> vertices = new ArrayList<>();
 
-    final Map<String, Long> values = Heatmap.calculateChangeMap(pointInTime, ctx);
-    final Map<String, String> heatmap = Heatmap.generateHeatmap(values);
+    final Map<UUID, Long> values = Heatmap.calculateChangeMap(pointInTime, ctx);
+    final Map<UUID, String> heatmap = Heatmap.generateHeatmap(values);
 
     for (final Vertex vertex : dependencyGraph.getVertices()) {
       final ReactiveVariable variable = vertex.getVariable();
-      final String color = heatmap.get(variable.getName());
+      final String color = heatmap.get(variable.getId());
       final String style = Stylesheet.calculateStyleFromColor(color);
       final BreakpointInformation breakpointInformation = ctx.getVariableLocation(variable.getId());
       final ReactiveVariableVertex variableVertext = new ReactiveVariableVertex(vertex, breakpointInformation, style);

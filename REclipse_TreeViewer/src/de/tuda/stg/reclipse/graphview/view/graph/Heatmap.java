@@ -6,6 +6,7 @@ import de.tuda.stg.reclipse.logger.ReactiveVariable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  *
@@ -22,15 +23,15 @@ public class Heatmap {
    *          Point in time for which the heatmap should be generated.
    * @return A map of names and color codes.
    */
-  public static Map<String, String> generateHeatmap(final Map<String, Long> values) {
+  public static Map<UUID, String> generateHeatmap(final Map<UUID, Long> values) {
     final long maximum = values.values().stream().max(Long::compare).orElse(1L).longValue();
 
-    final Map<String, String> heatmap = new HashMap<>();
+    final Map<UUID, String> heatmap = new HashMap<>();
 
-    for (final String name : values.keySet()) {
-      final Long value = values.get(name);
-      heatmap.put(name, color);
+    for (final UUID id : values.keySet()) {
+      final Long value = values.get(id);
       final String color = calculateColor(value, maximum);
+      heatmap.put(id, color);
     }
 
     return heatmap;
@@ -44,10 +45,10 @@ public class Heatmap {
    *          Point in time for which the change map should be calculated.
    * @return A map of names and change counters.
    */
-  public static Map<String, Long> calculateChangeMap(final int lastPointInTime, final SessionContext ctx) {
-    final Map<String, Long> changes = new HashMap<>();
+  public static Map<UUID, Long> calculateChangeMap(final int lastPointInTime, final SessionContext ctx) {
+    final Map<UUID, Long> changes = new HashMap<>();
 
-    final Map<String, String> values = new HashMap<>();
+    final Map<UUID, String> values = new HashMap<>();
 
     // iterate through points in time
     for (int pointInTime = 0; pointInTime < lastPointInTime; pointInTime++) {
@@ -55,7 +56,7 @@ public class Heatmap {
       final List<ReactiveVariable> currentReVars = ctx.getPersistence().getReVars(pointInTime);
 
       for (final ReactiveVariable reVar : currentReVars) {
-        final String name = reVar.getName();
+        final UUID id = reVar.getId();
 
         // create non-empty string from value
         String value = reVar.getValueString();
@@ -64,17 +65,17 @@ public class Heatmap {
         }
 
         // update change map
-        if (values.containsKey(name)) {
-          if (!values.get(name).equals(value)) {
-            changes.put(name, changes.get(name) + 1);
+        if (values.containsKey(id)) {
+          if (!values.get(id).equals(value)) {
+            changes.put(id, changes.get(id) + 1);
           }
         }
         else {
-          changes.put(name, 0L);
+          changes.put(id, 0L);
         }
 
         // save count
-        values.put(name, value);
+        values.put(id, value);
       }
     }
 

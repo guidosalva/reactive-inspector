@@ -7,6 +7,7 @@ import de.tuda.stg.reclipse.logger.ReactiveVariable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -103,16 +104,16 @@ public class Charts {
   private void populateChangeDataset() {
     final int lastPointInTime = ctx.getPersistence().getLastPointInTime();
 
-    final Map<String, Long> changemap = Heatmap.calculateChangeMap(lastPointInTime, ctx);
+    final Map<UUID, Long> changemap = Heatmap.calculateChangeMap(lastPointInTime, ctx);
 
-    for (final String name : changemap.keySet()) {
-      final Long value = changemap.get(name);
+    for (final UUID id : changemap.keySet()) {
+      final Long value = changemap.get(id);
 
       if (value == 0) {
         continue;
       }
 
-      changeDataset.setValue(value, "", name); //$NON-NLS-1$
+      changeDataset.setValue(value, "", id); //$NON-NLS-1$
     }
   }
 }
