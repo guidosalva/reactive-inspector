@@ -101,10 +101,11 @@ public class Charts {
     }
   }
 
+  @SuppressWarnings("nls")
   private void populateChangeDataset() {
     final int lastPointInTime = ctx.getPersistence().getLastPointInTime();
-
     final Map<UUID, Long> changemap = Heatmap.calculateChangeMap(lastPointInTime, ctx);
+    final Map<UUID, String> names = Heatmap.getIdsAndNames(lastPointInTime, ctx);
 
     for (final UUID id : changemap.keySet()) {
       final Long value = changemap.get(id);
@@ -113,7 +114,7 @@ public class Charts {
         continue;
       }
 
-      changeDataset.setValue(value, "", id); //$NON-NLS-1$
+      changeDataset.setValue(value, "", names.getOrDefault(id, ""));
     }
   }
 }

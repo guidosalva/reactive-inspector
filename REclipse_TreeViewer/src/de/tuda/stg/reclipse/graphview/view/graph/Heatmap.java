@@ -38,12 +38,11 @@ public class Heatmap {
   }
 
   /**
-   * Calculates a map of names of reactive variables mapping to the amount of
+   * Calculates a map of ids of reactive variables mapping to the amount of
    * changes until the specified point in time.
    *
-   * @param lastPointInTime
-   *          Point in time for which the change map should be calculated.
-   * @return A map of names and change counters.
+   * @param lastPointInTime Point in time for which the change map should be calculated.
+   * @return A map of ids and change counters.
    */
   public static Map<UUID, Long> calculateChangeMap(final int lastPointInTime, final SessionContext ctx) {
     final Map<UUID, Long> changes = new HashMap<>();
@@ -80,6 +79,27 @@ public class Heatmap {
     }
 
     return changes;
+  }
+
+  /**
+   * Computes a map of ids of reactive variables mapping to their names
+   * @param lastPointInTime Point in time for which the change map should be calculated.
+   * @return A map of ids and names.
+   */
+  public static Map<UUID, String> getIdsAndNames(final int pointInTime, final SessionContext ctx) {
+    final Map<UUID, String> names = new HashMap<>();
+
+    for (int time = 0; time < pointInTime; time++) {
+      final List<ReactiveVariable> currentReVars = ctx.getPersistence().getReVars(time);
+
+      for (final ReactiveVariable reVar : currentReVars) {
+        if (!names.containsKey(reVar.getId())) {
+          names.put(reVar.getId(), reVar.getName());
+        }
+      }
+    }
+
+    return names;
   }
 
   /**
