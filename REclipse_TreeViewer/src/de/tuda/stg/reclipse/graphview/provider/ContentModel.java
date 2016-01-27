@@ -1,6 +1,5 @@
 package de.tuda.stg.reclipse.graphview.provider;
 
-import de.tuda.stg.reclipse.graphview.Activator;
 import de.tuda.stg.reclipse.graphview.model.SessionContext;
 import de.tuda.stg.reclipse.graphview.model.persistence.DependencyGraph;
 import de.tuda.stg.reclipse.graphview.model.persistence.DependencyGraph.Vertex;
@@ -181,8 +180,6 @@ public class ContentModel {
       final String style = Stylesheet.calculateStyleFromColor(color);
       final BreakpointInformation breakpointInformation = ctx.getVariableLocation(variable.getId());
       final ReactiveVariableVertex variableVertext = new ReactiveVariableVertex(vertex, breakpointInformation, style);
-
-      Activator.logInfo("Name: " + variable.getName() + "  Evaluations: " + values.getOrDefault(variable.getName(), Long.valueOf(0L)));
 
       vertices.add(variableVertext);
     }
