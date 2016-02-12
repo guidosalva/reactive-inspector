@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<site>
-   <feature url="features/de.tuda.stg.reclipse.feature_0.1.0.201508111439.jar" id="de.tuda.stg.reclipse.feature" version="0.1.0.201508111439">
-      <category name="de.tuda.stg.rp"/>
-   </feature>
-   <category-def name="de.tuda.stg.rp" label="Reactive Programming"/>
-</site>
