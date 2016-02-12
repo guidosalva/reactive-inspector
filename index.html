@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>REclipse by KonstantinSitnikov</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">REclipse</h1>
+      <h2 class="project-tagline">Reactive Debugging - REdefined</h2>
+      <a href="https://github.com/KonstantinSitnikov/Eclipse-Plugin-Website" class="btn">View on GitHub</a>
+      <a href="https://github.com/KonstantinSitnikov/Eclipse-Plugin-Website/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/KonstantinSitnikov/Eclipse-Plugin-Website/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h2>
+<a id="why-reclipse" class="anchor" href="#why-reclipse" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Why REclipse?</h2>
+
+<p>Debugging reactive software with a traditional debugger can be unnecessary complicated. We want to change that. With the REclipse plugin we give you the tools needed to debug your reactive software in a comfortable and powerful way.</p>
+
+<h2>
+<a id="features" class="anchor" href="#features" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Features</h2>
+
+<h4>
+<a id="reactive-tree" class="anchor" href="#reactive-tree" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Reactive Tree</h4>
+
+<p>The reactive tree view lets you inspect variables, signals, events and their dependencies in a visualization of the dependency graph in your app. You can see the values of the individual nodes as they change over time and the tree provides you with visual cues when a significant event occurs, such as a value change or when an exception is thrown.</p>
+
+<p><img src="http://eclipse.kaiengelhardt.com/eclipse-plugin/dependency-graph.png" alt="Dependency Graph Visualization"></p>
+
+<h4>
+<a id="tree-outline" class="anchor" href="#tree-outline" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Tree Outline</h4>
+
+<p>In a big dependency graph it is sometimes hard to navigate in the reactive tree. This view shows you at a glance where you are in the graph and helps you jump quickly to a different portion of the graph.</p>
+
+<p><img src="http://eclipse.kaiengelhardt.com/eclipse-plugin/tree-outline.png" alt="Tree Outline"></p>
+
+<h4>
+<a id="time-travel" class="anchor" href="#time-travel" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Time Travel</h4>
+
+<p>Ever needed to go back to a particular step in your program to inspect your variables values at that point in time? Well, REclipse makes this possible. It records all the values of each signal or variable and allows you to travel back in time through all states of the dependency graph.
+This video shows you how it works in action.</p>
+
+<p></p>
+
+<p>History Queries</p>
+
+<h4>
+<a id="reactive-breakpoints" class="anchor" href="#reactive-breakpoints" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Reactive Breakpoints</h4>
+
+<h4>
+<a id="time-profiling" class="anchor" href="#time-profiling" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Time Profiling</h4>
+
+<h4>
+<a id="node-search--dependency-highlighting" class="anchor" href="#node-search--dependency-highlighting" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Node Search / Dependency Highlighting</h4>
+
+<p><img src="http://eclipse.kaiengelhardt.com/eclipse-plugin/node-search.png" alt="Node search"></p>
+
+<p><img src="http://eclipse.kaiengelhardt.com/eclipse-plugin/highlight-dependencies-children.png" alt="Highlight dependents of a node">
+<img src="http://eclipse.kaiengelhardt.com/eclipse-plugin/highlight-dependencies-ancestors.png" alt="Highlight dependencies of a node"></p>
+
+<h2>
+<a id="supported-platforms" class="anchor" href="#supported-platforms" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Supported Platforms</h2>
+
+<ul>
+<li>IDE: Eclipse</li>
+<li>Language: Scala v. 2.4.1 and later</li>
+<li>RP Frameworks: <a href="https://github.com/guidosalva/REScala">REScala</a>
+</li>
+</ul>
+
+<h2>
+<a id="installation--setup" class="anchor" href="#installation--setup" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation &amp; Setup</h2>
+
+<ul>
+<li>Install and open Eclipse (the Scala IDE is recommended).</li>
+<li>Help -&gt; Install New Software...</li>
+<li>Add the REclipse update site: <a href="https://dl.bintray.com/m1c3/generic">https://dl.bintray.com/m1c3/generic</a>
+</li>
+<li>Select the just added REclipse update site from the drow-down.</li>
+<li>Install the REclipse plugin from the Reactive Programming category.</li>
+</ul>
+
+<h4>
+<a id="create-a-new-project" class="anchor" href="#create-a-new-project" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Create a new project</h4>
+
+<p>If you want to create a new project with REclipse support you can use the <a href="https://github.com/m1c3/reclipse-template">REclipse Template</a> project as a starting point:</p>
+
+<p><code>git clone https://github.com/m1c3/reclipse-template.git</code></p>
+
+<p>Then you can import the project into Eclipse via sbt:</p>
+
+<ul>
+<li><code>sbt eclipse</code></li>
+<li>Eclipse: File -&gt; Import...</li>
+<li>Select General -&gt; Existing Projects into Workspace</li>
+<li>Select the cloned template project.</li>
+</ul>
+
+<h4>
+<a id="use-an-existing-rescala-project-with-reclipse" class="anchor" href="#use-an-existing-rescala-project-with-reclipse" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Use an existing REScala project with REclipse</h4>
+
+<p>Add the REScala Logger to the dependencies of the build.sbt:
+<code>"de.tuda.stg.reclipse" %% "rescala-logger" % "0.1"</code></p>
+
+<p>Add a resolver for the REclipse maven repository in the build.sbt:
+<code>resolvers += Resolver.bintrayRepo("m1c3", "maven")</code></p>
+
+<p>Attach the REScala Logger to REScala's logging in the main method of your application (or at a place before any Var, Signal or Event is created):</p>
+
+<pre><code>rescala.ReactiveEngine.log = new REScalaLogger
+</code></pre>
+
+<h2>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>License</h2>
+
+<p>?</p>
+
+<h2>
+<a id="contributors" class="anchor" href="#contributors" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Contributors</h2>
+
+<ul>
+<li><a href="https://github.com/m1c3">Matthias Jahn</a></li>
+<li><a href="https://github.com/guidosalva">Guido Salvaneshi</a></li>
+<li><a href="https://github.com/ruhleder">Sebastian Ruhleder</a></li>
+<li><a href="https://github.com/kaiengelhardt">Kai Engelhardt</a></li>
+<li><a href="https://github.com/KonstantinSitnikov">Konstantin Sitnikov</a></li>
+</ul>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/KonstantinSitnikov/Eclipse-Plugin-Website">REclipse</a> is maintained by <a href="https://github.com/KonstantinSitnikov">KonstantinSitnikov</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
