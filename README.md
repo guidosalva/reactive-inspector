@@ -1,4 +1,7 @@
-## REclipse Plugin
+## Reactive Inspector
+
+You may want to vistit the main page of this project:
+`http://guidosalva.github.io/reactive-inspector/`
 
 ### Installation
 
