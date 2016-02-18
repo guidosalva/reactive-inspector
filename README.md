@@ -1,6 +1,7 @@
 ## Reactive Inspector
 
-You may want to vistit the main page of this project:
+You may want to vistit the [main page of the Reactive Inspector project](http://guidosalva.github.io/reactive-inspector/):
+
 `http://guidosalva.github.io/reactive-inspector/`
 
 ### Installation
