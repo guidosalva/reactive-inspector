@@ -22,7 +22,9 @@
       <h2>
 <a id="why-reactive-inspector" class="anchor" href="#why-reactive-inspector" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Why Reactive Inspector?</h2>
 
-<p>Debugging reactive software with a traditional debugger can be unnecessary complicated. We want to change that. With Reactive Inspector we give you the tools needed to debug your reactive software in a comfortable and powerful way.</p>
+<p>Debugging reactive software with a traditional debugger can be unnecessary complicated. We want to change that. With the Reactive Inspector plugin we give you the tools needed to debug your reactive software in a comfortable and powerful way.</p>
+
+<p><img src="images/reactive-inspector-all.png" alt="Dependency Graph Visualization"></p>
 
 <h2>
 <a id="features" class="anchor" href="#features" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Features</h2>
@@ -45,9 +47,9 @@
 <p>Ever needed to go back to a particular step in your program to inspect your variables values at that point in time? Well, Reactive Inspector makes this possible. It records all the values of each signal or variable and allows you to travel back in time through all states of the dependency graph.
 This video shows you how it works in action.</p>
 
-<video src=images/time-travel.mp4 controls width=100%> 
+<p> 
    Your browser does not implement html5 video. 
-</video>
+&lt;/ video&gt;</p>
 
 <h4>
 <a id="history-queries" class="anchor" href="#history-queries" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>History Queries</h4>
@@ -86,7 +88,10 @@ Go right to the place were the program was interrupted and find the bug that you
 <img src="images/highlight-dependencies-ancestors.png" alt="Highlight dependencies of a node"></p>
 
 <h2>
-<a id="supported-platforms" class="anchor" href="#supported-platforms" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Supported Platforms</h2>
+<a id="how-to-use-reactive-inspector" class="anchor" href="#how-to-use-reactive-inspector" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How to use Reactive Inspector</h2>
+
+<h4>
+<a id="supported-platforms" class="anchor" href="#supported-platforms" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Supported Platforms</h4>
 
 <ul>
 <li>IDE: Eclipse</li>
@@ -95,8 +100,8 @@ Go right to the place were the program was interrupted and find the bug that you
 </li>
 </ul>
 
-<h2>
-<a id="installation--setup" class="anchor" href="#installation--setup" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation &amp; Setup</h2>
+<h4>
+<a id="installation--setup" class="anchor" href="#installation--setup" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation &amp; Setup</h4>
 
 <ul>
 <li>Install and open Eclipse (the Scala IDE is recommended).</li>
@@ -110,7 +115,7 @@ Go right to the place were the program was interrupted and find the bug that you
 <h4>
 <a id="create-a-new-project" class="anchor" href="#create-a-new-project" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Create a new project</h4>
 
-<p>If you want to create a new project with Reactive Inspector support you can use the template project contained in this repository as a starting point.</p>
+<p>If you want to create a new project with REclipse support you can use the Reactive Inspector template project contained in this repository as a starting point.</p>
 
 <p>You can import the project into Eclipse via sbt:</p>
 
@@ -122,12 +127,12 @@ Go right to the place were the program was interrupted and find the bug that you
 </ul>
 
 <h4>
-<a id="use-an-existing-rescala-project-with-reactive-inspector" class="anchor" href="#use-an-existing-rescala-project-with-reactive-inspector" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Use an existing REScala project with Reactive Inspector</h4>
+<a id="use-an-existing-rescala-project-with-reclipse" class="anchor" href="#use-an-existing-rescala-project-with-reclipse" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Use an existing REScala project with REclipse</h4>
 
 <p>Add the REScala Logger to the dependencies of the build.sbt:
 <code>"de.tuda.stg.reclipse" %% "rescala-logger" % "0.1"</code></p>
 
-<p>Add a resolver for the Reactive Inspector maven repository in the build.sbt:
+<p>Add a resolver for the REclipse maven repository in the build.sbt:
 <code>resolvers += Resolver.bintrayRepo("m1c3", "maven")</code></p>
 
 <p>Attach the REScala Logger to REScala's logging in the main method of your application (or at a place before any Var, Signal or Event is created):</p>
@@ -136,20 +141,23 @@ Go right to the place were the program was interrupted and find the bug that you
 </code></pre>
 
 <h2>
-<a id="publications" class="anchor" href="#publications" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Publications</h2>
+<a id="academic-publications" class="anchor" href="#academic-publications" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Academic publications</h2>
 
-<p>Guido Salvaneschi, Mira Mezini, Debugging for Reactive Programming, International conference on Software Engineering 2016.</p>
-
-<p>Guido Salvaneschi, Mira Mezini, Debugging Reactive Programming with Reactive Inspector, International conference on Software Engineering 2016, poster.</p>
+<ul>
+<li><p>Guido Salvaneschi, Mira Mezini, Debugging for Reactive Programming, International conference on Software Engineering, ICSE 2016 (<a href="http://www.guidosalvaneschi.com/attachments/papers/2016_Debugging-for-Reactive-Programming_pdf.pdf">Pdf</a>).</p></li>
+<li><p>Guido Salvaneschi, Mira Mezini, Debugging Reactive Programming with Reactive Inspector, International conference on Software Engineering, ICSE 2016, poster (<a href="http://www.guidosalvaneschi.com/attachments/papers/2016_Debugging-Reactive-Programming-with-Reactive-Inspector_pdf.pdf">Pdf</a>).</p></li>
+</ul>
 
 <h2>
 <a id="about" class="anchor" href="#about" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>About</h2>
 
-<p>Reactive Inspector is a project started by Guido Salvaneschi at the Software Technology Group - Technical University of Darmstadt, Germany. </p>
+<p>Reactive Inspector is a project started by <strong><a href="http://www.guidosalvaneschi.com">Guido Salvaneschi</a></strong> at the Software Technology Group - Technical University of Darmstadt, Germany. Many people contributed to the project:</p>
 
 <ul>
+<li><a href="https://github.com/guidosalva">Guido Salvaneschi</a></li>
 <li><a href="https://github.com/m1c3">Matthias Jahn</a></li>
-<li><a href="https://github.com/guidosalva">Guido Salvaneshi</a></li>
+<li><a href="https://github.com/sprankhub">Simon Sprankel</a></li>
+<li><a href="https://github.com/Wallaby1999">Michael Hausl</a></li>
 <li><a href="https://github.com/ruhleder">Sebastian Ruhleder</a></li>
 <li><a href="https://github.com/kaiengelhardt">Kai Engelhardt</a></li>
 <li><a href="https://github.com/KonstantinSitnikov">Konstantin Sitnikov</a></li>
@@ -163,6 +171,16 @@ Go right to the place were the program was interrupted and find the bug that you
 
     </section>
 
-  
+            <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-75290290-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
   </body>
 </html>
