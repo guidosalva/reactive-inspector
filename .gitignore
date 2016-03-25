@@ -1,3 +1,11 @@
 target
 .DS_Store
 bin
+REclipse_LoggerInterface/.classpath
+REclipse_LoggerInterface/.project
+REclipse_LoggerInterface/.settings/org.eclipse.core.resources.prefs
+REclipse_LoggerInterface/.settings/org.scala-ide.sdt.core.prefs
+REclipse_REScala/.cache-main
+REclipse_REScala/.classpath
+REclipse_REScala/.project
+REclipse_REScala/.settings/org.eclipse.core.resources.prefs
