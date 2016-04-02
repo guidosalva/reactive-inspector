@@ -8,6 +8,8 @@
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/custom-styles.css" media="screen">
+    <link href="plugins/lightbox/css/lightbox.css" rel="stylesheet">
   </head>
   <body>
     <section class="page-header">
@@ -22,9 +24,11 @@
       <h2>
 <a id="why-reactive-inspector" class="anchor" href="#why-reactive-inspector" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Why Reactive Inspector?</h2>
 
-<p>Debugging reactive software with a traditional debugger can be unnecessary complicated. We want to change that. With the Reactive Inspector plugin we give you the tools needed to debug your reactive software in a comfortable and powerful way.</p>
-
-<p><img src="images/reactive-inspector-all.png" alt="Dependency Graph Visualization"></p>
+<p>
+Debugging reactive software with a traditional debugger can be unnecessary complicated. We want to change that. With the Reactive Inspector plugin we give you the tools needed to debug your reactive software in a comfortable and powerful way.
+<div class="video-wrapper"><iframe class="youtube-video" src="https://www.youtube.com/embed/7pftHIpHdSg?rel=0&vq=hd720" frameborder="0" allowfullscreen></iframe></div>
+<!--<a href="images/reactive-inspector-all.png" data-lightbox="reactive-inspector-all" data-title="Reactive Inspector"><img class="thumb" src="images/reactive-inspector-all.png" alt="Dependency Graph Visualization"></a>-->
+</p>
 
 <h2>
 <a id="features" class="anchor" href="#features" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Features</h2>
@@ -32,14 +36,18 @@
 <h4>
 <a id="reactive-tree" class="anchor" href="#reactive-tree" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Reactive Tree</h4>
 
-<p>The reactive tree view lets you inspect variables, signals, events and their dependencies in a visualization of the dependency graph in your app. You can see the values of the individual nodes as they change over time and the tree provides you with visual cues when a significant event occurs, such as a value change or when an exception is thrown.
-<img src="images/dependency-graph.png" alt="Dependency Graph Visualization"></p>
+<p>
+<a href="images/dependency-graph.png" data-lightbox="dependency-graph" data-title="Dependency-Graph"><img class="thumb" src="images/dependency-graph.png" alt="Dependency Graph Visualization"></a>
+The reactive tree view lets you inspect variables, signals, events and their dependencies in a visualization of the dependency graph in your app. You can see the values of the individual nodes as they change over time and the tree provides you with visual cues when a significant event occurs, such as a value change or when an exception is thrown.
+</p>
 
 <h4>
 <a id="tree-outline" class="anchor" href="#tree-outline" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Tree Outline</h4>
 
-<p>In a big dependency graph it is sometimes hard to navigate in the reactive tree. This view shows you at a glance where you are in the graph and helps you jump quickly to a different portion of the graph.
-<img src="images/tree-outline.png" alt="Tree Outline"></p>
+<p>
+<a href="images/tree-outline.png" data-lightbox="tree-outline" data-title="Tree-Outline"><img class="thumb" src="images/tree-outline.png" alt="Tree Outline"></a>
+In a big dependency graph it is sometimes hard to navigate in the reactive tree. This view shows you at a glance where you are in the graph and helps you jump quickly to a different portion of the graph.
+</p>
 
 <h4>
 <a id="time-travel" class="anchor" href="#time-travel" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Time Travel</h4>
@@ -47,47 +55,52 @@
 <p>Ever needed to go back to a particular step in your program to inspect your variables values at that point in time? Well, Reactive Inspector makes this possible. It records all the values of each signal or variable and allows you to travel back in time through all states of the dependency graph.
 This video shows you how it works in action.</p>
 
-<p> 
-   Your browser does not implement html5 video. 
-&lt;/ video&gt;</p>
-
 <h4>
 <a id="history-queries" class="anchor" href="#history-queries" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>History Queries</h4>
 
-<p>Scrubbing through past values is useful, but it can become cumbersome if you have a big dependency graph. With History Queries you can search in the history for specific reactive events.
-<img src="images/history-queries.png" alt="History Queries"></p>
+<p>
+<a href="images/history-queries.png" data-lightbox="history-queries" data-title="History-Queries"><img class="thumb" src="images/history-queries.png" alt="History Queries"></a>
+Scrubbing through past values is useful, but it can become cumbersome if you have a big dependency graph. With History Queries you can search in the history for specific reactive events.
+</p>
 
 <h4>
 <a id="reactive-breakpoints" class="anchor" href="#reactive-breakpoints" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Reactive Breakpoints</h4>
 
-<p>One of the most helpful features  in finding those little bugs that hide between the lines of your code is Reactive Breakpoints.  With Reactive Breakpoints we give you the possibiliy to set breakpoints at certain reactive events. Create queries, such as <code>nodeEvaluated</code>, and the debugger will pause if an event matches the query during the execution.
+<p>
+<a href="images/reactive-breakpoints.png" data-lightbox="reactive-breakpoints" data-title="Reactive-Breakpoints"><img class="thumb" src="images/reactive-breakpoints.png" alt="Reactive Breakpoints"></a>
+One of the most helpful features  in finding those little bugs that hide between the lines of your code is Reactive Breakpoints.  With Reactive Breakpoints we give you the possibiliy to set breakpoints at certain reactive events. Create queries, such as <code>nodeEvaluated</code>, and the debugger will pause if an event matches the query during the execution.
 Go right to the place were the program was interrupted and find the bug that you were searching for so long.
-<img src="images/reactive-breakpoints.png" alt="Reactive Breakpoints"></p>
+</p>
 
 <h4>
 <a id="time-profiling" class="anchor" href="#time-profiling" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Time Profiling</h4>
 
-<p>To improve the performance of your programs you have the possibility to measure the time needed to evaluate your reactive nodes. Reactive Inspector visualizes these measurements by coloring nodes in the tree view according to how each node performed in comparison to the others.  You can switch between 3 modes of time profiling:</p>
+<p>
+<a href="images/time-profiling.png" data-lightbox="time-profiling" data-title="Time-Profiling"><p><img class="thumb" src="images/time-profiling.png" alt="Time Profiling"></a>
+To improve the performance of your programs you have the possibility to measure the time needed to evaluate your reactive nodes. Reactive Inspector visualizes these measurements by coloring nodes in the tree view according to how each node performed in comparison to the others.  You can switch between 3 modes of time profiling:</p>
 
 <ul>
 <li>Relative Performance - shows the number of evaluations of each node</li>
 <li>Absolute Performance (latest) - shows the duration of the last evaluation</li>
 <li>Absolute Performance (sum) - shows the sum of the evaluation times of the nodes</li>
 </ul>
-
-<p><img src="images/time-profiling.png" alt="Time Profiling"></p>
+</p>
 
 <h4>
 <a id="node-search--dependency-highlighting" class="anchor" href="#node-search--dependency-highlighting" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Node Search / Dependency Highlighting</h4>
 
-<p>Reactive Inspector allows you to find nodes by their names. This makes navigation in dependancy graphs more comfortable.
-<img src="images/node-search.png" alt="Node search"></p>
+<p>
+<a href="images/node-search.png" data-lightbox="node-search" data-title="Node-Search"><img class="thumb" src="images/node-search.png" alt="Node search"></a>
+Reactive Inspector allows you to find nodes by their names. This makes navigation in dependancy graphs more comfortable.
+</p>
 
-<p>You can also highlight a node and all of its dependencies. This allows you to find the dependencies and  of a selected node much easier.
-<img src="images/highlight-dependencies-children.png" alt="Highlight dependents of a node">
-<img src="images/highlight-dependencies-ancestors.png" alt="Highlight dependencies of a node"></p>
+<p class="clearfix">
+<a href="images/highlight-dependencies-children.png" data-lightbox="highlight-dependencies-children"><img class="thumb clearfix" src="images/highlight-dependencies-children.png" alt="Highlight dependents of a node">
+<a href="images/highlight-dependencies-ancestors.png" data-lightbox="lightlight-dependencies-ancestors"><img class="thumb clearfix" src="images/highlight-dependencies-ancestors.png" alt="Highlight dependencies of a node"></a>
+You can also highlight a node and all of its dependencies. This allows you to find the dependencies and  of a selected node much easier.
+</p>
 
-<h2>
+<h2 class="clearfix">
 <a id="how-to-use-reactive-inspector" class="anchor" href="#how-to-use-reactive-inspector" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How to use Reactive Inspector</h2>
 
 <h4>
@@ -181,6 +194,7 @@ Go right to the place were the program was interrupted and find the bug that you
             pageTracker._trackPageview();
             } catch(err) {}
           </script>
-
+    <script src="scripts/jquery.js"></script>
+    <script src="plugins/lightbox/js/lightbox.js"></script>
   </body>
 </html>
